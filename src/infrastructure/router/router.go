@@ -13,10 +13,15 @@ func New(static Static) *router.Router {
 
 	r.ErrorHandler = panicHandler
 
+	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
 	r.GET(`/static/:name`, getStatic(static))
 
 	return r
+}
+
+func getVersion(c *router.Context) error {
+	return c.String(http.StatusOK, version())
 }
 
 func getIndex(assets Static) router.Handle {
