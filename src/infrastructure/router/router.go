@@ -15,7 +15,7 @@ func New(static Static) *router.Router {
 
 	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
-	r.GET(`/static/:name`, getStatic(static))
+	r.GET(`/static/:name`, getStatic(static), compressionMiddleware)
 
 	return r
 }
@@ -24,9 +24,9 @@ func getVersion(c *router.Context) error {
 	return c.String(http.StatusOK, version())
 }
 
-func getIndex(assets Static) router.Handle {
+func getIndex(static Static) router.Handle {
 	return func(c *router.Context) error {
-		index, err := assets(`index.html`)
+		index, err := static(`index.html`)
 		if err != nil {
 			panic(err)
 		}
@@ -36,14 +36,15 @@ func getIndex(assets Static) router.Handle {
 	}
 }
 
-func getStatic(assets Static) router.Handle {
+func getStatic(static Static) router.Handle {
 	return func(c *router.Context) error {
 		name := c.Param(`name`)
-		asset, err := assets(name)
+		asset, err := static(name)
 		if err != nil {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		return c.Bytes(http.StatusOK, asset)
+		_, err = c.Response.Write(asset)
+		return err
 	}
 }
