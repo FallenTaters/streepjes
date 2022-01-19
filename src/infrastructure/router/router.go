@@ -1,6 +1,7 @@
 package router
 
 import (
+	"compress/gzip"
 	"net/http"
 
 	"git.fuyu.moe/Fuyu/router"
@@ -15,7 +16,7 @@ func New(static Static) *router.Router {
 
 	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
-	r.GET(`/static/:name`, getStatic(static), compressionMiddleware)
+	r.GET(`/static/:name`, getStatic(static))
 
 	return r
 }
@@ -44,7 +45,19 @@ func getStatic(static Static) router.Handle {
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		_, err = c.Response.Write(asset)
+		c.Response.Header().Set(`Content-Encoding`, `gzip`)
+		w := gzip.NewWriter(c.Response)
+		_, err = w.Write(asset)
+		if err != nil {
+			panic(err)
+		}
+		err = w.Close()
+		if err != nil {
+			panic(err)
+		}
+
+		// _, err = c.Response.Write(asset)
+
 		return err
 	}
 }
