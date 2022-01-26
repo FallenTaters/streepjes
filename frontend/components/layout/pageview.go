@@ -23,10 +23,7 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 				vecty.Rerender(pv)
 			},
 		},
-		elem.Div(
-			vecty.Markup(vecty.Class(`container`)),
-			renderPage(pv.Page),
-		),
+		renderPage(pv.Page),
 	)
 }
 

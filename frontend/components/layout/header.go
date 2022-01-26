@@ -22,7 +22,7 @@ func (h *Header) Render() vecty.ComponentOrHTML {
 
 	return elem.Div(
 		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `m`, `l`, `left`))}, links...)...),
-		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `s`, `bottom`))}, links...)...),
+		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `s`, `top`))}, links...)...),
 	)
 }
 
@@ -35,7 +35,7 @@ func (h *Header) headerLink(icon beercss.IconType, text string, target Page) *ve
 		),
 		beercss.Icon(icon),
 		elem.Div(
-			vecty.Markup(vecty.Class(`m`, `l`)),
+			vecty.Markup(vecty.Class(`l`)),
 			vecty.Text(text),
 		),
 	)

@@ -12,6 +12,12 @@ type Order struct {
 // Render implements the vecty.Component interface.
 func (o *Order) Render() vecty.ComponentOrHTML {
 	return elem.Div(
-		elem.Heading1(vecty.Text(`This is the order page!`)),
+		vecty.Markup(vecty.Class(`full-height`, `order-grid`)),
+		elem.Div(vecty.Text(`This is the order page!`)),
+		elem.Div(vecty.Text(`This is the order page!`)),
+		elem.Div(vecty.Text(`This is the order page!`)),
+		elem.Div(vecty.Text(`This is the order page!`)),
+		elem.Div(vecty.Text(`This is the order page!`)),
+		elem.Div(vecty.Text(`This is the order page!`)),
 	)
 }

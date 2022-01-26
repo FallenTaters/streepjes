@@ -1,0 +1,19 @@
+.order-grid {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: 30% 30% 40%;
+  grid-template-rows: 50% 50%;
+  padding: 50px 50px 50px 100px;
+}
+/* @media only screen and (max-width: 1200px) {
+  .order-grid {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 100%;
+    padding: 100px 50px 0px 100px;
+  }
+} */
+
+.order-grid > div {
+  background-color: green;
+}

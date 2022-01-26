@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strings"
 
 	"git.fuyu.moe/Fuyu/router"
 )
@@ -15,7 +16,7 @@ func New(static Static) *router.Router {
 
 	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
-	r.GET(`/static/:name`, getStatic(static))
+	r.GET(`/static/*name`, getStatic(static))
 
 	return r
 }
@@ -38,7 +39,7 @@ func getIndex(assets Static) router.Handle {
 
 func getStatic(assets Static) router.Handle {
 	return func(c *router.Context) error {
-		name := c.Param(`name`)
+		name := strings.TrimPrefix(c.Param(`name`), `/`)
 		asset, err := assets(name)
 		if err != nil {
 			return c.NoContent(http.StatusNotFound)

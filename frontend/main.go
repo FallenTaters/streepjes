@@ -9,17 +9,18 @@ import (
 )
 
 func main() {
-	vecty.SetTitle("Hello Vecty!")
-	vecty.RenderBody(&PageView{})
+	vecty.SetTitle("Streepjeslijst")
+	vecty.AddStylesheet(`/css/order.css`)
+	vecty.RenderBody(&Body{})
 }
 
-// PageView is our main page component.
-type PageView struct {
+// Body is our main page component.
+type Body struct {
 	vecty.Core
 }
 
 // Render implements the vecty.Component interface.
-func (p *PageView) Render() vecty.ComponentOrHTML {
+func (p *Body) Render() vecty.ComponentOrHTML {
 	return elem.Body(
 		&layout.PageView{
 			Page: layout.PageOrder,
