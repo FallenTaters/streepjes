@@ -19,5 +19,7 @@ func (o *Order) Render() vecty.ComponentOrHTML {
 	if largeScreen {
 		return &order.Large{}
 	}
-	return &order.Small{}
+	return &order.Small{
+		Page: order.SubPageCategories,
+	}
 }

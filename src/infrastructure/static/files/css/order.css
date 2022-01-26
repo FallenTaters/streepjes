@@ -15,5 +15,5 @@
 } */
 
 .order-grid > div {
-  background-color: green;
+  border: 1px solid black;
 }
