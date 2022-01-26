@@ -20,10 +20,10 @@ func (h *Header) Render() vecty.ComponentOrHTML {
 		h.headerLink(beercss.IconTypeHistory, `History`, PageHistory),
 	}
 
-	return elem.Div(vecty.List{
+	return elem.Div(
 		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `m`, `l`, `top`))}, links...)...),
 		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `s`, `bottom`))}, links...)...),
-	})
+	)
 }
 
 func (h *Header) headerLink(icon beercss.IconType, text string, target Page) *vecty.HTML {
