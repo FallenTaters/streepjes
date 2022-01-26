@@ -2,22 +2,22 @@ package pages
 
 import (
 	"github.com/hexops/vecty"
-	"github.com/hexops/vecty/elem"
+
+	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
+	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 )
 
 type Order struct {
 	vecty.Core
 }
 
-// Render implements the vecty.Component interface.
 func (o *Order) Render() vecty.ComponentOrHTML {
-	return elem.Div(
-		vecty.Markup(vecty.Class(`full-height`, `order-grid`)),
-		elem.Div(vecty.Text(`This is the order page!`)),
-		elem.Div(vecty.Text(`This is the order page!`)),
-		elem.Div(vecty.Text(`This is the order page!`)),
-		elem.Div(vecty.Text(`This is the order page!`)),
-		elem.Div(vecty.Text(`This is the order page!`)),
-		elem.Div(vecty.Text(`This is the order page!`)),
-	)
+	largeScreen := window.OnResize(func() {
+		vecty.Rerender(o)
+	})
+
+	if largeScreen {
+		return &order.Large{}
+	}
+	return &order.Small{}
 }

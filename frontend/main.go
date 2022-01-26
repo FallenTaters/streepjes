@@ -1,4 +1,4 @@
-//go:build wasm
+//go:build js && wasm
 
 package main
 
@@ -10,7 +10,6 @@ import (
 
 func main() {
 	vecty.SetTitle("Streepjeslijst")
-	vecty.AddStylesheet(`/css/order.css`)
 	vecty.RenderBody(&Body{})
 }
 
