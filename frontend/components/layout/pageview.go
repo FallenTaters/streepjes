@@ -1,7 +1,9 @@
 package layout
 
 import (
-	"github.com/PotatoesFall/vecty-test/frontend/pages"
+	"fmt"
+
+	"github.com/PotatoesFall/vecty-test/frontend/components/pages"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
@@ -18,9 +20,13 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 		&Header{
 			Navigate: func(p Page) {
 				pv.Page = p
+				vecty.Rerender(pv)
 			},
 		},
-		renderPage(pv.Page),
+		elem.Div(
+			vecty.Markup(vecty.Class(`container`)),
+			renderPage(pv.Page),
+		),
 	)
 }
 
@@ -39,7 +45,9 @@ func renderPage(p Page) vecty.ComponentOrHTML {
 	switch p {
 	case PageOrder:
 		return &pages.Order{}
+	case PageHistory:
+		return &pages.History{}
 	}
 
-	panic(p)
+	panic(fmt.Sprintf(`unknown page with value: %d`, p))
 }

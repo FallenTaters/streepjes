@@ -21,7 +21,7 @@ func (h *Header) Render() vecty.ComponentOrHTML {
 	}
 
 	return elem.Div(
-		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `m`, `l`, `top`))}, links...)...),
+		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `m`, `l`, `left`))}, links...)...),
 		elem.Div(append([]vecty.MarkupOrChild{vecty.Markup(vecty.Class(`menu`, `s`, `bottom`))}, links...)...),
 	)
 }
