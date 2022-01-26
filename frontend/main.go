@@ -1,8 +1,9 @@
-//go:build js && wasm
+//go:build wasm
 
 package main
 
 import (
+	"github.com/PotatoesFall/vecty-test/frontend/components/layout"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
@@ -20,6 +21,8 @@ type PageView struct {
 // Render implements the vecty.Component interface.
 func (p *PageView) Render() vecty.ComponentOrHTML {
 	return elem.Body(
-		elem.Heading1(vecty.Text("Hello Vecty!")),
+		&layout.PageView{
+			Page: layout.PageOrder,
+		},
 	)
 }
