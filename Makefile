@@ -11,7 +11,7 @@ LDFLAGS := '-X "$(PACKAGE).buildCommit=$(GIT_COMMIT)" \
 		-X "$(PACKAGE).buildVersion=$(GIT_TAG)"'
 
 wasm:
-	@GOARCH=wasm GOOS=js go build -o ./src/infrastructure/static/files/app.wasm ./frontend/
+	@GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
 
 run: wasm
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .

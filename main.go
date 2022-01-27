@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/PotatoesFall/vecty-test/src/infrastructure/router"
-	"github.com/PotatoesFall/vecty-test/src/infrastructure/static"
+	"github.com/PotatoesFall/vecty-test/static"
 )
 
 func main() {
