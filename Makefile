@@ -17,4 +17,4 @@ run: wasm
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
 build: wasm
-	@go build -o ./bin/vecty-test -ldflags $(LDFLAGS) .
+	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
