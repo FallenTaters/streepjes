@@ -9,7 +9,7 @@ const (
 
 var Club ClubType
 
-var Listeners []func(ClubType)
+var ClubListeners []func(ClubType)
 
 func Toggle() {
 	if Club == Gladiators {
@@ -18,7 +18,7 @@ func Toggle() {
 		Club = Gladiators
 	}
 
-	for _, f := range Listeners {
+	for _, f := range ClubListeners {
 		f(Club)
 	}
 }

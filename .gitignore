@@ -2,3 +2,5 @@
 bin
 .vscode/
 air.log
+
+*_enumer.go

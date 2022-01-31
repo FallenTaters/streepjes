@@ -10,11 +10,14 @@ LDFLAGS := '-X "$(PACKAGE).buildCommit=$(GIT_COMMIT)" \
 		-X "$(PACKAGE).buildTime=$(GIT_TIME)" \
 		-X "$(PACKAGE).buildVersion=$(GIT_TAG)"'
 
+generate:
+	@go generate ./...
+
 wasm:
 	@GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
 
-run: wasm
+run: generate wasm
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
-build: wasm
+build: generate wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
