@@ -1,4 +1,4 @@
-package club
+package order
 
 type ClubType int
 
