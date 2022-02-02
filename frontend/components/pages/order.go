@@ -31,7 +31,9 @@ func (o *Order) Render() vecty.ComponentOrHTML {
 
 	o.catalog = cat
 
-	categories := catalog.Categories(o.catalog.Categories)
+	categories := catalog.Categories(o.catalog.Categories, func(c api.Category) {
+		// TODO
+	})
 
 	if largeScreen {
 		return order.Large(categories)

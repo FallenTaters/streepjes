@@ -4,11 +4,12 @@ import (
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
+	"github.com/hexops/vecty/event"
 )
 
-func Categories(categories []api.Category) *CategoriesComponent {
-	// todo add listeners
+func Categories(categories []api.Category, onChange func(api.Category)) *CategoriesComponent {
 	return &CategoriesComponent{
+		onChange:   onChange,
 		categories: categories,
 	}
 }
@@ -16,6 +17,7 @@ func Categories(categories []api.Category) *CategoriesComponent {
 type CategoriesComponent struct {
 	vecty.Core
 
+	onChange   func(api.Category)
 	categories []api.Category
 }
 
@@ -26,7 +28,17 @@ func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
 	}
 
 	for _, category := range c.categories {
-		markupAndChildren = append(markupAndChildren, elem.Div(vecty.Text(category.Name)))
+		categoryButton := elem.Button(
+			vecty.Markup(
+				vecty.Class(`responsive`), // TOOD add padding or margin
+				event.Click(func(*vecty.Event) {
+					c.onChange(category)
+				}),
+			),
+			vecty.Text(category.Name),
+		)
+
+		markupAndChildren = append(markupAndChildren, categoryButton)
 	}
 
 	return elem.Div(markupAndChildren...)
