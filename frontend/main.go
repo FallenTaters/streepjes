@@ -3,12 +3,15 @@
 package main
 
 import (
+	"github.com/PotatoesFall/vecty-test/frontend/backend"
 	"github.com/PotatoesFall/vecty-test/frontend/components/layout"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
 
 func main() {
+	backend.Init(`http://localhost:8080`) // TODO: make setting or automatically get current location
+
 	vecty.SetTitle("Streepjeslijst")
 	vecty.RenderBody(&Body{})
 }

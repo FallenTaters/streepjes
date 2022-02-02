@@ -1,13 +1,49 @@
 package cache
 
-var cache map[string]interface{}
+import (
+	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/frontend/backend"
+)
 
-func getOrAdd(key string, add func() interface{}) interface{} {
-	exists := cache[key]
+var cache = map[string]interface{}{}
+
+func getOrAdd(key string, f func() (interface{}, error)) (interface{}, error) {
+	data, exists := cache[key]
+	if exists {
+		return data, nil
+	}
+
+	data, err := f()
+	if err != nil {
+		return nil, err
+	}
+
+	add(key, data)
+	return data, nil
 }
 
-func add(key string)
+func add(key string, v interface{}) {
+	cache[key] = v
+}
 
-// TODO: make nice. For example ability to call cache.GetOrFetch(), cache.ForceFetch() from outside this package?
-// nevermind the above, empty interface crap should stay encapsulated within this package.
-// so do something like cache.Catalog() and cache.ForceFetchCatalog() ? just see
+func Catalog() (api.Catalog, error) {
+	data, err := getOrAdd(`catalog`, func() (interface{}, error) {
+		return backend.GetCatalog()
+	})
+	if err != nil {
+		return api.Catalog{}, err
+	}
+
+	return data.(api.Catalog), nil
+}
+
+func FetchCatalog() (api.Catalog, error) {
+	catalog, err := backend.GetCatalog()
+	if err != nil {
+		return catalog, err
+	}
+
+	add(`catalog`, catalog)
+
+	return catalog, err
+}

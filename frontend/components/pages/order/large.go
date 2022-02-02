@@ -1,20 +1,29 @@
 package order
 
 import (
+	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
 
-type Large struct {
-	vecty.Core
+func Large(categories *catalog.CategoriesComponent) vecty.Component {
+	return &LargeComponent{
+		categories: categories,
+	}
 }
 
-func (l *Large) Render() vecty.ComponentOrHTML {
+type LargeComponent struct {
+	vecty.Core
+
+	categories *catalog.CategoriesComponent
+}
+
+func (l *LargeComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(
 		vecty.Markup(
 			vecty.Class(`full-height`, `order-grid`),
 		),
-		elem.Div(vecty.Markup(vecty.Style(`overflow`, `auto`)), elem.Heading2(vecty.Text("Categories"))),
+		l.categories,
 		elem.Div(vecty.Markup(vecty.Style(`overflow`, `auto`)), elem.Heading2(vecty.Text("Products"))),
 		elem.Div(vecty.Markup(vecty.Style(`overflow`, `auto`)), elem.Heading2(vecty.Text("Order"))),
 		elem.Div(elem.Heading2(vecty.Text("Club"))),

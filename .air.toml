@@ -7,7 +7,7 @@ tmp_dir = "bin"
 
 [build]
 # Just plain old shell command. You could use `make` as well.
-cmd = "make wasm && go run ."
+cmd = "make run"
 # Binary file yields from `cmd`.
 # bin = "./bin/streepjes"
 # Customize binary, can setup environment variables when run your app.
