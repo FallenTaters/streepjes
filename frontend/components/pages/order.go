@@ -14,6 +14,8 @@ type Order struct {
 	vecty.Core
 
 	catalog api.Catalog
+
+	conceptOrder order.Concept
 }
 
 func (o *Order) Render() vecty.ComponentOrHTML {
