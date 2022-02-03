@@ -4,7 +4,7 @@ import (
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 
-	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
 	"github.com/PotatoesFall/vecty-test/frontend/state/cache"
@@ -12,10 +12,12 @@ import (
 
 func Order() *OrderComponent {
 	o := &OrderComponent{
-		items: make(map[api.Item]int),
+		items: make(map[domain.Item]int),
+		club:  domain.ClubGladiators, // TODO
+		// club: domain.ClubParabool, // TODO
 	}
 
-	o.overview = order.Overview(o.items, o.DeleteItem)
+	o.overview = order.Overview(o.items, o.DeleteItem, o.club)
 
 	return o
 }
@@ -23,11 +25,9 @@ func Order() *OrderComponent {
 type OrderComponent struct {
 	vecty.Core
 
-	// concept api.Order
-	items map[api.Item]int
-
-	overview *order.OverviewComponent
-
+	club               domain.Club
+	items              map[domain.Item]int
+	overview           *order.OverviewComponent
 	selectedCategoryID int
 }
 
@@ -38,14 +38,14 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 		panic(err)
 	}
 
-	items := catalog.Items([]api.Item{}, func(i api.Item) {
+	items := catalog.Items([]domain.Item{}, func(i domain.Item) {
 		o.AddItem(i)
 	})
 
-	categories := catalog.Categories(cat.Categories, func(c api.Category) {
+	categories := catalog.Categories(cat.Categories, func(c domain.Category) {
 		o.selectedCategoryID = c.ID
 
-		var newItems []api.Item
+		var newItems []domain.Item
 		for _, item := range cat.Items {
 			if item.CategoryID == c.ID {
 				newItems = append(newItems, item)
@@ -86,12 +86,12 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 	)
 }
 
-func (o *OrderComponent) AddItem(item api.Item) {
+func (o *OrderComponent) AddItem(item domain.Item) {
 	o.items[item]++
 	vecty.Rerender(o.overview)
 }
 
-func (o *OrderComponent) DeleteItem(item api.Item) {
+func (o *OrderComponent) DeleteItem(item domain.Item) {
 	defer vecty.Rerender(o.overview)
 
 	n, ok := o.items[item]

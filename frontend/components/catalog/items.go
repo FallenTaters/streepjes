@@ -1,13 +1,13 @@
 package catalog
 
 import (
-	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 	"github.com/hexops/vecty/event"
 )
 
-func Items(items []api.Item, onChange func(api.Item)) *ItemsComponent {
+func Items(items []domain.Item, onChange func(domain.Item)) *ItemsComponent {
 	return &ItemsComponent{
 		items:          items,
 		selectedItemID: -1,
@@ -18,10 +18,10 @@ func Items(items []api.Item, onChange func(api.Item)) *ItemsComponent {
 type ItemsComponent struct {
 	vecty.Core
 
-	items          []api.Item
+	items          []domain.Item
 	selectedItemID int
 
-	onChange func(api.Item)
+	onChange func(domain.Item)
 }
 
 func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
@@ -42,7 +42,7 @@ func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(markupAndChildren...)
 }
 
-func itemButton(item api.Item, selected bool, onClick func()) vecty.ComponentOrHTML {
+func itemButton(item domain.Item, selected bool, onClick func()) vecty.ComponentOrHTML {
 	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)
@@ -57,7 +57,7 @@ func itemButton(item api.Item, selected bool, onClick func()) vecty.ComponentOrH
 	)
 }
 
-func (i *ItemsComponent) SetItems(items []api.Item) {
+func (i *ItemsComponent) SetItems(items []domain.Item) {
 	i.items = items
 	vecty.Rerender(i)
 }

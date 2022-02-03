@@ -5,15 +5,16 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/frontend/components/beercss"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 	"github.com/hexops/vecty/event"
 )
 
-func Overview(items map[api.Item]int, onDelete func(api.Item)) *OverviewComponent {
+func Overview(items map[domain.Item]int, onDelete func(domain.Item), club domain.Club) *OverviewComponent {
 	return &OverviewComponent{
+		club:     club,
 		items:    items,
 		onDelete: onDelete,
 	}
@@ -22,26 +23,25 @@ func Overview(items map[api.Item]int, onDelete func(api.Item)) *OverviewComponen
 type OverviewComponent struct {
 	vecty.Core
 
-	items map[api.Item]int
-
-	onDelete func(api.Item)
+	club     domain.Club
+	items    map[domain.Item]int
+	onDelete func(domain.Item)
 }
 
 func (o *OverviewComponent) Render() vecty.ComponentOrHTML {
 	fmt.Println(`render`, o.items)
 	markupAndChildren := []vecty.MarkupOrChild{
 		vecty.Markup(vecty.Style(`overflow`, `auto`), vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
-		// TODO get rid of padding without getting rid of shadows?
 		elem.Heading5(vecty.Text("Overview")),
 	}
 
-	markupAndChildren = append(markupAndChildren, makeCards(o.items, o.onDelete)...)
+	markupAndChildren = append(markupAndChildren, o.makeCards(o.items, o.onDelete)...)
 
 	return elem.Div(markupAndChildren...)
 }
 
-func makeCards(itemCounts map[api.Item]int, onDelete func(api.Item)) []vecty.MarkupOrChild {
-	var itemsSorted []api.Item
+func (o *OverviewComponent) makeCards(itemCounts map[domain.Item]int, onDelete func(domain.Item)) []vecty.MarkupOrChild {
+	var itemsSorted []domain.Item
 	for item := range itemCounts {
 		itemsSorted = append(itemsSorted, item)
 	}
@@ -56,7 +56,7 @@ func makeCards(itemCounts map[api.Item]int, onDelete func(api.Item)) []vecty.Mar
 	var children []vecty.MarkupOrChild
 	for _, item := range itemsSorted {
 		itm := item
-		children = append(children, makeCard(item, itemCounts[item], func(e *vecty.Event) {
+		children = append(children, o.makeCard(item, itemCounts[item], func(e *vecty.Event) {
 			onDelete(itm)
 		}))
 	}
@@ -64,16 +64,23 @@ func makeCards(itemCounts map[api.Item]int, onDelete func(api.Item)) []vecty.Mar
 	return children
 }
 
-func makeCard(item api.Item, count int, onClick func(e *vecty.Event)) vecty.MarkupOrChild {
+func (o *OverviewComponent) makeCard(item domain.Item, count int, onClick func(e *vecty.Event)) vecty.MarkupOrChild {
 	return elem.Article(
+		vecty.Markup(vecty.Class(`small-padding`)),
 		elem.Div(
-			vecty.Markup(vecty.Class(`row`, `no-wrap`)),
+			vecty.Markup(vecty.Class(`row`, `no-wrap`, `large-text`)),
 			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `max`)),
-				elem.Heading6(
-					vecty.Markup(vecty.Class(`no-margin`)),
-					vecty.Text(fmt.Sprintf(`x%d %s`, count, item.Name)),
+				vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)),
+				elem.Span(
+					vecty.Markup(
+						vecty.Class(`bold`),
+						vecty.UnsafeHTML(fmt.Sprintf(`&nbsp;×%d&nbsp;&nbsp;`, count))),
 				),
+				elem.Span(vecty.Text(item.Name)),
+			),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+				vecty.Text(item.PriceString(o.club)),
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`)),

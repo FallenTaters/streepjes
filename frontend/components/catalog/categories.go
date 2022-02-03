@@ -1,13 +1,13 @@
 package catalog
 
 import (
-	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 	"github.com/hexops/vecty/event"
 )
 
-func Categories(categories []api.Category, onChange func(api.Category)) *CategoriesComponent {
+func Categories(categories []domain.Category, onChange func(domain.Category)) *CategoriesComponent {
 	return &CategoriesComponent{
 		categories:         categories,
 		selectedCategoryID: -1,
@@ -18,10 +18,10 @@ func Categories(categories []api.Category, onChange func(api.Category)) *Categor
 type CategoriesComponent struct {
 	vecty.Core
 
-	categories         []api.Category
+	categories         []domain.Category
 	selectedCategoryID int
 
-	onChange func(api.Category)
+	onChange func(domain.Category)
 }
 
 func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
@@ -43,7 +43,7 @@ func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(markupAndChildren...)
 }
 
-func categoryButton(category api.Category, selected bool, onClick func()) vecty.ComponentOrHTML {
+func categoryButton(category domain.Category, selected bool, onClick func()) vecty.ComponentOrHTML {
 	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)
