@@ -1,7 +1,18 @@
 package window
 
-import "syscall/js"
+import (
+	"strconv"
+	"syscall/js"
+)
 
-func LargeScreen() bool {
-	return js.Global().Call(`matchMedia`, `only screen and (min-width: 993px)`).Get(`matches`).Bool()
+func GetSize() Size {
+	if js.Global().Call(`matchMedia`, `only screen and (min-width: `+strconv.Itoa(minWidthL)+`px)`).Get(`matches`).Bool() {
+		return SizeL
+	}
+
+	if js.Global().Call(`matchMedia`, `only screen and (min-width: `+strconv.Itoa(minWidthM)+`px)`).Get(`matches`).Bool() {
+		return SizeM
+	}
+
+	return SizeS
 }

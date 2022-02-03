@@ -6,13 +6,18 @@ import (
 
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
+	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
 	"github.com/PotatoesFall/vecty-test/frontend/state/cache"
 )
 
 func Order() *OrderComponent {
-	return &OrderComponent{
+	o := &OrderComponent{
 		items: make(map[api.Item]int),
 	}
+
+	o.overview = order.Overview(o.items, o.DeleteItem)
+
+	return o
 }
 
 type OrderComponent struct {
@@ -20,6 +25,8 @@ type OrderComponent struct {
 
 	// concept api.Order
 	items map[api.Item]int
+
+	overview *order.OverviewComponent
 
 	selectedCategoryID int
 }
@@ -49,43 +56,53 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 	})
 
 	return elem.Div(
-		vecty.Markup(
-			vecty.Class(`full-height`, `row`),
+		elem.Div(
+			vecty.Markup(vecty.Class(`row`)),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l3`)),
+				categories,
+			),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l3`)),
+				items,
+			),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m12`, `l6`)),
+				o.overview,
+			),
 		),
 		elem.Div(
-			vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-			categories,
+			vecty.Markup(vecty.Class(`row`)),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
+				elem.Heading2(vecty.Text("Club"))),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
+				elem.Heading2(vecty.Text("Member"))),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
+				elem.Heading2(vecty.Text("Payment"))),
 		),
-		elem.Div(
-			vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-			items,
-		),
-		elem.Div(
-			vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-			elem.Heading5(vecty.Text("Order")),
-		),
-		elem.Div(elem.Heading2(vecty.Text("Club"))),
-		elem.Div(elem.Heading2(vecty.Text("Member"))),
-		elem.Div(elem.Heading2(vecty.Text("Payment"))),
 	)
 }
 
 func (o *OrderComponent) AddItem(item api.Item) {
 	o.items[item]++
-	// TODO: rerender correct components
+	vecty.Rerender(o.overview)
 }
 
 func (o *OrderComponent) DeleteItem(item api.Item) {
+	defer vecty.Rerender(o.overview)
+
 	n, ok := o.items[item]
-	if !ok || n < 1 {
+	if !ok {
 		return
 	}
 
-	if n == 1 {
+	if n <= 1 {
 		delete(o.items, item)
 		return
 	}
 
 	o.items[item]--
-	// TODO: rerender correct components
 }

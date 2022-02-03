@@ -44,7 +44,7 @@ func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
 }
 
 func categoryButton(category api.Category, selected bool, onClick func()) vecty.ComponentOrHTML {
-	classList := []string{`responsive`, `left-round`, `extra`, `small-margin`}
+	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)
 	}

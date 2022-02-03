@@ -17,16 +17,13 @@ type Header struct {
 // Render implements the vecty.Component interface.
 func (h *Header) Render() vecty.ComponentOrHTML {
 	links := []vecty.MarkupOrChild{
-		h.headerLink(beercss.IconTypeLocalBar, `Order`, PageOrder),
-		h.headerLink(beercss.IconTypeHistory, `History`, PageHistory),
+		h.headerLink(beercss.IconLocalBar, `Order`, PageOrder),
+		h.headerLink(beercss.IconHistory, `History`, PageHistory),
 	}
 
-	largeScreen := window.OnResize(nil)
-
-	var side string
-	if largeScreen {
-		side = `left`
-	} else {
+	size := window.GetSize()
+	side := `left`
+	if size == window.SizeS {
 		side = `bottom`
 	}
 

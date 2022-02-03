@@ -25,9 +25,8 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 			},
 		},
 		elem.Div(
-			getStyles(window.OnResize(func() {
-				vecty.Rerender(pv)
-			})),
+			vecty.Markup(vecty.Class(`full-height`)),
+			getStyles(window.OnResize(func(s window.Size) { vecty.Rerender(pv) })),
 			renderPage(pv.Page),
 		),
 	)
@@ -55,10 +54,17 @@ func renderPage(p Page) vecty.ComponentOrHTML {
 	panic(fmt.Sprintf(`unknown page with value: %d`, p))
 }
 
-func getStyles(largeScreen bool) vecty.MarkupList {
-	if largeScreen {
-		return vecty.Markup(vecty.Style(`padding`, `20px 20px 20px 100px`))
+func getStyles(screenSize window.Size) vecty.MarkupList {
+	switch screenSize {
+	case window.SizeL:
+		return vecty.Markup(vecty.Style(`padding`, `70px 50px 50px 130px`))
+
+	case window.SizeM:
+		return vecty.Markup(vecty.Style(`padding`, `20px 20px 0px 100px`))
+
+	case window.SizeS:
+		return vecty.Markup(vecty.Style(`padding`, `10px 10px 100px 10px`))
 	}
 
-	return vecty.Markup(vecty.Style(`padding`, `10px 10px 100px 10px`))
+	panic(screenSize)
 }

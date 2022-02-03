@@ -31,10 +31,9 @@ func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 	}
 
 	for _, item := range i.items {
-		cat := item
+		itm := item
 		btn := itemButton(item, item.ID == i.selectedItemID, func() {
-			// i.SetSelected(cat.ID)
-			i.onChange(cat)
+			i.onChange(itm)
 		})
 
 		markupAndChildren = append(markupAndChildren, btn)
@@ -44,7 +43,7 @@ func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 }
 
 func itemButton(item api.Item, selected bool, onClick func()) vecty.ComponentOrHTML {
-	classList := []string{`responsive`, `right-round`, `extra`, `small-margin`}
+	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)
 	}
