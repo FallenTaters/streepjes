@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/FallenTaters/bbucket"
-	"github.com/PotatoesFall/vecty-test/src/domain"
-	"github.com/PotatoesFall/vecty-test/src/infrastructure/repo"
+	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
+	"github.com/PotatoesFall/vecty-test/domain"
 
 	"go.etcd.io/bbolt"
 )

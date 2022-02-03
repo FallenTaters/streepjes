@@ -3,7 +3,7 @@ package repo
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/src/domain"
+	"github.com/PotatoesFall/vecty-test/domain"
 )
 
 type Order interface {

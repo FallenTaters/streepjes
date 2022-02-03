@@ -6,6 +6,7 @@ import (
 
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/domain"
 )
 
 type Static func(filename string) ([]byte, error)
@@ -55,7 +56,7 @@ func getStatic(assets Static) router.Handle {
 func getCatalog(c *router.Context) error {
 	// TODO make actual catalog
 	catalog := api.Catalog{
-		Categories: []api.Category{
+		Categories: []domain.Category{
 			{
 				ID:   1,
 				Name: `Food`,
@@ -65,7 +66,7 @@ func getCatalog(c *router.Context) error {
 				Name: `Drinks`,
 			},
 		},
-		Items: []api.Item{
+		Items: []domain.Item{
 			{
 				ID:              1,
 				CategoryID:      1,
@@ -80,6 +81,7 @@ func getCatalog(c *router.Context) error {
 				PriceGladiators: 200,
 				PriceParabool:   150,
 			},
+
 			{
 				ID:              3,
 				CategoryID:      2,
@@ -93,6 +95,20 @@ func getCatalog(c *router.Context) error {
 				Name:            `Wine`,
 				PriceGladiators: 250,
 				PriceParabool:   220,
+			},
+			{
+				ID:              5,
+				CategoryID:      1,
+				Name:            `Chicken Fingers 2`,
+				PriceGladiators: 250,
+				PriceParabool:   200,
+			},
+			{
+				ID:              6,
+				CategoryID:      1,
+				Name:            `Snickers 2`,
+				PriceGladiators: 200,
+				PriceParabool:   150,
 			},
 		},
 	}

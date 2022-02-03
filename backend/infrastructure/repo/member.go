@@ -3,7 +3,7 @@ package repo
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/src/domain"
+	"github.com/PotatoesFall/vecty-test/domain"
 )
 
 type Member interface {
