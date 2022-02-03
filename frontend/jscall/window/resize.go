@@ -9,7 +9,9 @@ func OnResize(f func()) bool {
 	jsFunc := js.FuncOf(func(js.Value, []js.Value) interface{} {
 		if largeScreen != LargeScreen() {
 			destroy()
-			f()
+			if f != nil {
+				f()
+			}
 		}
 
 		return nil

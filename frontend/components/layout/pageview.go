@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages"
+	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
@@ -23,7 +24,12 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 				vecty.Rerender(pv)
 			},
 		},
-		renderPage(pv.Page),
+		elem.Div(
+			getStyles(window.OnResize(func() {
+				vecty.Rerender(pv)
+			})),
+			renderPage(pv.Page),
+		),
 	)
 }
 
@@ -41,10 +47,18 @@ const (
 func renderPage(p Page) vecty.ComponentOrHTML {
 	switch p {
 	case PageOrder:
-		return &pages.Order{}
+		return pages.Order()
 	case PageHistory:
 		return &pages.History{}
 	}
 
 	panic(fmt.Sprintf(`unknown page with value: %d`, p))
+}
+
+func getStyles(largeScreen bool) vecty.MarkupList {
+	if largeScreen {
+		return vecty.Markup(vecty.Style(`padding`, `20px 20px 20px 100px`))
+	}
+
+	return vecty.Markup(vecty.Style(`padding`, `10px 10px 100px 10px`))
 }

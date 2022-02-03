@@ -65,7 +65,7 @@ func getCatalog(c *router.Context) error {
 				Name: `Drinks`,
 			},
 		},
-		Products: []api.Item{
+		Items: []api.Item{
 			{
 				ID:              1,
 				CategoryID:      1,

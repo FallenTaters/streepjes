@@ -17,5 +17,5 @@ type (
 
 type Catalog struct {
 	Categories []Category `json:"categories"`
-	Products   []Item     `json:"products"`
+	Items      []Item     `json:"items"`
 }

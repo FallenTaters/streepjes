@@ -21,15 +21,13 @@ func (h *Header) Render() vecty.ComponentOrHTML {
 		h.headerLink(beercss.IconTypeHistory, `History`, PageHistory),
 	}
 
-	largeScreen := window.OnResize(func() {
-		vecty.Rerender(h)
-	})
+	largeScreen := window.OnResize(nil)
 
 	var side string
 	if largeScreen {
 		side = `left`
 	} else {
-		side = `top`
+		side = `bottom`
 	}
 
 	return elem.Div(
