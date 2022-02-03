@@ -63,11 +63,11 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 				categories,
 			),
 			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l3`)),
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
 				items,
 			),
 			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m12`, `l6`)),
+				vecty.Markup(vecty.Class(`col`, `s12`, `m12`, `l5`)),
 				o.overview,
 			),
 		),

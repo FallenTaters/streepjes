@@ -30,7 +30,8 @@ type OverviewComponent struct {
 func (o *OverviewComponent) Render() vecty.ComponentOrHTML {
 	fmt.Println(`render`, o.items)
 	markupAndChildren := []vecty.MarkupOrChild{
-		vecty.Markup(vecty.Style(`overflow`, `auto`)),
+		vecty.Markup(vecty.Style(`overflow`, `auto`), vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
+		// TODO get rid of padding without getting rid of shadows?
 		elem.Heading5(vecty.Text("Overview")),
 	}
 
@@ -78,7 +79,7 @@ func makeCard(item api.Item, count int, onClick func(e *vecty.Event)) vecty.Mark
 				vecty.Markup(vecty.Class(`col`, `min`)),
 				elem.Button(
 					vecty.Markup(
-						vecty.Class(`round`, `error`),
+						vecty.Class(`circle`, `error`),
 						event.Click(onClick),
 					),
 					beercss.Icon(beercss.IconDelete),
