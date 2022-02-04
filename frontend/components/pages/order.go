@@ -7,14 +7,16 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
 	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
+	"github.com/PotatoesFall/vecty-test/frontend/components/club"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
 )
 
 func Order() *OrderComponent {
 	o := &OrderComponent{
 		items: make(order.Items),
-		club:  domain.ClubGladiators, // TODO
-		// club: domain.ClubParabool, // TODO
+		club:  domain.ClubGladiators, // TODO dont always default to gladiators
+		// idea: before entering order screen, club must be selected?
+		// the toggle then becomes unnecessary or could at least be removed on mobile
 	}
 
 	o.overview = order.Overview(o.items, o.club)
@@ -75,11 +77,14 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 			vecty.Markup(vecty.Class(`row`)),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				elem.Heading2(vecty.Text("Club"))),
-			elem.Div(
+				club.Switcher(false, o.club, func(c domain.Club) {
+					o.club = c
+					vecty.Rerender(o)
+				}),
+			), elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				elem.Heading2(vecty.Text("Member"))),
-			elem.Div(
+				elem.Heading2(vecty.Text("Member")),
+			), elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
 				elem.Heading2(vecty.Text("Payment"))),
 		),

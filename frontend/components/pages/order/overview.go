@@ -27,7 +27,6 @@ type OverviewComponent struct {
 }
 
 func (o *OverviewComponent) Render() vecty.ComponentOrHTML {
-	fmt.Println(`render`, o.items)
 	markupAndChildren := []vecty.MarkupOrChild{
 		vecty.Markup(vecty.Style(`overflow`, `auto`), vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
 		elem.Heading5(vecty.Text("Overview")),
