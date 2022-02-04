@@ -1,6 +1,4 @@
-
-
-:root {
+body > div {
   /* theme */
   --primary: #9ccaff;
   --on-primary: #00325a;
@@ -10,10 +8,10 @@
   --on-secondary: #253140;
   --secondary-container: #3c4858;
   --on-secondary-container: #d6e3f7;
-  --tertiary: #dfd6e4;
-  --on-tertiary: #453e49;
-  --tertiary-container: #564b5e;
-  --on-tertiary-container: #f0dbfa;
+  --tertiary: #d6bee4;
+  --on-tertiary: #3b2948;
+  --tertiary-container: #523f5f;
+  --on-tertiary-container: #f3daff;
   --error: #ffb4a9;
   --error-container: #930006;
   --on-error: #680003;
@@ -43,10 +41,10 @@
   --secondary: var(--secondary-no-club);
   --on-secondary: var(--on-secondary-no-club);
 }
+
 .Gladiators {
   --primary: #004a1f;
   --on-primary: whitesmoke;
-
   --secondary: #d27405;
   --on-secondary: #2f3436;
 }
