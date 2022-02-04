@@ -8,30 +8,22 @@ import (
 	"github.com/hexops/vecty/elem"
 )
 
-func Logo(club domain.Club, size int) *LogoComponent {
-	l := &LogoComponent{
-		size: size,
-		club: club,
-	}
-	fmt.Println(`l upon creation:`, l)
-
-	return l
-}
-
-type LogoComponent struct {
+type Logo struct {
 	vecty.Core
 
-	size int
-	club domain.Club
+	Size   int         `vecty:"prop"`
+	Margin int         `vecty:"prop"`
+	Club   domain.Club `vecty:"prop"`
 }
 
-func (l *LogoComponent) Render() vecty.ComponentOrHTML {
-	fmt.Println(`l at rendertime:`, l)
-
+func (l *Logo) Render() vecty.ComponentOrHTML {
 	return elem.Image(vecty.Markup(
-		vecty.Style(`height`, fmt.Sprintf(`%dpx`, l.size)),
-		vecty.Style(`width`, fmt.Sprintf(`%dpx`, l.size)),
-		vecty.Attribute(`src`, path(l.club)),
+		vecty.Style(`height`, fmt.Sprintf(`%dpx`, l.Size)),
+		vecty.Style(`width`, fmt.Sprintf(`%dpx`, l.Size)),
+		// vecty.Style(`margin`, fmt.Sprintf(`%dpx`, l.Margin)),
+		// vecty.Style(`padding`, fmt.Sprintf(`%dpx`, l.Margin)),
+		vecty.Style(`border-radius`, `100px`),
+		vecty.Attribute(`src`, path(l.Club)),
 	))
 }
 

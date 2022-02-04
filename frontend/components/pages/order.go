@@ -14,7 +14,7 @@ import (
 func Order() *OrderComponent {
 	o := &OrderComponent{
 		items: make(order.Items),
-		club:  domain.ClubGladiators, // TODO dont always default to gladiators
+		club:  domain.ClubParabool, // TODO dont always default to gladiators
 		// idea: before entering order screen, club must be selected?
 		// the toggle then becomes unnecessary or could at least be removed on mobile
 	}
@@ -74,19 +74,26 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 			),
 		),
 		elem.Div(
-			vecty.Markup(vecty.Class(`row`)),
+			vecty.Markup(vecty.Class(`row`, `no-wrap`)),
 			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				club.Switcher(false, o.club, func(c domain.Club) {
-					o.club = c
-					vecty.Rerender(o)
-				}),
-			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				elem.Heading2(vecty.Text("Member")),
-			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				elem.Heading2(vecty.Text("Payment"))),
+				vecty.Markup(vecty.Class(`col`, `min`)),
+				&club.Toggler{
+					Rerender: false,
+					Club:     o.club,
+					OnToggle: func(c domain.Club) {
+						o.club = c
+						vecty.Rerender(o)
+					},
+				},
+			),
+			// elem.Div(
+			// 	vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
+			// 	// club.Logo(domain.ClubGladiators, 100),
+			// 	// club.Logo(domain.ClubParabool, 100),
+			// ), elem.Div(
+			// 	vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
+			// 	elem.Heading2(vecty.Text("Payment"))
+			// ),
 		),
 	)
 }
