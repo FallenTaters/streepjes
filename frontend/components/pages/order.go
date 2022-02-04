@@ -5,9 +5,9 @@ import (
 	"github.com/hexops/vecty/elem"
 
 	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
 	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
-	"github.com/PotatoesFall/vecty-test/frontend/state/cache"
 )
 
 func Order() *OrderComponent {
