@@ -99,7 +99,7 @@ func getCatalog(c *router.Context) error {
 			{
 				ID:              5,
 				CategoryID:      1,
-				Name:            `Chicken Fingers 2`,
+				Name:            `Chicken Fingers 2 3 4 5 6 reaasfdsdflkjsdlfkjsdlkfjsdlkfjsldkjflskdjfsdfdsfsdfsdfsfdkgjsdf;lgkjdlkfjgsdlkfjg`,
 				PriceGladiators: 250,
 				PriceParabool:   200,
 			},

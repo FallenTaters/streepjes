@@ -12,7 +12,10 @@ import (
 type PageView struct {
 	vecty.Core
 
-	Page Page
+	Page Page `vecty:"prop"`
+
+	OrderPage   *pages.OrderComponent `vecty:"prop"`
+	HistoryPage *pages.History        `vecty:"prop"`
 }
 
 // Render implements the vecty.Component interface.
@@ -27,7 +30,7 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 		elem.Div(
 			vecty.Markup(vecty.Class(`full-height`)),
 			getStyles(window.OnResize(func(s window.Size) { vecty.Rerender(pv) })),
-			renderPage(pv.Page),
+			pv.renderPage(pv.Page),
 		),
 	)
 }
@@ -43,12 +46,12 @@ const (
 	PageUsers
 )
 
-func renderPage(p Page) vecty.ComponentOrHTML {
+func (pv *PageView) renderPage(p Page) vecty.ComponentOrHTML {
 	switch p {
 	case PageOrder:
-		return pages.Order()
+		return pv.OrderPage
 	case PageHistory:
-		return &pages.History{}
+		return pv.HistoryPage
 	}
 
 	panic(fmt.Sprintf(`unknown page with value: %d`, p))
@@ -63,7 +66,7 @@ func getStyles(screenSize window.Size) vecty.MarkupList {
 		return vecty.Markup(vecty.Style(`padding`, `20px 20px 0px 100px`))
 
 	case window.SizeS:
-		return vecty.Markup(vecty.Style(`padding`, `10px 10px 100px 10px`))
+		return vecty.Markup(vecty.Style(`padding`, `20px 10px 100px 10px`))
 	}
 
 	panic(screenSize)

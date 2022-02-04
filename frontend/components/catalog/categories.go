@@ -9,33 +9,28 @@ import (
 
 func Categories(categories []domain.Category, onChange func(domain.Category)) *CategoriesComponent {
 	return &CategoriesComponent{
-		categories:         categories,
-		selectedCategoryID: -1,
-		onChange:           onChange,
+		Categories:         categories,
+		SelectedCategoryID: -1,
+		OnChange:           onChange,
 	}
 }
 
 type CategoriesComponent struct {
 	vecty.Core
 
-	categories         []domain.Category
-	selectedCategoryID int
+	Categories         []domain.Category `vecty:"prop"`
+	SelectedCategoryID int               `vecty:"prop"`
 
-	onChange func(domain.Category)
+	OnChange func(domain.Category) `vecty:"prop"`
 }
 
 func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
 	markupAndChildren := []vecty.MarkupOrChild{
-		vecty.Markup(vecty.Style(`overflow`, `auto`)),
 		elem.Heading5(vecty.Text("Categories")),
 	}
 
-	for _, category := range c.categories {
-		cat := category
-		btn := categoryButton(category, category.ID == c.selectedCategoryID, func() {
-			c.SetSelected(cat.ID)
-			c.onChange(cat)
-		})
+	for _, category := range c.Categories {
+		btn := categoryButton(category, category.ID == c.SelectedCategoryID, c.OnChange)
 
 		markupAndChildren = append(markupAndChildren, btn)
 	}
@@ -43,7 +38,7 @@ func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(markupAndChildren...)
 }
 
-func categoryButton(category domain.Category, selected bool, onClick func()) vecty.ComponentOrHTML {
+func categoryButton(category domain.Category, selected bool, onClick func(c domain.Category)) vecty.ComponentOrHTML {
 	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)
@@ -52,13 +47,8 @@ func categoryButton(category domain.Category, selected bool, onClick func()) vec
 	return elem.Button(
 		vecty.Markup(
 			vecty.Class(classList...),
-			event.Click(func(*vecty.Event) { onClick() }),
+			event.Click(func(*vecty.Event) { onClick(category) }),
 		),
 		vecty.Text(category.Name),
 	)
-}
-
-func (c *CategoriesComponent) SetSelected(id int) {
-	c.selectedCategoryID = id
-	vecty.Rerender(c)
 }

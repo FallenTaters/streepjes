@@ -26,15 +26,11 @@ type ItemsComponent struct {
 
 func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 	markupAndChildren := []vecty.MarkupOrChild{
-		vecty.Markup(vecty.Style(`overflow`, `auto`)),
 		elem.Heading5(vecty.Text("Items")),
 	}
 
 	for _, item := range i.items {
-		itm := item
-		btn := itemButton(item, item.ID == i.selectedItemID, func() {
-			i.onChange(itm)
-		})
+		btn := itemButton(item, item.ID == i.selectedItemID, i.onChange)
 
 		markupAndChildren = append(markupAndChildren, btn)
 	}
@@ -42,7 +38,7 @@ func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(markupAndChildren...)
 }
 
-func itemButton(item domain.Item, selected bool, onClick func()) vecty.ComponentOrHTML {
+func itemButton(item domain.Item, selected bool, onClick func(i domain.Item)) vecty.ComponentOrHTML {
 	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)
@@ -51,7 +47,7 @@ func itemButton(item domain.Item, selected bool, onClick func()) vecty.Component
 	return elem.Button(
 		vecty.Markup(
 			vecty.Class(classList...),
-			event.Click(func(*vecty.Event) { onClick() }),
+			event.Click(func(*vecty.Event) { onClick(item) }),
 		),
 		vecty.Text(item.Name),
 	)
