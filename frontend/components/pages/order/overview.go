@@ -12,7 +12,7 @@ import (
 	"github.com/hexops/vecty/event"
 )
 
-func Overview(items map[domain.Item]int, club domain.Club) *OverviewComponent {
+func Overview(items map[domain.Item]int, club *domain.Club) *OverviewComponent {
 	return &OverviewComponent{
 		club:  club,
 		items: items,
@@ -22,13 +22,13 @@ func Overview(items map[domain.Item]int, club domain.Club) *OverviewComponent {
 type OverviewComponent struct {
 	vecty.Core
 
-	club  domain.Club
-	items Items
+	club  *domain.Club `vecty:"prop"`
+	items Items        `vecty:"prop"`
 }
 
 func (o *OverviewComponent) Render() vecty.ComponentOrHTML {
 	markupAndChildren := []vecty.MarkupOrChild{
-		vecty.Markup(vecty.Style(`overflow`, `auto`), vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
+		vecty.Markup(vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
 		elem.Heading5(vecty.Text("Overview")),
 	}
 
@@ -52,14 +52,16 @@ func (o *OverviewComponent) makeCards() []vecty.MarkupOrChild {
 
 	var children []vecty.MarkupOrChild
 	for _, item := range itemsSorted {
-		children = append(children, o.makeCard(item, o.items[item]))
+		children = append(children, o.makeCard(item, o.items))
 	}
 
 	return children
 }
 
 // TODO make smaller, remove duplication
-func (o *OverviewComponent) makeCard(item domain.Item, count int) vecty.MarkupOrChild {
+func (o *OverviewComponent) makeCard(item domain.Item, items Items) vecty.MarkupOrChild {
+	amount := items[item]
+
 	return elem.Article(
 		vecty.Markup(vecty.Class(`small-padding`)),
 		elem.Div(
@@ -70,7 +72,7 @@ func (o *OverviewComponent) makeCard(item domain.Item, count int) vecty.MarkupOr
 					vecty.Markup(
 						vecty.Class(`circle`, `left-round`, `no-margin`),
 						event.Click(func(e *vecty.Event) {
-							o.items.Remove(item)
+							items.Remove(item)
 							vecty.Rerender(o)
 						}),
 					),
@@ -80,7 +82,7 @@ func (o *OverviewComponent) makeCard(item domain.Item, count int) vecty.MarkupOr
 				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
 				elem.Span(
 					vecty.Markup(vecty.Class(`bold`)),
-					vecty.Text(fmt.Sprint(count)),
+					vecty.Text(fmt.Sprint(amount)),
 				),
 			), elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
@@ -95,12 +97,15 @@ func (o *OverviewComponent) makeCard(item domain.Item, count int) vecty.MarkupOr
 					beercss.Icon(beercss.IconAdd),
 				),
 			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)),
+				vecty.Markup(
+					vecty.Class(`col`, `max`, `middle-align`),
+					vecty.Style(`text-overflow`, `ellipsis`),
+				),
 				elem.Span(vecty.Text(item.Name)),
 			), elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
 				vecty.Text(
-					item.Price(o.club).Times(count).String(),
+					item.Price(*o.club).Times(amount).String(),
 				),
 			), elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),

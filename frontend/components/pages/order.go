@@ -1,6 +1,8 @@
 package pages
 
 import (
+	"fmt"
+
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 
@@ -10,36 +12,51 @@ import (
 	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
 	"github.com/PotatoesFall/vecty-test/frontend/components/club"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
+	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 )
 
 func Order() *OrderComponent {
-	o := &OrderComponent{
-		club: domain.ClubGladiators, // TODO
-	}
+	o := new(OrderComponent)
+	clb := new(domain.Club)      // must be passed in callback
+	*clb = domain.ClubGladiators // TODO
+	o.Club = clb
 
-	o.toggler = &club.Toggler{
+	o.Toggler = &club.Toggler{
 		Size:     70,
 		Rerender: false,
-		Club:     o.club,
+		Club:     *clb,
 		OnToggle: func(c domain.Club) {
-			o.club = c
+			fmt.Println(c.String())
+			*clb = c
 			vecty.Rerender(o)
+			vecty.Rerender(o.Overview)
 		},
 	}
+
+	itemsInOrder := make(order.Items) // must be passed in callback
+	o.ItemsInOrder = itemsInOrder
 
 	cat, err := cache.Catalog()
 	if err != nil {
 		// TODO handle gracefully
 		panic(err)
 	}
-	o.catalog = cat
+	o.Catalog = cat
 
-	o.items = catalog.Items([]domain.Item{}, func(i domain.Item) {
-		o.AddItem(i)
+	overview := order.Overview(itemsInOrder, clb) // must be passed in callback
+	o.Overview = overview
+
+	items := catalog.Items([]domain.Item{}, func(i domain.Item) {
+		itemsInOrder.Add(i)
+		vecty.Rerender(overview)
 	})
+	o.Items = items
 
-	o.categories = catalog.Categories(cat.Categories, func(c domain.Category) {
-		o.selectedCategoryID = c.ID
+	var selectedCategoryID int
+	o.SelectedCategoryID = &selectedCategoryID
+
+	o.Categories = catalog.Categories(cat.Categories, func(c domain.Category) {
+		selectedCategoryID = c.ID
 
 		var newItems []domain.Item
 		for _, item := range cat.Items {
@@ -48,11 +65,8 @@ func Order() *OrderComponent {
 			}
 		}
 
-		o.items.SetItems(newItems)
+		items.SetItems(newItems)
 	})
-
-	o.itemsInOrder = make(order.Items)
-	o.overview = order.Overview(o.itemsInOrder, o.club)
 
 	return o
 }
@@ -60,64 +74,80 @@ func Order() *OrderComponent {
 type OrderComponent struct {
 	vecty.Core
 
-	club domain.Club
+	Club *domain.Club `vecty:"prop"`
 
-	catalog            api.Catalog
-	selectedCategoryID int
-	itemsInOrder       order.Items
+	Catalog            api.Catalog `vecty:"prop"`
+	SelectedCategoryID *int        `vecty:"prop"`
+	ItemsInOrder       order.Items `vecty:"prop"`
 
-	toggler    *club.Toggler
-	items      *catalog.ItemsComponent
-	categories *catalog.CategoriesComponent
-	overview   *order.OverviewComponent
+	Toggler    *club.Toggler                `vecty:"prop"`
+	Items      *catalog.ItemsComponent      `vecty:"prop"`
+	Categories *catalog.CategoriesComponent `vecty:"prop"`
+	Overview   *order.OverviewComponent     `vecty:"prop"`
 }
 
 func (o *OrderComponent) Render() vecty.ComponentOrHTML {
+	screenSize := window.GetSize()
+
+	var child *vecty.HTML
+	if screenSize == window.SizeL {
+		child = o.grid()
+	} else {
+		child = o.reactive()
+	}
+
 	return elem.Div(
-		elem.Div(
-			vecty.Markup(vecty.Class(`row`, `s`, `no-wrap`)),
-			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`)),
-				o.toggler,
-			),
-			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
-		),
-		elem.Div(
-			vecty.Markup(vecty.Class(`row`, o.club.String())),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l3`)),
-				o.categories,
-			),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				o.items,
-			),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `s12`, `m12`, `l5`)),
-				o.overview,
-			),
-		),
-		elem.Div(
-			vecty.Markup(vecty.Class(`row`)),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`, `l`, `m`, `l2`)),
-				o.toggler,
-			),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `l10`, `s12`)),
-				vecty.Text(`hello`),
-			),
-		),
+		vecty.Markup(vecty.Class(`row`, o.Club.String())),
+		child,
 	)
 }
 
-func (o *OrderComponent) AddItem(item domain.Item) {
-	o.itemsInOrder.Add(item)
-	vecty.Rerender(o.overview)
+func (o *OrderComponent) DeleteItem(item domain.Item) {
+	o.ItemsInOrder.Delete(item)
+	defer vecty.Rerender(o.Overview)
 }
 
-func (o *OrderComponent) DeleteItem(item domain.Item) {
-	o.itemsInOrder.Delete(item)
-	defer vecty.Rerender(o.overview)
+// TODO THIS SPLITTING IS BROKEN AS FUCK, ON RESIZE THE WHOLE THING BREAKS
+func (o *OrderComponent) grid() *vecty.HTML {
+	return elem.Div(
+		vecty.Markup(
+			vecty.Class(`l`),
+			vecty.Style(`display`, `grid`),
+			vecty.Style(`grid-gap`, `5px`),
+			vecty.Style(`grid-template-columns`, `30% 30% 40%`),
+			vecty.Style(`grid-template-rows`, `1fr 200px`),
+		),
+		o.Categories,
+		o.Items,
+		o.Overview,
+		o.Toggler,
+	)
+}
+
+func (o *OrderComponent) reactive() *vecty.HTML {
+	return elem.Div(
+		elem.Div(
+			vecty.Markup(vecty.Class(`row`, `no-wrap`)),
+			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`)),
+				o.Toggler,
+			),
+			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
+		),
+		elem.Div(
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`)),
+				o.Categories,
+			),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m6`)),
+				o.Items,
+			),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m12`)),
+				o.Overview,
+			),
+		),
+	)
 }
