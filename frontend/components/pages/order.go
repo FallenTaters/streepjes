@@ -4,6 +4,7 @@ import (
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 
+	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
 	"github.com/PotatoesFall/vecty-test/frontend/components/catalog"
@@ -13,38 +14,31 @@ import (
 
 func Order() *OrderComponent {
 	o := &OrderComponent{
-		items: make(order.Items),
-		club:  domain.ClubParabool, // TODO dont always default to gladiators
-		// idea: before entering order screen, club must be selected?
-		// the toggle then becomes unnecessary or could at least be removed on mobile
+		club: domain.ClubGladiators, // TODO
 	}
 
-	o.overview = order.Overview(o.items, o.club)
+	o.toggler = &club.Toggler{
+		Size:     70,
+		Rerender: false,
+		Club:     o.club,
+		OnToggle: func(c domain.Club) {
+			o.club = c
+			vecty.Rerender(o)
+		},
+	}
 
-	return o
-}
-
-type OrderComponent struct {
-	vecty.Core
-
-	club               domain.Club
-	items              order.Items
-	overview           *order.OverviewComponent
-	selectedCategoryID int
-}
-
-func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 	cat, err := cache.Catalog()
 	if err != nil {
 		// TODO handle gracefully
 		panic(err)
 	}
+	o.catalog = cat
 
-	items := catalog.Items([]domain.Item{}, func(i domain.Item) {
+	o.items = catalog.Items([]domain.Item{}, func(i domain.Item) {
 		o.AddItem(i)
 	})
 
-	categories := catalog.Categories(cat.Categories, func(c domain.Category) {
+	o.categories = catalog.Categories(cat.Categories, func(c domain.Category) {
 		o.selectedCategoryID = c.ID
 
 		var newItems []domain.Item
@@ -54,19 +48,50 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 			}
 		}
 
-		items.SetItems(newItems)
+		o.items.SetItems(newItems)
 	})
 
+	o.itemsInOrder = make(order.Items)
+	o.overview = order.Overview(o.itemsInOrder, o.club)
+
+	return o
+}
+
+type OrderComponent struct {
+	vecty.Core
+
+	club domain.Club
+
+	catalog            api.Catalog
+	selectedCategoryID int
+	itemsInOrder       order.Items
+
+	toggler    *club.Toggler
+	items      *catalog.ItemsComponent
+	categories *catalog.CategoriesComponent
+	overview   *order.OverviewComponent
+}
+
+func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(
+		elem.Div(
+			vecty.Markup(vecty.Class(`row`, `s`, `no-wrap`)),
+			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`)),
+				o.toggler,
+			),
+			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
+		),
 		elem.Div(
 			vecty.Markup(vecty.Class(`row`, o.club.String())),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l3`)),
-				categories,
+				o.categories,
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-				items,
+				o.items,
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m12`, `l5`)),
@@ -74,36 +99,25 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 			),
 		),
 		elem.Div(
-			vecty.Markup(vecty.Class(`row`, `no-wrap`)),
+			vecty.Markup(vecty.Class(`row`)),
 			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`)),
-				&club.Toggler{
-					Rerender: false,
-					Club:     o.club,
-					OnToggle: func(c domain.Club) {
-						o.club = c
-						vecty.Rerender(o)
-					},
-				},
+				vecty.Markup(vecty.Class(`col`, `min`, `l`, `m`, `l2`)),
+				o.toggler,
 			),
-			// elem.Div(
-			// 	vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-			// 	// club.Logo(domain.ClubGladiators, 100),
-			// 	// club.Logo(domain.ClubParabool, 100),
-			// ), elem.Div(
-			// 	vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l4`)),
-			// 	elem.Heading2(vecty.Text("Payment"))
-			// ),
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `l10`, `s12`)),
+				vecty.Text(`hello`),
+			),
 		),
 	)
 }
 
 func (o *OrderComponent) AddItem(item domain.Item) {
-	o.items.Add(item)
+	o.itemsInOrder.Add(item)
 	vecty.Rerender(o.overview)
 }
 
 func (o *OrderComponent) DeleteItem(item domain.Item) {
-	o.items.Delete(item)
+	o.itemsInOrder.Delete(item)
 	defer vecty.Rerender(o.overview)
 }

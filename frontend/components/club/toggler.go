@@ -10,6 +10,7 @@ import (
 type Toggler struct {
 	vecty.Core
 
+	Size     int               `vecty:"prop"`
 	Rerender bool              `vecty:"prop"`
 	OnToggle func(domain.Club) `vecty:"prop"`
 	Club     domain.Club       `vecty:"prop"`
@@ -23,7 +24,7 @@ func (s *Toggler) Render() vecty.ComponentOrHTML {
 				s.toggle()
 			}),
 		),
-		&Logo{Size: 150, Margin: 100, Club: s.Club},
+		&Logo{Size: s.Size, Club: s.Club},
 	)
 }
 

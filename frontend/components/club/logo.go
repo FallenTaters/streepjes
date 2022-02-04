@@ -11,29 +11,39 @@ import (
 type Logo struct {
 	vecty.Core
 
-	Size   int         `vecty:"prop"`
-	Margin int         `vecty:"prop"`
-	Club   domain.Club `vecty:"prop"`
+	Size int         `vecty:"prop"`
+	Club domain.Club `vecty:"prop"`
 }
 
 func (l *Logo) Render() vecty.ComponentOrHTML {
-	return elem.Image(vecty.Markup(
-		vecty.Style(`height`, fmt.Sprintf(`%dpx`, l.Size)),
-		vecty.Style(`width`, fmt.Sprintf(`%dpx`, l.Size)),
-		// vecty.Style(`margin`, fmt.Sprintf(`%dpx`, l.Margin)),
-		// vecty.Style(`padding`, fmt.Sprintf(`%dpx`, l.Margin)),
-		vecty.Style(`border-radius`, `100px`),
-		vecty.Attribute(`src`, path(l.Club)),
-	))
+	return elem.Div(
+		vecty.Markup(
+			vecty.Style(`background-color`, `white`),
+			vecty.Style(`background-position`, `center`),
+			vecty.Style(`background-repeat`, `no-repeat`),
+			vecty.Style(`background-image`, path(l.Club)),
+			vecty.Style(`background-size`, px(l.Size, 1)),
+			vecty.Style(`height`, px(l.Size, 1)),
+			vecty.Style(`width`, px(l.Size, 1)),
+			vecty.Style(`padding`, px(l.Size, 0.207)),
+			vecty.Style(`border-radius`, px(l.Size, 0.707)),
+			vecty.Style(`border`, `none`),
+		),
+	)
 }
 
 func path(club domain.Club) string {
 	switch club {
 	case domain.ClubParabool:
-		return `/static/logos/parabool.jpg`
+		return `url("/static/logos/parabool.jpg")`
 	case domain.ClubGladiators:
-		return `/static/logos/gladiators.jpg`
+		return `url("/static/logos/gladiators.jpg")`
 	}
 
 	panic(club)
+}
+
+func px(n int, factor float64) string {
+	n = int(float64(n) * factor)
+	return fmt.Sprintf(`%dpx`, n)
 }
