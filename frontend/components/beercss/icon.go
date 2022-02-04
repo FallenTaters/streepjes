@@ -14,6 +14,7 @@ const (
 	IconSwapHoriz IconType = `swap_horiz`
 	IconPayments  IconType = `payments`
 	IconDelete    IconType = `delete`
+	IconRemove    IconType = `remove`
 )
 
 func Icon(i IconType, markup ...vecty.MarkupOrChild) *vecty.HTML {

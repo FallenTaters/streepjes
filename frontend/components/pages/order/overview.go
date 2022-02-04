@@ -12,20 +12,18 @@ import (
 	"github.com/hexops/vecty/event"
 )
 
-func Overview(items map[domain.Item]int, onDelete func(domain.Item), club domain.Club) *OverviewComponent {
+func Overview(items map[domain.Item]int, club domain.Club) *OverviewComponent {
 	return &OverviewComponent{
-		club:     club,
-		items:    items,
-		onDelete: onDelete,
+		club:  club,
+		items: items,
 	}
 }
 
 type OverviewComponent struct {
 	vecty.Core
 
-	club     domain.Club
-	items    Items
-	onDelete func(domain.Item)
+	club  domain.Club
+	items Items
 }
 
 func (o *OverviewComponent) Render() vecty.ComponentOrHTML {
@@ -35,14 +33,14 @@ func (o *OverviewComponent) Render() vecty.ComponentOrHTML {
 		elem.Heading5(vecty.Text("Overview")),
 	}
 
-	markupAndChildren = append(markupAndChildren, o.makeCards(o.items, o.onDelete)...)
+	markupAndChildren = append(markupAndChildren, o.makeCards()...)
 
 	return elem.Div(markupAndChildren...)
 }
 
-func (o *OverviewComponent) makeCards(itemCounts map[domain.Item]int, onDelete func(domain.Item)) []vecty.MarkupOrChild {
+func (o *OverviewComponent) makeCards() []vecty.MarkupOrChild {
 	var itemsSorted []domain.Item
-	for item := range itemCounts {
+	for item := range o.items {
 		itemsSorted = append(itemsSorted, item)
 	}
 
@@ -55,55 +53,69 @@ func (o *OverviewComponent) makeCards(itemCounts map[domain.Item]int, onDelete f
 
 	var children []vecty.MarkupOrChild
 	for _, item := range itemsSorted {
-		itm := item
-		children = append(children, o.makeCard(item, itemCounts[item], func(e *vecty.Event) {
-			onDelete(itm)
-		}))
+		children = append(children, o.makeCard(item, o.items[item]))
 	}
 
 	return children
 }
 
-func (o *OverviewComponent) makeCard(item domain.Item, count int, onClick func(e *vecty.Event)) vecty.MarkupOrChild {
+// TODO make smaller, remove duplication
+func (o *OverviewComponent) makeCard(item domain.Item, count int) vecty.MarkupOrChild {
 	return elem.Article(
 		vecty.Markup(vecty.Class(`small-padding`)),
 		elem.Div(
-			vecty.Markup(vecty.Class(`row`, `no-wrap`, `large-text`)),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)),
-				elem.Span(
-					vecty.Markup(
-						vecty.Class(`bold`),
-						vecty.UnsafeHTML(fmt.Sprintf(`&nbsp;×%d&nbsp;&nbsp;`, count))),
-				),
-				elem.Span(vecty.Text(item.Name)),
-			),
+			vecty.Markup(vecty.Class(`row`, `no-wrap`, `large-text`, `no-club`)),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
-				vecty.Text(item.Price(o.club).String()),
-			),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`)),
 				elem.Button(
 					vecty.Markup(
-						vecty.Class(`circle`, `left-round`),
+						vecty.Class(`circle`, `left-round`, `no-margin`),
 						event.Click(func(e *vecty.Event) {
+							o.items.Remove(item)
+							vecty.Rerender(o)
+						}),
+					),
+					beercss.Icon(beercss.IconRemove),
+				),
+			), elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+				elem.Span(
+					vecty.Markup(vecty.Class(`bold`)),
+					vecty.Text(fmt.Sprint(count)),
+				),
+			), elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+				elem.Button(
+					vecty.Markup(
+						vecty.Class(`circle`, `right-round`, `no-margin`),
+						event.Click(func(e *vecty.Event) {
+							o.items.Add(item)
+							vecty.Rerender(o)
 						}),
 					),
 					beercss.Icon(beercss.IconAdd),
 				),
-				elem.Button(),
+			), elem.Div(
+				vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)),
+				elem.Span(vecty.Text(item.Name)),
+			), elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+				vecty.Text(
+					item.Price(o.club).Times(count).String(),
+				),
+			), elem.Div(
+				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+				elem.Button(
+					vecty.Markup(
+						vecty.Class(`circle`, `error`),
+						event.Click(func(e *vecty.Event) {
+							o.items.Delete(item)
+							vecty.Rerender(o)
+						}),
+					),
+					beercss.Icon(beercss.IconDelete),
+				),
 			),
-			// elem.Div(
-			// 	vecty.Markup(vecty.Class(`col`, `min`)),
-			// 	elem.Button(
-			// 		vecty.Markup(
-			// 			vecty.Class(`circle`, `error`),
-			// 			event.Click(onClick),
-			// 		),
-			// 		beercss.Icon(beercss.IconDelete),
-			// 	),
-			// ),
 		),
 	)
 }
@@ -114,7 +126,7 @@ func (oi Items) Add(item domain.Item) {
 	oi[item]++
 }
 
-func (oi Items) DeleteItem(item domain.Item) {
+func (oi Items) Remove(item domain.Item) {
 	n, ok := oi[item]
 	if !ok {
 		return
@@ -126,4 +138,8 @@ func (oi Items) DeleteItem(item domain.Item) {
 	}
 
 	oi[item]--
+}
+
+func (oi Items) Delete(item domain.Item) {
+	delete(oi, item)
 }

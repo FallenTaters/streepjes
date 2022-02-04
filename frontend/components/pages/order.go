@@ -17,7 +17,7 @@ func Order() *OrderComponent {
 		// club: domain.ClubParabool, // TODO
 	}
 
-	o.overview = order.Overview(o.items, o.DeleteItem, o.club)
+	o.overview = order.Overview(o.items, o.club)
 
 	return o
 }
