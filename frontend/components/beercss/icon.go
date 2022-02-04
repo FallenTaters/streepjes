@@ -7,6 +7,7 @@ type IconType string
 const (
 	IconLocalBar  IconType = `local_bar`
 	IconHistory   IconType = `history`
+	IconAdd       IconType = `add`
 	IconAddCircle IconType = `add_circle`
 	IconList      IconType = `list`
 	IconPerson    IconType = `person`

@@ -19,5 +19,8 @@ wasm:
 run: generate wasm
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
+arelo:
+	@arelo -p '**/*.go' -p '**/*.css' -p '**/*.js' -p '**/*.html' -i '**/.*' -i '**/*_test.go' -i '**/*_enumer.go' -- make run
+
 build: generate wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .

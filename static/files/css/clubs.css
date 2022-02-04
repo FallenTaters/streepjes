@@ -1,25 +1,27 @@
-/* colors */
-:root {
-    --gladiators-primary: #004A1F;
-    --gladiators-secondary: #D27405;
-    --parabool-primary: #583E8D;
-    --parabool-secondary: #FFF;
+.Gladiators {
+  --primary: #004a1f;
+  --on-primary: whitesmoke;
+
+  --secondary: #d27405;
+  --on-secondary: #2f3436;
 }
 
-:root {
-    --current-primary: var(--gladiators-primary);
-    --current-secondary: var(--gladiators-secondary);
+.Parabool {
+  --primary: #583e8d;
+  --on-primary: whitesmoke;
+  --secondary: #625b71;
+  --on-secondary: white;
 }
 
 /* theme */
-body {
-  --primary: var(--current-primary);
-  --on-primary: #ffffff;
-  /* --primary-container: #8cf8c3; */
-  /* --on-primary-container: #002112; */
-  --secondary: var(--current-secondary);
-  --on-secondary: #000;
-  /* --secondary-container: #d0e8d8;
+/* body { */
+/* --primary: var(--current-primary);
+  --on-primary: #ffffff; */
+/* --primary-container: #8cf8c3; */
+/* --on-primary-container: #002112; */
+/* --secondary: var(--current-secondary);
+  --on-secondary: #000; */
+/* --secondary-container: #d0e8d8;
   --on-secondary-container: #0a2015;
   --tertiary: #3d6473;
   --on-tertiary: #ffffff;
@@ -40,11 +42,4 @@ body {
   --inverse-surface: #2d312e;
   --overlay: rgba(0, 0, 0, 0.5);
   --active: rgba(0, 0, 0, 0.1); */
-}
-
-/* TODO
-- don't use global theme ?
-  - okay use global theme but use it based on the logged in user
-- have classes for either theme ?
-- for order-stuff: order component should provide the theme or have its own class that can be used on color components
-*/
+/* } */

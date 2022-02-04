@@ -24,7 +24,7 @@ type OverviewComponent struct {
 	vecty.Core
 
 	club     domain.Club
-	items    map[domain.Item]int
+	items    Items
 	onDelete func(domain.Item)
 }
 
@@ -80,18 +80,50 @@ func (o *OverviewComponent) makeCard(item domain.Item, count int, onClick func(e
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
-				vecty.Text(item.PriceString(o.club)),
+				vecty.Text(item.Price(o.club).String()),
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `min`)),
 				elem.Button(
 					vecty.Markup(
-						vecty.Class(`circle`, `error`),
-						event.Click(onClick),
+						vecty.Class(`circle`, `left-round`),
+						event.Click(func(e *vecty.Event) {
+						}),
 					),
-					beercss.Icon(beercss.IconDelete),
+					beercss.Icon(beercss.IconAdd),
 				),
+				elem.Button(),
 			),
+			// elem.Div(
+			// 	vecty.Markup(vecty.Class(`col`, `min`)),
+			// 	elem.Button(
+			// 		vecty.Markup(
+			// 			vecty.Class(`circle`, `error`),
+			// 			event.Click(onClick),
+			// 		),
+			// 		beercss.Icon(beercss.IconDelete),
+			// 	),
+			// ),
 		),
 	)
+}
+
+type Items map[domain.Item]int
+
+func (oi Items) Add(item domain.Item) {
+	oi[item]++
+}
+
+func (oi Items) DeleteItem(item domain.Item) {
+	n, ok := oi[item]
+	if !ok {
+		return
+	}
+
+	if n <= 1 {
+		delete(oi, item)
+		return
+	}
+
+	oi[item]--
 }

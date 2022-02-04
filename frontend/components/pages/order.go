@@ -12,7 +12,7 @@ import (
 
 func Order() *OrderComponent {
 	o := &OrderComponent{
-		items: make(map[domain.Item]int),
+		items: make(order.Items),
 		club:  domain.ClubGladiators, // TODO
 		// club: domain.ClubParabool, // TODO
 	}
@@ -26,7 +26,7 @@ type OrderComponent struct {
 	vecty.Core
 
 	club               domain.Club
-	items              map[domain.Item]int
+	items              order.Items
 	overview           *order.OverviewComponent
 	selectedCategoryID int
 }
@@ -57,7 +57,7 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 
 	return elem.Div(
 		elem.Div(
-			vecty.Markup(vecty.Class(`row`)),
+			vecty.Markup(vecty.Class(`row`, o.club.String())),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`, `l3`)),
 				categories,
@@ -87,22 +87,11 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 }
 
 func (o *OrderComponent) AddItem(item domain.Item) {
-	o.items[item]++
+	o.items.Add(item)
 	vecty.Rerender(o.overview)
 }
 
 func (o *OrderComponent) DeleteItem(item domain.Item) {
+	o.items.Delete(item)
 	defer vecty.Rerender(o.overview)
-
-	n, ok := o.items[item]
-	if !ok {
-		return
-	}
-
-	if n <= 1 {
-		delete(o.items, item)
-		return
-	}
-
-	o.items[item]--
 }
