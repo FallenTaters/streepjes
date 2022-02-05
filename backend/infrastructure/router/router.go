@@ -21,6 +21,7 @@ func New(static Static) *router.Router {
 	r.GET(`/static/*name`, getStatic(static))
 
 	r.GET(`/catalog`, getCatalog)
+	r.GET(`/members`, getMembers)
 
 	return r
 }
@@ -127,4 +128,29 @@ func getCatalog(c *router.Context) error {
 		},
 	}
 	return c.JSON(http.StatusOK, catalog)
+}
+
+func getMembers(c *router.Context) error {
+	// TODO actual members
+	members := []domain.Member{
+		{
+			ID:   1,
+			Club: domain.ClubGladiators,
+			Name: `Gladiator 1`,
+			Debt: 120,
+		},
+		{
+			ID:   2,
+			Club: domain.ClubGladiators,
+			Name: `Gladiator 2`,
+			Debt: 12000,
+		},
+		{
+			ID:   3,
+			Club: domain.ClubParabool,
+			Name: `Parabool 1`,
+			Debt: 420,
+		},
+	}
+	return c.JSON(http.StatusOK, members)
 }

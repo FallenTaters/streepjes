@@ -87,6 +87,7 @@ func (o *OrderComponent) reactive() *vecty.HTML {
 			elem.Div(vecty.Markup(vecty.Class(`col`, `max`))),
 		),
 		elem.Div(
+			vecty.Markup(vecty.Class(`row`)),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`)),
 				elem.Heading5(vecty.Text("Categories")),
