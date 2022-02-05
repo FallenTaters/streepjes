@@ -25,9 +25,7 @@ type ItemsComponent struct {
 }
 
 func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
-	markupAndChildren := []vecty.MarkupOrChild{
-		elem.Heading5(vecty.Text("Items")),
-	}
+	markupAndChildren := []vecty.MarkupOrChild{}
 
 	for _, item := range i.Items {
 		btn := itemButton(item, item.ID == i.SelectedItemID, i.OnChange)

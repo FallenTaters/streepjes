@@ -20,7 +20,6 @@ type Overview struct {
 func (o *Overview) Render() vecty.ComponentOrHTML {
 	markupAndChildren := []vecty.MarkupOrChild{
 		vecty.Markup(vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
-		elem.Heading5(vecty.Text("Overview")),
 	}
 
 	markupAndChildren = append(markupAndChildren, makeCards()...)

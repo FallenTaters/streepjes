@@ -25,9 +25,7 @@ type CategoriesComponent struct {
 }
 
 func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
-	markupAndChildren := []vecty.MarkupOrChild{
-		elem.Heading5(vecty.Text("Categories")),
-	}
+	markupAndChildren := []vecty.MarkupOrChild{}
 
 	for _, category := range c.Categories {
 		btn := categoryButton(category, category.ID == c.SelectedCategoryID, c.OnChange)

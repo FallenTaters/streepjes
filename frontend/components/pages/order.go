@@ -40,7 +40,7 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 	}
 
 	return elem.Div(
-		vecty.Markup(vecty.Class(`row`, store.Order.Club.String())),
+		vecty.Markup(vecty.Class(store.Order.Club.String())),
 		child,
 	)
 }
@@ -50,14 +50,27 @@ func (o *OrderComponent) grid() *vecty.HTML {
 	return elem.Div(
 		vecty.Markup(
 			vecty.Class(`l`),
+			vecty.Style(`height`, `100%`),
 			vecty.Style(`display`, `grid`),
 			vecty.Style(`grid-gap`, `5px`),
 			vecty.Style(`grid-template-columns`, `30% 30% 40%`),
-			vecty.Style(`grid-template-rows`, `1fr 200px`),
+			vecty.Style(`grid-template-rows`, `50px 1fr 200px`),
 		),
-		categories(),
-		items(),
-		&order.Overview{},
+		elem.Heading5(vecty.Text("Categories")),
+		elem.Heading5(vecty.Text("Items")),
+		elem.Heading5(vecty.Text("Overview")),
+		elem.Div(
+			vecty.Markup(vecty.Style(`overflow`, `auto`)),
+			categories(),
+		),
+		elem.Div(
+			vecty.Markup(vecty.Style(`overflow`, `auto`)),
+			items(),
+		),
+		elem.Div(
+			vecty.Markup(vecty.Style(`overflow`, `auto`)),
+			&order.Overview{},
+		),
 		toggler(),
 	)
 }
@@ -76,14 +89,17 @@ func (o *OrderComponent) reactive() *vecty.HTML {
 		elem.Div(
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`)),
+				elem.Heading5(vecty.Text("Categories")),
 				categories(),
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m6`)),
+				elem.Heading5(vecty.Text("Items")),
 				items(),
 			),
 			elem.Div(
 				vecty.Markup(vecty.Class(`col`, `s12`, `m12`)),
+				elem.Heading5(vecty.Text("Overview")),
 				&order.Overview{},
 			),
 		),
@@ -108,6 +124,6 @@ func toggler() *vecty.HTML {
 				store.Order.ToggleClub()
 			}),
 		),
-		club.Logo(store.Order.Club, 150),
+		club.Logo(store.Order.Club, 120),
 	)
 }
