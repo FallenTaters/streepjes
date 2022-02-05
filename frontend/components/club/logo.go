@@ -8,14 +8,21 @@ import (
 	"github.com/hexops/vecty/elem"
 )
 
-type Logo struct {
+func Logo(club domain.Club, size int) *LogoComponent {
+	return &LogoComponent{
+		Club: club,
+		Size: size,
+	}
+}
+
+type LogoComponent struct {
 	vecty.Core
 
 	Size int         `vecty:"prop"`
 	Club domain.Club `vecty:"prop"`
 }
 
-func (l *Logo) Render() vecty.ComponentOrHTML {
+func (l *LogoComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(
 		vecty.Markup(
 			vecty.Style(`background-color`, `white`),

@@ -9,19 +9,19 @@ import (
 
 func Items(items []domain.Item, onChange func(domain.Item)) *ItemsComponent {
 	return &ItemsComponent{
-		items:          items,
-		selectedItemID: -1,
-		onChange:       onChange,
+		Items:          items,
+		SelectedItemID: -1,
+		OnChange:       onChange,
 	}
 }
 
 type ItemsComponent struct {
 	vecty.Core
 
-	items          []domain.Item
-	selectedItemID int
+	Items          []domain.Item `vecty:"prop"`
+	SelectedItemID int           `vecty:"prop"`
 
-	onChange func(domain.Item)
+	OnChange func(domain.Item) `vecty:"prop"`
 }
 
 func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
@@ -29,8 +29,8 @@ func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 		elem.Heading5(vecty.Text("Items")),
 	}
 
-	for _, item := range i.items {
-		btn := itemButton(item, item.ID == i.selectedItemID, i.onChange)
+	for _, item := range i.Items {
+		btn := itemButton(item, item.ID == i.SelectedItemID, i.OnChange)
 
 		markupAndChildren = append(markupAndChildren, btn)
 	}
@@ -54,11 +54,11 @@ func itemButton(item domain.Item, selected bool, onClick func(i domain.Item)) ve
 }
 
 func (i *ItemsComponent) SetItems(items []domain.Item) {
-	i.items = items
+	i.Items = items
 	vecty.Rerender(i)
 }
 
 func (i *ItemsComponent) SetSelected(id int) {
-	i.selectedItemID = id
+	i.SelectedItemID = id
 	vecty.Rerender(i)
 }

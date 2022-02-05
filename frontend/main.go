@@ -5,7 +5,6 @@ package main
 import (
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
 	"github.com/PotatoesFall/vecty-test/frontend/components/layout"
-	"github.com/PotatoesFall/vecty-test/frontend/components/pages"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
@@ -28,9 +27,6 @@ func (p *Body) Render() vecty.ComponentOrHTML {
 		vecty.Markup(vecty.Class(`is-dark`)),
 		&layout.PageView{
 			Page: layout.PageOrder,
-
-			OrderPage:   pages.Order(),
-			HistoryPage: &pages.History{},
 		},
 	)
 }

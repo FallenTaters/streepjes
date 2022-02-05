@@ -7,10 +7,10 @@ import (
 	"github.com/hexops/vecty/event"
 )
 
-func Categories(categories []domain.Category, onChange func(domain.Category)) *CategoriesComponent {
+func Categories(categories []domain.Category, selectedCategoryID int, onChange func(domain.Category)) *CategoriesComponent {
 	return &CategoriesComponent{
 		Categories:         categories,
-		SelectedCategoryID: -1,
+		SelectedCategoryID: selectedCategoryID,
 		OnChange:           onChange,
 	}
 }

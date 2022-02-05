@@ -5,6 +5,7 @@ import (
 
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
+	"github.com/PotatoesFall/vecty-test/frontend/store"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
@@ -13,9 +14,6 @@ type PageView struct {
 	vecty.Core
 
 	Page Page `vecty:"prop"`
-
-	OrderPage   *pages.OrderComponent `vecty:"prop"`
-	HistoryPage *pages.History        `vecty:"prop"`
 }
 
 // Render implements the vecty.Component interface.
@@ -49,9 +47,9 @@ const (
 func (pv *PageView) renderPage(p Page) vecty.ComponentOrHTML {
 	switch p {
 	case PageOrder:
-		return pv.OrderPage
+		return order()
 	case PageHistory:
-		return pv.HistoryPage
+		return &pages.History{}
 	}
 
 	panic(fmt.Sprintf(`unknown page with value: %d`, p))
@@ -70,4 +68,20 @@ func getStyles(screenSize window.Size) vecty.MarkupList {
 	}
 
 	panic(screenSize)
+}
+
+var orderComponent *pages.OrderComponent
+
+func order() *pages.OrderComponent {
+	if orderComponent != nil {
+		return orderComponent
+	}
+
+	orderComponent = pages.Order()
+
+	store.Order.OnChange = func(oe store.OrderEvent) {
+		vecty.Rerender(orderComponent)
+	}
+
+	return orderComponent
 }
