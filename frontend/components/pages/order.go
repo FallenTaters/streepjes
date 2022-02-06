@@ -131,7 +131,7 @@ func (o *OrderComponent) reactive() *vecty.HTML {
 }
 
 func categories() *catalog.CategoriesComponent {
-	return catalog.Categories(store.Order.Catalog.Categories, store.Order.SelectedCategoryID, func(c domain.Category) {
+	return catalog.Categories(store.Order.Categories(), store.Order.SelectedCategoryID, func(c domain.Category) {
 		store.Order.SelectCategory(c.ID)
 	})
 }

@@ -121,3 +121,21 @@ func (os *OrderStore) ToggleClub() {
 
 	os.Emit(OrderEventClubChanged)
 }
+
+func (os *OrderStore) Categories() []domain.Category {
+	hasItems := make(map[int]bool)
+	for _, item := range os.Catalog.Items {
+		if item.Price(os.Club) != 0 {
+			hasItems[item.CategoryID] = true
+		}
+	}
+
+	var categories []domain.Category
+	for _, category := range os.Catalog.Categories {
+		if hasItems[category.ID] {
+			categories = append(categories, category)
+		}
+	}
+
+	return categories
+}

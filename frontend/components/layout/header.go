@@ -19,6 +19,7 @@ func (h *Header) Render() vecty.ComponentOrHTML {
 	links := []vecty.MarkupOrChild{
 		h.headerLink(beercss.IconFastfood, `Order`, h.navigate(PageOrder)),
 		h.headerLink(beercss.IconHistory, `History`, h.navigate(PageHistory)),
+		h.headerLink(beercss.IconPerson, `Profile`, func(e *vecty.Event) {}), // TODO show profile options (dropdown?)
 	}
 
 	size := window.GetSize()

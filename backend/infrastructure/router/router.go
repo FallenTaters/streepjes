@@ -66,6 +66,10 @@ func getCatalog(c *router.Context) error {
 				ID:   2,
 				Name: `Drinks`,
 			},
+			{
+				ID:   3,
+				Name: `Empty`,
+			},
 		},
 		Items: []domain.Item{
 			{
