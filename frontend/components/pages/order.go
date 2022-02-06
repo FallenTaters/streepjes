@@ -45,7 +45,6 @@ func (o *OrderComponent) Render() vecty.ComponentOrHTML {
 	)
 }
 
-// TODO grid sucks rn
 func (o *OrderComponent) grid() *vecty.HTML {
 	return elem.Div(
 		vecty.Markup(
@@ -55,6 +54,7 @@ func (o *OrderComponent) grid() *vecty.HTML {
 			vecty.Style(`grid-gap`, `5px`),
 			vecty.Style(`grid-template-columns`, `30% 30% 40%`),
 			vecty.Style(`grid-template-rows`, `50px 1fr 200px`),
+			vecty.Style(`grid-template-areas`, `"topleft topcenter topright" "midleft midcenter right" "bottom bottom right"`),
 		),
 		elem.Heading5(vecty.Text("Categories")),
 		elem.Heading5(vecty.Text("Items")),
@@ -68,10 +68,24 @@ func (o *OrderComponent) grid() *vecty.HTML {
 			items(),
 		),
 		elem.Div(
-			vecty.Markup(vecty.Style(`overflow`, `auto`)),
-			&order.Overview{},
+			vecty.Markup(
+				vecty.Style(`grid-area`, `right`),
+			),
+			vecty.Markup(
+				vecty.Style(`display`, `grid`),
+				vecty.Style(`grid-template-columns`, `1fr`),
+				vecty.Style(`grid-template-rows`, `1fr 70px`),
+			),
+			elem.Div(
+				vecty.Markup(vecty.Style(`overflow`, `auto`)),
+				&order.Overview{},
+			),
+			&order.Summary{},
 		),
-		toggler(),
+		elem.Div(
+			vecty.Markup(vecty.Style(`grid-area`, `bottom`)),
+			toggler(),
+		),
 	)
 }
 
@@ -103,6 +117,7 @@ func (o *OrderComponent) reactive() *vecty.HTML {
 				elem.Heading5(vecty.Text("Overview")),
 				&order.Overview{},
 			),
+			&order.Summary{},
 		),
 	)
 }

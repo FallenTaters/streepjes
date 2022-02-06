@@ -35,6 +35,15 @@ func (os *OrderStore) Emit(event OrderEvent) {
 	os.OnChange(event)
 }
 
+func (os *OrderStore) CalculateTotal() domain.Price {
+	var total domain.Price = 0
+	for item, amount := range os.Items {
+		total += item.Price(os.Club) * domain.Price(amount)
+	}
+
+	return total
+}
+
 func (os *OrderStore) SelectCategory(id int) {
 	os.SelectedCategoryID = id
 
