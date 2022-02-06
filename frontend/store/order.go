@@ -26,8 +26,7 @@ type OrderStore struct {
 	Catalog            api.Catalog
 	Club               domain.Club
 	SelectedCategoryID int
-	Items              []Orderline
-	ShownItems         []domain.Item
+	Lines              []Orderline
 
 	OnChange func(OrderEvent)
 }
@@ -42,7 +41,7 @@ func (os *OrderStore) Emit(event OrderEvent) {
 
 func (os *OrderStore) CalculateTotal() domain.Price {
 	var total domain.Price = 0
-	for _, itemAmount := range os.Items {
+	for _, itemAmount := range os.Lines {
 		total += itemAmount.Item.Price(os.Club) * domain.Price(itemAmount.Amount)
 	}
 
@@ -51,28 +50,20 @@ func (os *OrderStore) CalculateTotal() domain.Price {
 
 func (os *OrderStore) SelectCategory(id int) {
 	os.SelectedCategoryID = id
-
-	os.ShownItems = nil
-	for _, item := range os.Catalog.Items {
-		if item.CategoryID == id {
-			os.ShownItems = append(os.ShownItems, item)
-		}
-	}
-
 	os.Emit(OrderEventCategorySelected)
 }
 
 func (os *OrderStore) AddItem(item domain.Item) {
 	defer os.Emit(OrderEventItemsChanged)
 
-	for i, itemAmount := range os.Items {
+	for i, itemAmount := range os.Lines {
 		if itemAmount.Item.ID == item.ID {
-			os.Items[i].Amount++
+			os.Lines[i].Amount++
 			return
 		}
 	}
 
-	os.Items = append(os.Items, Orderline{
+	os.Lines = append(os.Lines, Orderline{
 		Item:   item,
 		Amount: 1,
 	})
@@ -81,20 +72,20 @@ func (os *OrderStore) AddItem(item domain.Item) {
 func (os *OrderStore) RemoveItem(item domain.Item) {
 	defer os.Emit(OrderEventItemsChanged)
 
-	for i, itemAmount := range os.Items {
+	for i, itemAmount := range os.Lines {
 		if itemAmount.Item.ID == item.ID {
 			if itemAmount.Amount <= 1 {
 				os.deleteAt(i)
 				return
 			}
 
-			os.Items[i].Amount--
+			os.Lines[i].Amount--
 		}
 	}
 }
 
 func (os *OrderStore) DeleteItem(item domain.Item) {
-	for i, itemAmount := range os.Items {
+	for i, itemAmount := range os.Lines {
 		if itemAmount.Item.ID == item.ID {
 			os.deleteAt(i)
 		}
@@ -104,12 +95,12 @@ func (os *OrderStore) DeleteItem(item domain.Item) {
 }
 
 func (os *OrderStore) deleteAt(i int) {
-	newItems := os.Items[:i]
-	if len(os.Items) > i+1 {
-		newItems = append(newItems, os.Items[i+1:]...)
+	newItems := os.Lines[:i]
+	if len(os.Lines) > i+1 {
+		newItems = append(newItems, os.Lines[i+1:]...)
 	}
 
-	os.Items = newItems
+	os.Lines = newItems
 }
 
 func (os *OrderStore) ToggleClub() {
@@ -138,4 +129,15 @@ func (os *OrderStore) Categories() []domain.Category {
 	}
 
 	return categories
+}
+
+func (os *OrderStore) Items() []domain.Item {
+	var items []domain.Item
+	for _, item := range os.Catalog.Items {
+		if item.CategoryID == os.SelectedCategoryID && item.Price(os.Club) != 0 {
+			items = append(items, item)
+		}
+	}
+
+	return items
 }

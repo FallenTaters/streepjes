@@ -26,7 +26,7 @@ func (o *Overview) Render() vecty.ComponentOrHTML {
 
 func makeCards() []vecty.MarkupOrChild {
 	var children []vecty.MarkupOrChild
-	for _, item := range store.Order.Items {
+	for _, item := range store.Order.Lines {
 		children = append(children, makeCard(item))
 	}
 
@@ -34,8 +34,13 @@ func makeCards() []vecty.MarkupOrChild {
 }
 
 func makeCard(item store.Orderline) vecty.MarkupOrChild {
+	classList := []string{`small-padding`}
+	if item.Item.Price(store.Order.Club) == 0 {
+		classList = append(classList, `error`)
+	}
+
 	return elem.Article(
-		vecty.Markup(vecty.Class(`small-padding`)),
+		vecty.Markup(vecty.Class(classList...)),
 		elem.Div(
 			vecty.Markup(vecty.Class(`row`, `no-wrap`, `large-text`, `no-club`)),
 			minCol(

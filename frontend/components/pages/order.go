@@ -137,7 +137,7 @@ func categories() *catalog.CategoriesComponent {
 }
 
 func items() *catalog.ItemsComponent {
-	return catalog.Items(store.Order.ShownItems, store.Order.AddItem)
+	return catalog.Items(store.Order.Items(), store.Order.AddItem)
 }
 
 func toggler() *vecty.HTML {

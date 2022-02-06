@@ -127,7 +127,7 @@ func getCatalog(c *router.Context) error {
 				CategoryID:      1,
 				Name:            `Snickers 3`,
 				PriceGladiators: 200,
-				PriceParabool:   150,
+				PriceParabool:   0,
 			},
 		},
 	}
