@@ -53,10 +53,8 @@ func itemButton(item domain.Item, selected bool, onClick func(i domain.Item)) ve
 
 func (i *ItemsComponent) SetItems(items []domain.Item) {
 	i.Items = items
-	vecty.Rerender(i)
 }
 
 func (i *ItemsComponent) SetSelected(id int) {
 	i.SelectedItemID = id
-	vecty.Rerender(i)
 }

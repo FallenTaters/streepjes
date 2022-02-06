@@ -77,10 +77,11 @@ func order() vecty.Component {
 		return orderComponent
 	}
 
-	orderComponent, err := pages.Order()
+	component, err := pages.Order()
 	if err != nil {
 		return pages.Error(err.Error())
 	}
+	orderComponent = component
 
 	store.Order.OnChange = func(oe store.OrderEvent) {
 		vecty.Rerender(orderComponent)

@@ -19,7 +19,7 @@ import (
 
 var ErrLoadCatalog = errors.New(`unable to load catalog`)
 
-func Order() (vecty.Component, error) {
+func Order() (*OrderComponent, error) {
 	catalog, err := cache.Catalog()
 	if err != nil {
 		return nil, fmt.Errorf(`%w: %s`, ErrLoadCatalog, err.Error())
