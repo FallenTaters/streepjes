@@ -117,7 +117,10 @@ func (o *OrderComponent) reactive() *vecty.HTML {
 				elem.Heading5(vecty.Text("Overview")),
 				&order.Overview{},
 			),
-			&order.Summary{},
+			elem.Div(
+				vecty.Markup(vecty.Class(`col`, `s12`, `m12`)),
+				&order.Summary{},
+			),
 		),
 	)
 }

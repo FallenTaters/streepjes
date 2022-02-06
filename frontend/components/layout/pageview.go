@@ -58,13 +58,13 @@ func (pv *PageView) renderPage(p Page) vecty.ComponentOrHTML {
 func getStyles(screenSize window.Size) vecty.MarkupList {
 	switch screenSize {
 	case window.SizeL:
-		return vecty.Markup(vecty.Style(`padding`, `70px 50px 50px 130px`))
+		return vecty.Markup(vecty.Style(`padding`, `20px 40px 20px 120px`))
 
 	case window.SizeM:
 		return vecty.Markup(vecty.Style(`padding`, `20px 20px 0px 100px`))
 
 	case window.SizeS:
-		return vecty.Markup(vecty.Style(`padding`, `20px 10px 100px 10px`))
+		return vecty.Markup(vecty.Style(`padding`, `20px 10px 50px 10px`))
 	}
 
 	panic(screenSize)

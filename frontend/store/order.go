@@ -1,8 +1,6 @@
 package store
 
 import (
-	"fmt"
-
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/domain"
 )
@@ -96,7 +94,6 @@ func (os *OrderStore) RemoveItem(item domain.Item) {
 }
 
 func (os *OrderStore) DeleteItem(item domain.Item) {
-	fmt.Println(item)
 	for i, itemAmount := range os.Items {
 		if itemAmount.Item.ID == item.ID {
 			os.deleteAt(i)
