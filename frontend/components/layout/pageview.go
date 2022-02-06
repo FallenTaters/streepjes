@@ -70,14 +70,17 @@ func getStyles(screenSize window.Size) vecty.MarkupList {
 	panic(screenSize)
 }
 
-var orderComponent *pages.OrderComponent
+var orderComponent vecty.Component
 
-func order() *pages.OrderComponent {
+func order() vecty.Component {
 	if orderComponent != nil {
 		return orderComponent
 	}
 
-	orderComponent = pages.Order()
+	orderComponent, err := pages.Order()
+	if err != nil {
+		return pages.Error(err.Error())
+	}
 
 	store.Order.OnChange = func(oe store.OrderEvent) {
 		vecty.Rerender(orderComponent)

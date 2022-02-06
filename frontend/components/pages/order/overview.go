@@ -92,10 +92,10 @@ func makeCard(item store.Orderline) vecty.MarkupOrChild {
 
 func minCol(children ...vecty.MarkupOrChild) *vecty.HTML {
 	children = append(children, vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)))
-	return elem.Div(children)
+	return elem.Div(children...)
 }
 
 func maxCol(children ...vecty.MarkupOrChild) *vecty.HTML {
 	children = append(children, vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)))
-	return elem.Div(children)
+	return elem.Div(children...)
 }

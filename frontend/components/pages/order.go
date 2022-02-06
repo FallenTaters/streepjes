@@ -1,6 +1,9 @@
 package pages
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 	"github.com/hexops/vecty/event"
@@ -14,15 +17,17 @@ import (
 	"github.com/PotatoesFall/vecty-test/frontend/store"
 )
 
-func Order() *OrderComponent {
+var ErrLoadCatalog = errors.New(`unable to load catalog`)
+
+func Order() (vecty.Component, error) {
 	catalog, err := cache.Catalog()
 	if err != nil {
-		panic(err) // TODO
+		return nil, fmt.Errorf(`%w: %s`, ErrLoadCatalog, err.Error())
 	}
 
 	store.Order.Catalog = catalog
 
-	return &OrderComponent{}
+	return &OrderComponent{}, err
 }
 
 type OrderComponent struct {
