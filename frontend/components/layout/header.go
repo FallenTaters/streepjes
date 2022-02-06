@@ -17,8 +17,8 @@ type Header struct {
 // Render implements the vecty.Component interface.
 func (h *Header) Render() vecty.ComponentOrHTML {
 	links := []vecty.MarkupOrChild{
-		h.headerLink(beercss.IconLocalBar, `Order`, PageOrder),
-		h.headerLink(beercss.IconHistory, `History`, PageHistory),
+		h.headerLink(beercss.IconFastfood, `Order`, h.navigate(PageOrder)),
+		h.headerLink(beercss.IconHistory, `History`, h.navigate(PageHistory)),
 	}
 
 	size := window.GetSize()
@@ -32,13 +32,15 @@ func (h *Header) Render() vecty.ComponentOrHTML {
 	)
 }
 
-func (h *Header) headerLink(icon beercss.IconType, text string, target Page) *vecty.HTML {
+func (h *Header) headerLink(icon beercss.IconType, text string, onClick func(*vecty.Event)) *vecty.HTML {
 	return elem.Anchor(
-		vecty.Markup(
-			event.Click(func(*vecty.Event) {
-				h.Navigate(target)
-			}),
-		),
+		vecty.Markup(event.Click(onClick)),
 		beercss.Icon(icon),
 	)
+}
+
+func (h *Header) navigate(p Page) func(*vecty.Event) {
+	return func(e *vecty.Event) {
+		h.Navigate(p)
+	}
 }
