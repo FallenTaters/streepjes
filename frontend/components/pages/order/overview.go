@@ -33,14 +33,12 @@ func makeCards() []vecty.MarkupOrChild {
 	return children
 }
 
-// TODO make smaller, remove duplication
 func makeCard(item store.Orderline) vecty.MarkupOrChild {
 	return elem.Article(
 		vecty.Markup(vecty.Class(`small-padding`)),
 		elem.Div(
 			vecty.Markup(vecty.Class(`row`, `no-wrap`, `large-text`, `no-club`)),
-			elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+			minCol(
 				elem.Button(
 					vecty.Markup(
 						vecty.Class(`circle`, `left-round`, `no-margin`),
@@ -48,14 +46,18 @@ func makeCard(item store.Orderline) vecty.MarkupOrChild {
 					),
 					beercss.Icon(beercss.IconRemove),
 				),
-			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+			),
+			minCol(
+				vecty.Markup(vecty.Style(`text-align`, `center`)),
 				elem.Span(
-					vecty.Markup(vecty.Class(`bold`)),
+					vecty.Markup(
+						vecty.Class(`bold`),
+						vecty.Style(`width`, `20px`),
+					),
 					vecty.Text(fmt.Sprint(item.Amount)),
 				),
-			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+			),
+			minCol(
 				elem.Button(
 					vecty.Markup(
 						vecty.Class(`circle`, `right-round`, `no-margin`),
@@ -63,19 +65,19 @@ func makeCard(item store.Orderline) vecty.MarkupOrChild {
 					),
 					beercss.Icon(beercss.IconAdd),
 				),
-			), elem.Div(
-				vecty.Markup(
-					vecty.Class(`col`, `max`, `middle-align`),
-					vecty.Style(`text-overflow`, `ellipsis`),
-				),
+			),
+
+			maxCol(
 				elem.Span(vecty.Text(item.Item.Name)),
-			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+			),
+
+			minCol(
 				vecty.Text(
 					item.Item.Price(store.Order.Club).Times(item.Amount).String(),
 				),
-			), elem.Div(
-				vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)),
+			),
+
+			minCol(
 				elem.Button(
 					vecty.Markup(
 						vecty.Class(`circle`, `error`),
@@ -86,4 +88,14 @@ func makeCard(item store.Orderline) vecty.MarkupOrChild {
 			),
 		),
 	)
+}
+
+func minCol(children ...vecty.MarkupOrChild) *vecty.HTML {
+	children = append(children, vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)))
+	return elem.Div(children)
+}
+
+func maxCol(children ...vecty.MarkupOrChild) *vecty.HTML {
+	children = append(children, vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)))
+	return elem.Div(children)
 }
