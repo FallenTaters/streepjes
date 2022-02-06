@@ -9,13 +9,8 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
-func Init(endpoint string) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		panic(err)
-	}
-
-	settings.Endpoint = u
+func Init(endpoint *url.URL) {
+	settings.Endpoint = endpoint
 }
 
 type Settings struct {

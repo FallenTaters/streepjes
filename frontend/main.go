@@ -5,12 +5,13 @@ package main
 import (
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
 	"github.com/PotatoesFall/vecty-test/frontend/components/layout"
+	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
 )
 
 func main() {
-	backend.Init(`http://localhost:8080`) // TODO: make setting or automatically get current location
+	initPackages()
 
 	vecty.SetTitle("Streepjeslijst")
 	vecty.RenderBody(&Body{})
@@ -29,4 +30,8 @@ func (p *Body) Render() vecty.ComponentOrHTML {
 			Page: layout.PageOrder,
 		},
 	)
+}
+
+func initPackages() {
+	backend.Init(window.Location())
 }
