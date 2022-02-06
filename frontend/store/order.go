@@ -1,6 +1,8 @@
 package store
 
 import (
+	"fmt"
+
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/domain"
 )
@@ -17,11 +19,16 @@ var Order = OrderStore{
 	Club: domain.ClubGladiators, // TODO
 }
 
+type Orderline struct {
+	Item   domain.Item
+	Amount int
+}
+
 type OrderStore struct {
 	Catalog            api.Catalog
 	Club               domain.Club
 	SelectedCategoryID int
-	Items              map[domain.Item]int
+	Items              []Orderline
 	ShownItems         []domain.Item
 
 	OnChange func(OrderEvent)
@@ -37,8 +44,8 @@ func (os *OrderStore) Emit(event OrderEvent) {
 
 func (os *OrderStore) CalculateTotal() domain.Price {
 	var total domain.Price = 0
-	for item, amount := range os.Items {
-		total += item.Price(os.Club) * domain.Price(amount)
+	for _, itemAmount := range os.Items {
+		total += itemAmount.Item.Price(os.Club) * domain.Price(itemAmount.Amount)
 	}
 
 	return total
@@ -58,36 +65,54 @@ func (os *OrderStore) SelectCategory(id int) {
 }
 
 func (os *OrderStore) AddItem(item domain.Item) {
-	if os.Items == nil {
-		os.Items = make(map[domain.Item]int)
+	defer os.Emit(OrderEventItemsChanged)
+
+	for i, itemAmount := range os.Items {
+		if itemAmount.Item.ID == item.ID {
+			os.Items[i].Amount++
+			return
+		}
 	}
 
-	os.Items[item]++
-	os.Emit(OrderEventItemsChanged)
+	os.Items = append(os.Items, Orderline{
+		Item:   item,
+		Amount: 1,
+	})
 }
 
 func (os *OrderStore) RemoveItem(item domain.Item) {
 	defer os.Emit(OrderEventItemsChanged)
 
-	if os.Items == nil {
-		os.Items = make(map[domain.Item]int)
-	}
+	for i, itemAmount := range os.Items {
+		if itemAmount.Item.ID == item.ID {
+			if itemAmount.Amount <= 1 {
+				os.deleteAt(i)
+				return
+			}
 
-	if os.Items[item] > 1 {
-		os.Items[item]--
-		return
+			os.Items[i].Amount--
+		}
 	}
-
-	delete(os.Items, item)
 }
 
 func (os *OrderStore) DeleteItem(item domain.Item) {
-	if os.Items == nil {
-		os.Items = make(map[domain.Item]int)
+	fmt.Println(item)
+	for i, itemAmount := range os.Items {
+		if itemAmount.Item.ID == item.ID {
+			os.deleteAt(i)
+		}
 	}
 
-	delete(os.Items, item)
 	os.Emit(OrderEventItemsChanged)
+}
+
+func (os *OrderStore) deleteAt(i int) {
+	newItems := os.Items[:i]
+	if len(os.Items) > i+1 {
+		newItems = append(newItems, os.Items[i+1:]...)
+	}
+
+	os.Items = newItems
 }
 
 func (os *OrderStore) ToggleClub() {
