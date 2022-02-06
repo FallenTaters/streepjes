@@ -59,7 +59,7 @@ func (o *OrderComponent) grid() *vecty.HTML {
 			vecty.Style(`grid-gap`, `5px`),
 			vecty.Style(`grid-template-columns`, `30% 30% 40%`),
 			vecty.Style(`grid-template-rows`, `50px 1fr 200px`),
-			vecty.Style(`grid-template-areas`, `"topleft topcenter topright" "midleft midcenter right" "bottom bottom right"`),
+			vecty.Style(`grid-template-areas`, `"categoryHeader itemHeader overviewHeader" "categories items overview" "bottom items payment"`),
 		),
 		elem.Heading5(vecty.Text("Categories")),
 		elem.Heading5(vecty.Text("Items")),
@@ -69,27 +69,27 @@ func (o *OrderComponent) grid() *vecty.HTML {
 			categories(),
 		),
 		elem.Div(
-			vecty.Markup(vecty.Style(`overflow`, `auto`)),
+			vecty.Markup(
+				vecty.Style(`overflow`, `auto`),
+				vecty.Style(`grid-area`, `items`),
+			),
 			items(),
 		),
 		elem.Div(
 			vecty.Markup(
-				vecty.Style(`grid-area`, `right`),
-			),
-			vecty.Markup(
-				vecty.Style(`display`, `grid`),
-				vecty.Style(`grid-template-columns`, `1fr`),
-				vecty.Style(`grid-template-rows`, `1fr 70px`),
-			),
-			elem.Div(
+				vecty.Style(`grid-area`, `overview`),
 				vecty.Markup(vecty.Style(`overflow`, `auto`)),
-				&order.Overview{},
 			),
-			&order.Summary{},
+			&order.Overview{},
 		),
 		elem.Div(
 			vecty.Markup(vecty.Style(`grid-area`, `bottom`)),
 			toggler(),
+		),
+		elem.Div(
+			vecty.Markup(vecty.Style(`grid-area`, `payment`)),
+			&order.Summary{},
+			// TODO
 		),
 	)
 }
