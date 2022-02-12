@@ -7,9 +7,10 @@ require (
 	github.com/FallenTaters/bbucket v1.0.0
 	github.com/hexops/vecty v0.6.0
 	go.etcd.io/bbolt v1.3.6
+	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2
 )
 
 require (
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
-	golang.org/x/sys v0.0.0-20200923182605-d9f96fdee20d // indirect
+	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
 )
