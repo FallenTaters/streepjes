@@ -13,5 +13,6 @@ func panicHandler(c *router.Context, v interface{}) {
 	fmt.Fprintf(os.Stderr, "panic: %s\n", v)
 	debug.PrintStack()
 	fmt.Println()
+
 	_ = c.NoContent(http.StatusInternalServerError)
 }

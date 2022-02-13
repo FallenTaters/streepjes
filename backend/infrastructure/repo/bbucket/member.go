@@ -36,6 +36,7 @@ func (mr memberRepo) GetAll() []domain.Member {
 
 func (mr memberRepo) Get(id int) (domain.Member, bool) {
 	var member domain.Member
+
 	err := mr.bucket.Get(itob(id), &member)
 	if errors.Is(err, bbucket.ErrObjectNotFound) {
 		return domain.Member{}, false
@@ -49,6 +50,7 @@ func (mr memberRepo) Get(id int) (domain.Member, bool) {
 
 func (mr memberRepo) UpdateMember(member domain.Member) error {
 	var m domain.Member
+
 	err := mr.bucket.Update(memberKey(member), &m, func(ptr interface{}) (object interface{}, err error) {
 		return member, nil
 	})

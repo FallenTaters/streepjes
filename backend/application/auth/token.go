@@ -10,7 +10,7 @@ const tokenLen = 32
 func generateToken() string {
 	binaryToken := make([]byte, base64.RawURLEncoding.DecodedLen(tokenLen)+1)
 
-	_, err := rand.Read(binaryToken)
+	_, err := rand.Read(binaryToken) //nolint:ifshort
 	if err != nil {
 		panic(err)
 	}

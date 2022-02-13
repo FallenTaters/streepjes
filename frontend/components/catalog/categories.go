@@ -36,7 +36,7 @@ func (c *CategoriesComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(markupAndChildren...)
 }
 
-func categoryButton(category domain.Category, selected bool, onClick func(c domain.Category)) vecty.ComponentOrHTML {
+func categoryButton(category domain.Category, selected bool, onClick func(c domain.Category)) *vecty.HTML {
 	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)

@@ -25,6 +25,7 @@ type orderRepo struct {
 
 func (or orderRepo) Get(id int) (domain.Order, bool) {
 	var o domain.Order
+
 	err := or.bucket.Get(bbucket.Itob(id), &o)
 	if errors.Is(err, bbucket.ErrObjectNotFound) {
 		return domain.Order{}, false

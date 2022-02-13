@@ -1,6 +1,5 @@
 run:
-  deadline: 10m
-  build-tags: ["js", "wasm"]
+  build-tags: []
   skip-dirs: []
   skip-files: []
  
@@ -10,38 +9,26 @@ output:
   print-linter-name: true
  
 linters:
-  disable-all: true
-  enable:
-    - bodyclose
-    - deadcode
-    - dupl
-    - errcheck
-    - errorlint
-    - exhaustive
-    - funlen
-    - goconst
-    - gocritic
-    - gocyclo
-    - goerr113
-    - gofumpt
-    - goimports
-    - gosimple
-    - govet
-    - ineffassign
-    - lll
-    - misspell
-    - nakedret
-    - nolintlint
-    - prealloc
-    - exportloopref
-    - staticcheck
-    - structcheck
+  enable-all: true
+  disable:
+    - interfacer
+    - maligned
+    - scopelint
+    - golint
+    - wrapcheck
+    - varnamelen
+    - tagliatelle
     - stylecheck
-    - unconvert
-    - unparam
-    - unused
-    - varcheck
-    - whitespace
+    - nlreturn
+    - gomnd
+    - gochecknoglobals
+    - forcetypeassert
+    - revive
+    - ireturn
+    - godox
+    - forbidigo
+    - gci
+    - noctx
  
 linters-settings:
   govet:
@@ -49,9 +36,6 @@ linters-settings:
  
   gocyclo:
     min-complexity: 15
- 
-  dupl:
-    threshold: 50
  
   lll:
     line-length: 150
@@ -67,12 +51,6 @@ linters-settings:
 issues:
   exclude: []
   exclude-rules:
-    - linters:
-      - stylecheck
-      text: "ST1000:"
-    - linters:
-      - interfacer
-      text: "can be `fmt.Stringer`"
     - path: _test.go
       linters:
         - lll
@@ -84,6 +62,19 @@ issues:
     - linters:
       - errcheck
       source: "defer .*Close()"
+    - linters:
+      - exhaustivestruct
+      text: "Core is missing"
+    - linters:
+      - exhaustivestruct
+      source: "\\{\\}"
+    - linters:
+      - wsl
+      text: "only be cuddled with assignments"
+    - linters:
+      - typecheck
+      text: "could not import syscall/js"
+
   exclude-use-default: false
   max-per-linter: 0
   max-same-issues: 0

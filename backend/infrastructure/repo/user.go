@@ -3,6 +3,8 @@ package repo
 import "github.com/PotatoesFall/vecty-test/domain"
 
 type User interface {
+	GetByID(id int) (domain.User, bool)
+
 	// GetUser by token, false if not found
 	GetByToken(token string) (domain.User, bool)
 

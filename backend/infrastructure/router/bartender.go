@@ -13,7 +13,7 @@ func bartenderRoutes(r *router.Group) {
 	r.GET(`/members`, getMembers)
 }
 
-func getCatalog(c *router.Context) error {
+func getCatalog(c *router.Context) error { //nolint:funlen
 	// TODO make actual catalog
 	catalog := api.Catalog{
 		Categories: []domain.Category{
@@ -90,6 +90,7 @@ func getCatalog(c *router.Context) error {
 			},
 		},
 	}
+
 	return c.JSON(http.StatusOK, catalog)
 }
 
@@ -115,5 +116,6 @@ func getMembers(c *router.Context) error {
 			Debt: 420,
 		},
 	}
+
 	return c.JSON(http.StatusOK, members)
 }

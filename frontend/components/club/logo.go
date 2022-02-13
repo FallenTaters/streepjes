@@ -41,13 +41,15 @@ func (l *LogoComponent) Render() vecty.ComponentOrHTML {
 
 func path(club domain.Club) string {
 	switch club {
+	case domain.ClubUnknown:
+		return ``
 	case domain.ClubParabool:
 		return `url("/static/logos/parabool.jpg")`
 	case domain.ClubGladiators:
 		return `url("/static/logos/gladiators.jpg")`
 	}
 
-	panic(club)
+	return ``
 }
 
 func px(n int, factor float64) string {

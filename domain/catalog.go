@@ -15,6 +15,8 @@ type Item struct {
 
 func (i Item) Price(c Club) Price {
 	switch c {
+	case ClubUnknown:
+		return 0
 	case ClubGladiators:
 		return i.PriceGladiators
 	case ClubParabool:

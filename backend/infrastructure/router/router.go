@@ -40,6 +40,7 @@ func getIndex(assets Static) router.Handle {
 		}
 
 		c.Response.Header().Set(`Content-Type`, `text/html`)
+
 		return c.Bytes(http.StatusOK, index)
 	}
 }
@@ -47,6 +48,7 @@ func getIndex(assets Static) router.Handle {
 func getStatic(assets Static) router.Handle {
 	return func(c *router.Context) error {
 		name := strings.TrimPrefix(c.Param(`name`), `/`)
+
 		asset, err := assets(name)
 		if err != nil {
 			return c.NoContent(http.StatusNotFound)

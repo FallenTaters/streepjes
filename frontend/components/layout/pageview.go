@@ -52,7 +52,8 @@ func (pv *PageView) renderPage(p Page) vecty.ComponentOrHTML {
 		return &pages.History{}
 	}
 
-	panic(fmt.Sprintf(`unknown page with value: %d`, p))
+	fmt.Printf(`unknown page with value: %d`, p)
+	return nil
 }
 
 func getStyles(screenSize window.Size) vecty.MarkupList {
@@ -67,7 +68,7 @@ func getStyles(screenSize window.Size) vecty.MarkupList {
 		return vecty.Markup(vecty.Style(`padding`, `20px 10px 50px 10px`))
 	}
 
-	panic(screenSize)
+	return vecty.Markup()
 }
 
 var orderComponent vecty.Component

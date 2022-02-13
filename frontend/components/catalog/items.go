@@ -36,7 +36,7 @@ func (i *ItemsComponent) Render() vecty.ComponentOrHTML {
 	return elem.Div(markupAndChildren...)
 }
 
-func itemButton(item domain.Item, selected bool, onClick func(i domain.Item)) vecty.ComponentOrHTML {
+func itemButton(item domain.Item, selected bool, onClick func(i domain.Item)) *vecty.HTML {
 	classList := []string{`responsive`, `extra`, `small-margin`}
 	if selected {
 		classList = append(classList, `secondary`)

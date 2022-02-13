@@ -14,7 +14,11 @@ const (
 )
 
 var Order = OrderStore{
-	Club: domain.ClubGladiators, // TODO
+	Club:               domain.ClubGladiators, // TODO
+	Catalog:            api.Catalog{},
+	SelectedCategoryID: 0,
+	Lines:              nil,
+	OnChange:           nil,
 }
 
 type Orderline struct {
