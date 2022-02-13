@@ -21,9 +21,11 @@ type userRepo struct {
 }
 
 func (ur *userRepo) GetByUsername(username string) (domain.User, bool) {
-	row := ur.db.QueryRow(`SELECT * FROM users U WHERE U.username = ?;`, username)
+	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.username = ?;`, username) //nolint:lll
 
-	err := row.Scan()
+	var user domain.User
+
+	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.User{}, false
 	}
@@ -31,5 +33,26 @@ func (ur *userRepo) GetByUsername(username string) (domain.User, bool) {
 		panic(err)
 	}
 
-	return domain.User{}, true // TODO
+	return user, true
+}
+
+func (ur *userRepo) Update(user domain.User) error {
+	res, err := ur.db.Exec(
+		`UPDATE users SET username = ?, password = ?, club = ?, name = ?, role = ?, auth_token = ?, auth_time = ? WHERE id = ?;`,
+		user.Username, user.PasswordHash, user.Club, user.Name, user.Role, user.AuthToken, user.AuthTime, user.ID,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if affected == 0 {
+		return repo.ErrUserNotFound
+	}
+
+	return nil
 }

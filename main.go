@@ -17,7 +17,9 @@ func main() {
 
 	userRepo := sqlite.NewUserRepo(db)
 
-	r := router.New(static.Get, auth.New(userRepo))
+	authService := auth.New(userRepo)
+
+	r := router.New(static.Get, authService)
 
 	panic(r.Start(`:8080`))
 }

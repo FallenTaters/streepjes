@@ -41,11 +41,12 @@ func (s *service) Login(username, pass string) (domain.User, bool) {
 		return domain.User{}, false
 	}
 
-	if !checkPassword(user.Password, pass) {
+	if !checkPassword(user.PasswordHash, pass) {
 		return domain.User{}, false
 	}
 
 	user.AuthToken = generateToken()
+	user.AuthTime = time.Now()
 
 	err := s.users.Update(user) //nolint:ifshort
 	if err != nil {

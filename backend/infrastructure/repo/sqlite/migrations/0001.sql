@@ -1,13 +1,12 @@
 CREATE TABLE users (
     id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
 
-    username TEXT,
+    club TEXT NOT NULL,
+    name TEXT NOT NULL,
+    role TEXT NOT NULL,
 
-    club TEXT,
-    name TEXT,
-    role TEXT,
-
-    password TEXT,
-    auth_token TEXT,
-    auth_time TEXT
+    auth_token TEXT NOT NULL DEFAULT '',
+    auth_time DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00.000'
 );

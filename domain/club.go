@@ -1,6 +1,6 @@
 package domain
 
-//go:generate enumer -json -linecomment -type Club
+//go:generate enumer -json -sql -linecomment -type Club
 
 type Club int
 

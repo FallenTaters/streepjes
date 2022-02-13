@@ -1,6 +1,12 @@
 package repo
 
-import "github.com/PotatoesFall/vecty-test/domain"
+import (
+	"errors"
+
+	"github.com/PotatoesFall/vecty-test/domain"
+)
+
+var ErrUserNotFound = errors.New(`user not found`)
 
 type User interface {
 	Get(id int) (domain.User, bool)

@@ -3,13 +3,14 @@ package domain
 import "time"
 
 type User struct {
-	Username string `json:"username"`
+	ID           int    `json:"id"`
+	Username     string `json:"username"`
+	PasswordHash string `json:"-"`
 
 	Club Club   `json:"club"`
 	Name string `json:"name"`
 	Role Role   `json:"role"`
 
-	Password  []byte    `json:"password"`
 	AuthToken string    `json:"authToken"`
 	AuthTime  time.Time `json:"authDate"`
 }
