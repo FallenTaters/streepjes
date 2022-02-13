@@ -42,6 +42,6 @@ func (h *Header) headerLink(icon beercss.IconType, text string, onClick func(*ve
 
 func (h *Header) navigate(p Page) func(*vecty.Event) {
 	return func(e *vecty.Event) {
-		h.Navigate(p)
+		go h.Navigate(p)
 	}
 }

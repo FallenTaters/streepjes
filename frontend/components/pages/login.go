@@ -2,6 +2,7 @@ package pages
 
 import (
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
+	"github.com/PotatoesFall/vecty-test/frontend/components/beercss"
 
 	"github.com/hexops/vecty"
 	"github.com/hexops/vecty/elem"
@@ -26,8 +27,7 @@ func (h *loginComponent) Render() vecty.ComponentOrHTML {
 		vecty.Markup(vecty.Class(`container`)),
 		elem.Form(
 			elem.Div(
-				vecty.Markup(vecty.Class(`field`, `label`, `border`)),
-				elem.Input(vecty.Markup(vecty.Attribute(`type`, `text`))),
+				beercss.Input(`Username`),
 			),
 		),
 	)

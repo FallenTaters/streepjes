@@ -3,6 +3,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
 	"github.com/PotatoesFall/vecty-test/frontend/components/layout"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
@@ -15,6 +17,12 @@ func main() {
 
 	vecty.SetTitle("Streepjeslijst")
 	vecty.RenderBody(&Body{})
+
+	go func() {
+		for {
+			time.Sleep(time.Second)
+		}
+	}()
 }
 
 // Body is our main page component.

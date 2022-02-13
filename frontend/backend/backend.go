@@ -62,13 +62,13 @@ func GetMembers() ([]domain.Member, error) {
 }
 
 func Logout() error {
-	resp, err := http.Get(settings.URL() + `/logout`)
+	resp, err := http.Post(settings.URL()+`/logout`, ``, nil)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusUnauthorized {
 		return fmt.Errorf(`%w: %d`, ErrStatus, resp.StatusCode)
 	}
 

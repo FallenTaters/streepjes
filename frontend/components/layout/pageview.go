@@ -27,7 +27,7 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 		},
 		elem.Div(
 			vecty.Markup(vecty.Class(`full-height`)),
-			getStyles(window.OnResize(func(s window.Size) { vecty.Rerender(pv) })),
+			getStyles(window.OnResize(func(s window.Size) { go vecty.Rerender(pv) })),
 			pv.renderPage(pv.Page),
 		),
 	)

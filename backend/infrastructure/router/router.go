@@ -19,13 +19,13 @@ func New(static Static, authService auth.Service) *router.Router {
 
 	publicRoutes(r, static, authService)
 
-	auth := r.Group(``, authMiddleware(authService))
+	auth := r.Group(`/`, authMiddleware(authService))
 	authRoutes(auth, authService)
 
-	bar := r.Group(``, roleMiddleware(domain.RoleBartender))
+	bar := auth.Group(`/`, roleMiddleware(domain.RoleBartender))
 	bartenderRoutes(bar)
 
-	admin := r.Group(``, roleMiddleware(domain.RoleAdmin))
+	admin := auth.Group(`/`, roleMiddleware(domain.RoleAdmin))
 	adminRoutes(admin)
 
 	return r
