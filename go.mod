@@ -6,6 +6,7 @@ require (
 	git.fuyu.moe/Fuyu/router v0.2.1
 	github.com/FallenTaters/bbucket v1.0.0
 	github.com/hexops/vecty v0.6.0
+	github.com/mattn/go-sqlite3 v1.14.11
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2
 )

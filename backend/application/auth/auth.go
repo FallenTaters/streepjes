@@ -73,7 +73,7 @@ func (s *service) Check(token string) (domain.User, bool) {
 }
 
 func (s *service) Active(id int) {
-	user, ok := s.users.GetByID(id)
+	user, ok := s.users.Get(id)
 	if !ok {
 		return
 	}
@@ -84,7 +84,7 @@ func (s *service) Active(id int) {
 }
 
 func (s *service) Logout(id int) {
-	user, ok := s.users.GetByID(id)
+	user, ok := s.users.Get(id)
 	if !ok {
 		return
 	}

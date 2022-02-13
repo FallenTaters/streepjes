@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"git.fuyu.moe/Fuyu/router"
+	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/backend/application/auth"
 )
 
@@ -18,11 +19,12 @@ func New(static Static, authService auth.Service) *router.Router {
 	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
 	r.GET(`/static/*name`, getStatic(static))
+	r.POST(`/login`, postLogin(authService))
 
-	bar := r.Group(``)
+	bar := r.Group(``) // TODO: add rolemiddleware
 	bartenderRoutes(bar)
 
-	admin := r.Group(``)
+	admin := r.Group(``) // TODO: add rolemiddleware
 	adminRoutes(admin)
 
 	return r
@@ -55,5 +57,16 @@ func getStatic(assets Static) router.Handle {
 		}
 
 		return c.Bytes(http.StatusOK, asset)
+	}
+}
+
+func postLogin(authService auth.Service) func(*router.Context, api.Credentials) error {
+	return func(c *router.Context, credentials api.Credentials) error {
+		user, ok := authService.Login(credentials.Username, credentials.Password)
+		if !ok {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		return c.JSON(http.StatusOK, api.Token{Token: user.AuthToken})
 	}
 }
