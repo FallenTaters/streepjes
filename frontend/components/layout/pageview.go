@@ -36,7 +36,9 @@ func (pv *PageView) Render() vecty.ComponentOrHTML {
 type Page int
 
 const (
-	PageOrder Page = iota + 1
+	PageLogin Page = iota + 1
+
+	PageOrder
 	PageHistory
 
 	PageCatalog
@@ -46,6 +48,8 @@ const (
 
 func (pv *PageView) renderPage(p Page) vecty.ComponentOrHTML {
 	switch p {
+	case PageLogin:
+		return login()
 	case PageOrder:
 		return order()
 	case PageHistory:
@@ -89,4 +93,13 @@ func order() vecty.Component {
 	}
 
 	return orderComponent
+}
+
+func login() vecty.Component {
+	component, err := pages.Login()
+	if err != nil {
+		return pages.Error(err.Error())
+	}
+
+	return component
 }

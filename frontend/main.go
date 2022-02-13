@@ -27,7 +27,7 @@ func (p *Body) Render() vecty.ComponentOrHTML {
 	return elem.Body(
 		vecty.Markup(vecty.Class(`is-dark`)),
 		&layout.PageView{
-			Page: layout.PageOrder,
+			Page: layout.PageLogin,
 		},
 	)
 }

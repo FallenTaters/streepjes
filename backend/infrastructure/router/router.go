@@ -19,7 +19,9 @@ func New(static Static, authService auth.Service) *router.Router {
 	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
 	r.GET(`/static/*name`, getStatic(static))
+
 	r.POST(`/login`, postLogin(authService))
+	r.POST(`/logout`, postLogout(authService)) // TODO: requires middleware
 
 	bar := r.Group(``) // TODO: add rolemiddleware
 	bartenderRoutes(bar)
