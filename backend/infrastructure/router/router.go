@@ -7,6 +7,7 @@ import (
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/backend/application/auth"
+	"github.com/PotatoesFall/vecty-test/domain"
 )
 
 type Static func(filename string) ([]byte, error)
@@ -16,17 +17,15 @@ func New(static Static, authService auth.Service) *router.Router {
 
 	r.ErrorHandler = panicHandler
 
-	r.GET(`/version`, getVersion)
-	r.GET(`/`, getIndex(static))
-	r.GET(`/static/*name`, getStatic(static))
+	publicRoutes(r, static, authService)
 
-	r.POST(`/login`, postLogin(authService))
-	r.POST(`/logout`, postLogout(authService)) // TODO: requires middleware
+	auth := r.Group(``, authMiddleware(authService))
+	authRoutes(auth, authService)
 
-	bar := r.Group(``) // TODO: add rolemiddleware
+	bar := r.Group(``, roleMiddleware(domain.RoleBartender))
 	bartenderRoutes(bar)
 
-	admin := r.Group(``) // TODO: add rolemiddleware
+	admin := r.Group(``, roleMiddleware(domain.RoleAdmin))
 	adminRoutes(admin)
 
 	return r
