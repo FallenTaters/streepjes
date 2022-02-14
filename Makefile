@@ -11,16 +11,20 @@ LDFLAGS := '-X "$(PACKAGE).buildCommit=$(GIT_COMMIT)" \
 		-X "$(PACKAGE).buildVersion=$(GIT_TAG)"'
 
 generate:
+	@echo "Generating code..."
 	@go generate ./...
+	@echo "Running vugugen..."
+	@bash ./frontend/generate.bash
+	@echo "Done"
 
 wasm:
+	@echo "Compiling frontend..."
 	@GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
+	@echo "Done"
 
 run: generate wasm
+	@echo "Starting local server..."
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
-
-arelo:
-	@arelo -p '**/*.go' -p '**/*.css' -p '**/*.js' -p '**/*.html' -i '**/.*' -i '**/*_test.go' -i '**/*_enumer.go' -- make run
 
 build: generate wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .

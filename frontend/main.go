@@ -3,43 +3,46 @@
 package main
 
 import (
-	"time"
-
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
-	"github.com/PotatoesFall/vecty-test/frontend/components/layout"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
-	"github.com/hexops/vecty"
-	"github.com/hexops/vecty/elem"
+	"github.com/vugu/vugu"
+	"github.com/vugu/vugu/domrender"
 )
 
 func main() {
 	initPackages()
 
-	vecty.SetTitle("Streepjeslijst")
-	vecty.RenderBody(&Body{})
-
-	go func() {
-		for {
-			time.Sleep(time.Second)
-		}
-	}()
-}
-
-// Body is our main page component.
-type Body struct {
-	vecty.Core
-}
-
-// Render implements the vecty.Component interface.
-func (p *Body) Render() vecty.ComponentOrHTML {
-	return elem.Body(
-		vecty.Markup(vecty.Class(`is-dark`)),
-		&layout.PageView{
-			Page: layout.PageLogin,
-		},
-	)
+	startVugu()
 }
 
 func initPackages() {
 	backend.Init(window.Location())
+}
+
+func startVugu() {
+	renderer, err := domrender.New("#vugu_mount_point")
+	if err != nil {
+		panic(err)
+	}
+	defer renderer.Release()
+
+	buildEnv, err := vugu.NewBuildEnv(renderer.EventEnv())
+	if err != nil {
+		panic(err)
+	}
+
+	root := &Root{}
+
+	render(renderer, buildEnv, root)
+	for renderer.EventWait() {
+		render(renderer, buildEnv, root)
+	}
+}
+
+func render(renderer *domrender.JSRenderer, buildEnv *vugu.BuildEnv, builder vugu.Builder) {
+	buildResults := buildEnv.RunBuild(builder)
+	err := renderer.Render(buildResults)
+	if err != nil {
+		panic(err)
+	}
 }

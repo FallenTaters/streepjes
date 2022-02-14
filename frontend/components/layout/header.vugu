@@ -1,0 +1,7 @@
+<div>
+    This is the Header
+</div>
+
+<script type="application/x-go">
+type Header struct{}
+</script>

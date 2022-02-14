@@ -8,8 +8,8 @@ import (
 )
 
 func publicRoutes(r *router.Router, static Static, authService auth.Service) {
-	r.GET(`/version`, getVersion)
 	r.GET(`/`, getIndex(static))
+	r.GET(`/version`, getVersion)
 	r.GET(`/static/*name`, getStatic(static))
 	r.POST(`/login`, postLogin(authService))
 }
