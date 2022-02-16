@@ -1,7 +1,11 @@
 <div>
-    This is the Header
+    <div :class="c.menuClasses()">
+        <a vg-for="_, link := range headerLinks" @click="link.onclick(c)">
+            <beercss:Icon :Icon="link.icon"></beercss:Icon>
+        </a>
+    </div>
 </div>
 
 <script type="application/x-go">
-type Header struct{}
+	import "github.com/PotatoesFall/vecty-test/frontend/components/beercss"
 </script>

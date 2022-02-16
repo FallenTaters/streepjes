@@ -29,6 +29,9 @@ func postLogout(authService auth.Service) func(c *router.Context) error {
 func authMiddleware(authService auth.Service) router.Middleware {
 	return func(next router.Handle) router.Handle {
 		return func(c *router.Context) error {
+			c.Set(`user`, domain.User{}) // TODO temporary override
+			return next(c)               // TODO temporary override
+
 			token, err := c.Request.Cookie(`auth_token`)
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
@@ -49,6 +52,8 @@ func authMiddleware(authService auth.Service) router.Middleware {
 func roleMiddleware(role domain.Role) router.Middleware {
 	return func(next router.Handle) router.Handle {
 		return func(c *router.Context) error {
+			return next(c) // TODO temporary override
+
 			user := userFromContext(c)
 
 			if user.Role != role {

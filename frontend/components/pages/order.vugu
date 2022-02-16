@@ -1,0 +1,32 @@
+<div :class="store.Order.Club.String()">
+    <h2>This is the Order Page</h2>
+    <order:Grid vg-if="window.GetSize() == window.SizeL">
+        <vg-slot name="Categories">
+            <catalog:Categories :Categories="c.catalog.Categories" :OnClick="c.selectCategory" :SelectedCategoryID="c.SelectedCategoryID"></catalog:Categories>
+        </vg-slot>
+        <vg-slot name="Items">
+            <catalog:Items :Items="c.items"></catalog:Items>
+        </vg-slot>
+        <vg-slot name="Overview">
+            <order:Overview></order:Overview>
+        </vg-slot>
+        <vg-slot name="Toggler">
+            <order:Toggler></order:Toggler>
+        </vg-slot>
+        <vg-slot name="Summary">
+            <order:Summary></order:Summary>
+        </vg-slot>
+    </order:Grid>
+    <order:Reactive vg-else></order:Reactive>
+</div>
+
+<script type="application/x-go">
+import (
+    "github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
+    "github.com/PotatoesFall/vecty-test/frontend/components/catalog"
+    "github.com/PotatoesFall/vecty-test/frontend/jscall/window"
+    "github.com/PotatoesFall/vecty-test/frontend/store"
+)
+</script>
+
+

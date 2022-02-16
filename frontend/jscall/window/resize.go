@@ -1,6 +1,10 @@
 package window
 
-import "syscall/js"
+import (
+	"syscall/js"
+
+	"github.com/PotatoesFall/vecty-test/frontend/global"
+)
 
 type Size int
 
@@ -16,28 +20,51 @@ const (
 	SizeL
 )
 
-// OnResize returns the current window size and adds a listener that goes off whenever the screen size changes.
-// passing nil is not allowed, just use window.GetSize()
-func OnResize(f func(Size)) Size {
-	size := GetSize()
+var listeners map[string]func(Size)
 
-	if f == nil {
-		panic(`OnResize called with nil listener. Did you mean to use window.GetSize()?`)
-	}
+var size Size
 
-	var destroy func()
+// Listen is an init function that should be called as an Init step
+func Listen() {
+	listeners = make(map[string]func(Size))
+	size = getSize()
+
+	// wrap callback as js.Func
 	jsFunc := js.FuncOf(func(js.Value, []js.Value) interface{} {
-		if size != GetSize() {
-			destroy()
-			f(size)
+		newSize := getSize()
+		if size == newSize {
+			return nil
+		}
+
+		size = newSize
+
+		global.EventEnv.Lock()
+		defer global.EventEnv.UnlockRender()
+
+		for _, listener := range listeners {
+			listener(size)
 		}
 
 		return nil
 	})
 
-	destroy = func() { js.Global().Call(`removeEventListener`, `resize`, jsFunc) }
-
 	js.Global().Call(`addEventListener`, `resize`, jsFunc)
+}
 
+// OnResize returns the current window size and adds a listener that goes off whenever the screen size changes.
+// passing nil is not allowed, just use window.Size()
+// OnResize will call a lock on the global EventEnv() and trigger a Rerender
+func OnResize(key string, f func(Size)) Size {
+	if f == nil {
+		panic(`OnResize called with nil listener. Did you mean to use window.GetSize()?`)
+	}
+
+	listeners[key] = f
+
+	return getSize()
+}
+
+// GetSize returns the current size
+func GetSize() Size {
 	return size
 }

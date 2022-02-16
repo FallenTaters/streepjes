@@ -1,7 +1,5 @@
 package beercss
 
-import "github.com/hexops/vecty"
-
 type IconType string
 
 const (
@@ -18,7 +16,6 @@ const (
 	IconFastfood  IconType = `fastfood`
 )
 
-func Icon(i IconType, markup ...vecty.MarkupOrChild) *vecty.HTML {
-	markup = append(markup, vecty.Text(string(i)))
-	return vecty.Tag(`i`, markup...)
+type Icon struct {
+	Icon IconType
 }

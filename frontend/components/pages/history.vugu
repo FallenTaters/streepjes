@@ -1,0 +1,7 @@
+<div>
+    <h1>This is the history page</h1>
+</div>
+
+<script type="application/x-go">
+type History struct{}
+</script>

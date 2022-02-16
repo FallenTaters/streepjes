@@ -1,0 +1,5 @@
+<div></div>
+
+<script type="application/x-go">
+type Reactive struct{}
+</script>

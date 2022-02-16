@@ -1,5 +1,61 @@
 package layout
 
+import (
+	"github.com/PotatoesFall/vecty-test/frontend/components/pages"
+	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
+	"github.com/vugu/vugu"
+)
+
+type Page int
+
+const (
+	PageLogin Page = iota + 1
+
+	PageOrder
+	PageHistory
+
+	PageCatalog
+	PageMembers
+	PageUsers
+)
+
+type Pageview struct {
+	Page Page
+}
+
+func (pv *Pageview) RenderPage() vugu.Builder {
+	if pv.Page == Page(0) {
+		pv.Page = PageOrder
+	}
+
+	component, err := pageComponents[pv.Page]()
+	if err != nil {
+		return &pages.Error{}
+	}
+
+	return component
+}
+
+var pageComponents = map[Page]func() (vugu.Builder, error){
+	PageOrder:   pages.NewOrder,
+	PageHistory: func() (vugu.Builder, error) { return &pages.History{}, nil },
+}
+
+func getStyles() string {
+	switch window.GetSize() {
+	case window.SizeL:
+		return `padding: 20px 40px 20px 120px;`
+
+	case window.SizeM:
+		return `padding: 20px 20px 0px 100px;`
+
+	case window.SizeS:
+		return `padding: 20px 10px 50px 10px;`
+	}
+
+	return ``
+}
+
 // type PageView struct {
 // 	vecty.Core
 
@@ -48,21 +104,6 @@ package layout
 
 // 	fmt.Printf(`unknown page with value: %d`, p)
 // 	return nil
-// }
-
-// func getStyles(screenSize window.Size) vecty.MarkupList {
-// 	switch screenSize {
-// 	case window.SizeL:
-// 		return vecty.Markup(vecty.Style(`padding`, `20px 40px 20px 120px`))
-
-// 	case window.SizeM:
-// 		return vecty.Markup(vecty.Style(`padding`, `20px 20px 0px 100px`))
-
-// 	case window.SizeS:
-// 		return vecty.Markup(vecty.Style(`padding`, `20px 10px 50px 10px`))
-// 	}
-
-// 	return vecty.Markup()
 // }
 
 // var orderComponent vecty.Component

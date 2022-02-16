@@ -1,30 +1,6 @@
 <div>
-    <:Header :Navigate="func(p Page) { c.Page = p }" />
-    <vg-comp expr="pageComponents[c.Page]()" />
+    <layout:Header :Navigate="func(p Page) { c.Page = p }" ></layout:Header>
+    <div class="full-height" :style="getStyles()">
+        <vg-comp expr="c.RenderPage()"></vg-comp>
+    </div>
 </div>
-
-<script type="application/x-go">
-
-import "github.com/PotatoesFall/vecty-test/frontend/components/pages"
-
-type Page int
-
-const (
-	PageLogin Page = iota + 1
-
-	PageOrder
-	PageHistory
-
-	PageCatalog
-	PageMembers
-	PageUsers
-)
-
-type Pageview struct {
-    Page Page
-}
-
-var pageComponents = map[Page]func() vugu.Builder {
-	PageOrder: func() vugu.Builder {return &pages.Order{}},
-}
-</script>

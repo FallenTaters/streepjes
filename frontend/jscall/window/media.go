@@ -16,7 +16,7 @@ func Location() *url.URL {
 	return u
 }
 
-func GetSize() Size {
+func getSize() Size {
 	if js.Global().Call(`matchMedia`, `only screen and (min-width: `+strconv.Itoa(minWidthL)+`px)`).Get(`matches`).Bool() {
 		return SizeL
 	}

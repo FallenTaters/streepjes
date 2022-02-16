@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
@@ -14,11 +13,9 @@ const (
 )
 
 var Order = OrderStore{
-	Club:               domain.ClubGladiators, // TODO
-	Catalog:            api.Catalog{},
-	SelectedCategoryID: 0,
-	Lines:              nil,
-	OnChange:           nil,
+	Club:     domain.ClubGladiators, // TODO
+	Lines:    nil,
+	OnChange: nil,
 }
 
 type Orderline struct {
@@ -27,10 +24,8 @@ type Orderline struct {
 }
 
 type OrderStore struct {
-	Catalog            api.Catalog
-	Club               domain.Club
-	SelectedCategoryID int
-	Lines              []Orderline
+	Club  domain.Club
+	Lines []Orderline
 
 	OnChange func(OrderEvent)
 }
@@ -50,11 +45,6 @@ func (os *OrderStore) CalculateTotal() domain.Price {
 	}
 
 	return total
-}
-
-func (os *OrderStore) SelectCategory(id int) {
-	os.SelectedCategoryID = id
-	os.Emit(OrderEventCategorySelected)
 }
 
 func (os *OrderStore) AddItem(item domain.Item) {
@@ -115,33 +105,4 @@ func (os *OrderStore) ToggleClub() {
 	}
 
 	os.Emit(OrderEventClubChanged)
-}
-
-func (os *OrderStore) Categories() []domain.Category {
-	hasItems := make(map[int]bool)
-	for _, item := range os.Catalog.Items {
-		if item.Price(os.Club) != 0 {
-			hasItems[item.CategoryID] = true
-		}
-	}
-
-	var categories []domain.Category
-	for _, category := range os.Catalog.Categories {
-		if hasItems[category.ID] {
-			categories = append(categories, category)
-		}
-	}
-
-	return categories
-}
-
-func (os *OrderStore) Items() []domain.Item {
-	var items []domain.Item
-	for _, item := range os.Catalog.Items {
-		if item.CategoryID == os.SelectedCategoryID && item.Price(os.Club) != 0 {
-			items = append(items, item)
-		}
-	}
-
-	return items
 }

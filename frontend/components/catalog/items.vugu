@@ -1,0 +1,10 @@
+<div>
+    <button
+        vg-for="_, items := range c.Items"
+    >
+    this is an item lol todo
+    </button>
+</div>
+
+<script type="application/x-go">
+</script>

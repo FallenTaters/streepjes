@@ -1,5 +1,5 @@
 <div>
-    <layout:PageView />
+    <layout:Pageview />
 </div>
 
 <script type="application/x-go">

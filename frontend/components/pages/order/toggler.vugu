@@ -1,0 +1,7 @@
+<div>
+toggler...
+</div>
+
+<script type="application/x-go">
+type Toggler struct{}
+</script>

@@ -1,0 +1,5 @@
+<div>summary...todo</div>
+
+<script type="application/x-go">
+type Summary struct{}
+</script>

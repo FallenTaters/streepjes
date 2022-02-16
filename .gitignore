@@ -1,7 +1,9 @@
 *.wasm
 bin
-.vscode/
+.vscode/*
 air.log
+
+!.vscode/snippets.code-snippets
 
 *_enumer.go
 

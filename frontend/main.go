@@ -4,6 +4,7 @@ package main
 
 import (
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
+	"github.com/PotatoesFall/vecty-test/frontend/global"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
@@ -26,12 +27,16 @@ func startVugu() {
 	}
 	defer renderer.Release()
 
-	buildEnv, err := vugu.NewBuildEnv(renderer.EventEnv())
+	global.EventEnv = renderer.EventEnv()
+
+	buildEnv, err := vugu.NewBuildEnv(global.EventEnv)
 	if err != nil {
 		panic(err)
 	}
 
 	root := &Root{}
+
+	window.Listen() // for resize
 
 	render(renderer, buildEnv, root)
 	for renderer.EventWait() {

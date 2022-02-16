@@ -1,0 +1,30 @@
+<div class="l" style="height:100%;display:grid;grid-gap:5px;grid-template-columns:30% 30% 40%;grid-template-rows:50px 1fr 200px;grid-template-areas: 'categoryHeader itemHeader overviewHeader' 'categories items overview' 'bottom items payment';">
+    <h5>Categories</h5>
+    <h5>Items</h5>
+    <h5>Overview</h5>
+    <div style="overflow:auto;">
+        <vg-comp expr='c.Categories'></vg-comp>
+    </div>
+    <div style="overflow:auto;grid-area:items">
+        <vg-comp expr='c.Items'></vg-comp>
+    </div>
+    <div style="overflow:auto;grid-area:overview">
+        <vg-comp expr='c.Overview'></vg-comp>
+    </div>
+    <div style="grid-area:bottom">
+        <vg-comp expr='c.Toggler'></vg-comp>
+    </div>
+    <div style="grid-area:payment">
+        <vg-comp expr='c.Summary'></vg-comp>
+    </div>
+</div>
+
+<script type="application/x-go">
+type Grid struct{
+    Categories vugu.Builder
+    Items vugu.Builder
+    Overview vugu.Builder
+    Toggler vugu.Builder
+    Summary vugu.Builder
+}
+</script>
