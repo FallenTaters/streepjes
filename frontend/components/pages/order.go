@@ -18,6 +18,7 @@ type Order struct {
 	Categories         []domain.Category `vugu:"data"`
 	Items              []domain.Item     `vugu:"data"`
 	SelectedCategoryID int               `vugu:"data"`
+	Large              bool              `vugu:"data"`
 }
 
 var ErrLoadCatalog = errors.New(`unable to load catalog`)
@@ -25,6 +26,7 @@ var ErrLoadCatalog = errors.New(`unable to load catalog`)
 func (o *Order) Compute(vugu.ComputeCtx) {
 	o.filterCategories()
 	o.filterItems()
+	o.Large = window.GetSize() == window.SizeL
 }
 
 func (o *Order) component() vugu.Builder {
@@ -183,16 +185,4 @@ func (o *Order) selectItem(item domain.Item) {
 
 // func items() *catalog.ItemsComponent {
 // 	return catalog.Items(store.Order.Items(), store.Order.AddItem)
-// }
-
-// func toggler() *vecty.HTML {
-// 	return elem.Div(
-// 		vecty.Markup(
-// 			vecty.Class(`col`, `min`),
-// 			event.Click(func(e *vecty.Event) {
-// 				store.Order.ToggleClub()
-// 			}),
-// 		),
-// 		club.Logo(store.Order.Club, 120),
-// 	)
 // }

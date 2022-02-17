@@ -1,0 +1,1 @@
+<div :style="c.style()"></div>

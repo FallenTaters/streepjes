@@ -1,7 +1,7 @@
-<div>
-toggler...
+<div class="col min" @click="c.toggle()">
+    <club:Logo :Club="c.Club" :Size="120"></club:Logo>
 </div>
 
 <script type="application/x-go">
-type Toggler struct{}
+    import "github.com/PotatoesFall/vecty-test/frontend/components/club"
 </script>

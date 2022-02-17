@@ -1,5 +1,5 @@
 <div :class="c.club()">
-    <order:Grid vg-if="window.GetSize() == window.SizeL">
+    <order:Grid vg-if="c.Large">
         <vg-slot name="Categories">
             <catalog:Categories :Categories="c.Categories" :OnClick="c.selectCategory" :SelectedCategoryID="c.SelectedCategoryID"></catalog:Categories>
         </vg-slot>
@@ -17,7 +17,7 @@
         </vg-slot>
     </order:Grid>
 
-    <order:Reactive vg-else>
+    <order:Reactive vg-if="!c.Large">
         <vg-slot name="Categories">
             <catalog:Categories :Categories="c.Categories" :OnClick="c.selectCategory" :SelectedCategoryID="c.SelectedCategoryID"></catalog:Categories>
         </vg-slot>
@@ -40,7 +40,6 @@
 import (
     "github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
     "github.com/PotatoesFall/vecty-test/frontend/components/catalog"
-    "github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 )
 </script>
 

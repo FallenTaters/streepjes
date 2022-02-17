@@ -1,7 +1,7 @@
 <div style="margin-top:7px; padding-bottom: 3px;">
     <article
         vg-for="_, line := range c.Lines"
-        :class="`small-padding` + c.classes(line)"
+        :class="`small-padding ` + c.classes(line)"
     >
         <div class="row no-wrap large-text no-club">
             <div class="col min middle-align">

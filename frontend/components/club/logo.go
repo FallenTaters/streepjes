@@ -4,43 +4,28 @@ import (
 	"fmt"
 
 	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/hexops/vecty"
-	"github.com/hexops/vecty/elem"
 )
 
-func Logo(club domain.Club, size int) *LogoComponent {
-	return &LogoComponent{
-		Club: club,
-		Size: size,
-	}
+type Logo struct {
+	Size int         `vugu:"data"`
+	Club domain.Club `vugu:"data"`
 }
 
-type LogoComponent struct {
-	vecty.Core
-
-	Size int         `vecty:"prop"`
-	Club domain.Club `vecty:"prop"`
+func (l *Logo) style() string {
+	return `background-color: white;` +
+		`background-position: center;` +
+		`background-repeat: no-repeat;` +
+		`background-image: ` + l.path() + `;` +
+		`background-size: ` + px(l.Size, 1) + `;` +
+		`height: ` + px(l.Size, 1) + `;` +
+		`width: ` + px(l.Size, 1) + `;` +
+		`padding: ` + px(l.Size, 0.207) + `;` +
+		`border-radius:` + px(l.Size, 0.707) + `;` +
+		`border: none;`
 }
 
-func (l *LogoComponent) Render() vecty.ComponentOrHTML {
-	return elem.Div(
-		vecty.Markup(
-			vecty.Style(`background-color`, `white`),
-			vecty.Style(`background-position`, `center`),
-			vecty.Style(`background-repeat`, `no-repeat`),
-			vecty.Style(`background-image`, path(l.Club)),
-			vecty.Style(`background-size`, px(l.Size, 1)),
-			vecty.Style(`height`, px(l.Size, 1)),
-			vecty.Style(`width`, px(l.Size, 1)),
-			vecty.Style(`padding`, px(l.Size, 0.207)),
-			vecty.Style(`border-radius`, px(l.Size, 0.707)),
-			vecty.Style(`border`, `none`),
-		),
-	)
-}
-
-func path(club domain.Club) string {
-	switch club {
+func (l *Logo) path() string {
+	switch l.Club {
 	case domain.ClubUnknown:
 		return ``
 	case domain.ClubParabool:
