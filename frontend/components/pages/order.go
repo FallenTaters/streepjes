@@ -43,16 +43,17 @@ func (o *Order) filterItems() {
 
 func (o *Order) selectCategory(category domain.Category) {
 	fmt.Println(`selecting:`, category.ID)
+	go o._selectCategory(category)
+}
 
-	go func() {
-		global.EventEnv.Lock()
-		defer global.EventEnv.UnlockRender()
+func (o *Order) _selectCategory(category domain.Category) {
+	global.EventEnv.Lock()
+	defer global.EventEnv.UnlockRender()
 
-		o.SelectedCategoryID = category.ID
-		o.filterItems()
+	o.SelectedCategoryID = category.ID
+	o.filterItems()
 
-		fmt.Println(`selected!`, category.ID)
-	}()
+	fmt.Println(`selected!`, category.ID)
 }
 
 // import (

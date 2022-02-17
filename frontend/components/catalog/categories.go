@@ -2,8 +2,11 @@ package catalog
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/vugu/vugu"
 )
 
 type Categories struct {
@@ -12,10 +15,14 @@ type Categories struct {
 	OnClick            func(domain.Category)
 }
 
-func (c *Categories) classes(category domain.Category) string {
-	fmt.Println(`pointer in Categories:`, c)
+func (c *Categories) Compute(ctx vugu.ComputeCtx) {
+	sort.Slice(c.Categories, func(i, j int) bool {
+		return strings.Compare(c.Categories[i].Name, c.Categories[j].Name) < 0
+	})
+}
 
-	fmt.Println(c.SelectedCategoryID, category.ID)
+func (c *Categories) classes(category domain.Category) string {
+	fmt.Println(`in categories:`, c.SelectedCategoryID, category.ID)
 	classes := `responsive extra small-margin`
 
 	if c.SelectedCategoryID == category.ID {

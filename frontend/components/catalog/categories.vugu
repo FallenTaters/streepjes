@@ -4,8 +4,8 @@
         vg-for="_, category := range c.Categories"
         :class="c.classes(category)"
         @click="c.OnClick(category)"
+        vg-content="category.Name"
     >
-    this is a category lol todo
     </button>
 </div>
 
