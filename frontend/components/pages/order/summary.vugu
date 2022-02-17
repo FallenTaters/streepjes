@@ -1,5 +1,6 @@
-<div>summary...todo</div>
+<div class="row no-wrap">
+    <h3 class="col min">Total</h3>
+    <div class="col max"></div>
+    <h3 class="col min" vg-content="c.total()"></h3>
+</div>
 
-<script type="application/x-go">
-type Summary struct{}
-</script>
