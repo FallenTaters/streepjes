@@ -12,48 +12,47 @@ import (
 )
 
 type Order struct {
-	catalog            api.Catalog
-	items              []domain.Item
-	SelectedCategoryID int
+	Catalog            api.Catalog   `vugu:"data"`
+	Items              []domain.Item `vugu:"data"`
+	SelectedCategoryID int           `vugu:"data"`
 }
 
 var ErrLoadCatalog = errors.New(`unable to load catalog`)
 
 func NewOrder() (vugu.Builder, error) {
-	order := &Order{}
+	order := &Order{
+		SelectedCategoryID: 1, // TODO remove this line
+	}
 
 	catalog, err := cache.Catalog()
 	if err != nil {
 		return nil, fmt.Errorf(`%w: %s`, ErrLoadCatalog, err.Error())
 	}
-	order.catalog = catalog
+	order.Catalog = catalog
 
 	return order, nil
 }
 
 func (o *Order) filterItems() {
-	o.items = []domain.Item{}
+	o.Items = []domain.Item{}
 
-	for _, item := range o.catalog.Items {
+	for _, item := range o.Catalog.Items {
 		if item.CategoryID == o.SelectedCategoryID {
-			o.items = append(o.items, item)
+			o.Items = append(o.Items, item)
 		}
 	}
 }
 
 func (o *Order) selectCategory(category domain.Category) {
 	fmt.Println(`selecting:`, category.ID)
-	go o._selectCategory(category)
-}
+	go func() {
+		global.EventEnv.Lock()
+		defer global.EventEnv.UnlockRender()
 
-func (o *Order) _selectCategory(category domain.Category) {
-	global.EventEnv.Lock()
-	defer global.EventEnv.UnlockRender()
-
-	o.SelectedCategoryID = category.ID
-	o.filterItems()
-
-	fmt.Println(`selected!`, category.ID)
+		o.SelectedCategoryID = category.ID
+		o.filterItems()
+		fmt.Println(`selected:`, category.ID)
+	}()
 }
 
 // import (

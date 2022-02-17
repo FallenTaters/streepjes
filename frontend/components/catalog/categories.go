@@ -10,9 +10,9 @@ import (
 )
 
 type Categories struct {
-	Categories         []domain.Category
-	SelectedCategoryID int
-	OnClick            func(domain.Category)
+	Categories         []domain.Category     `vugu:"data"`
+	SelectedCategoryID int                   `vugu:"data"`
+	OnClick            func(domain.Category) `vugu:"data"`
 }
 
 func (c *Categories) Compute(ctx vugu.ComputeCtx) {

@@ -2,10 +2,10 @@
     <h2>This is the Order Page</h2>
     <order:Grid vg-if="window.GetSize() == window.SizeL">
         <vg-slot name="Categories">
-            <catalog:Categories :Categories="c.catalog.Categories" :OnClick="c.selectCategory" :SelectedCategoryID="c.SelectedCategoryID"></catalog:Categories>
+            <catalog:Categories :Categories="c.Catalog.Categories" :OnClick="c.selectCategory" :SelectedCategoryID="c.SelectedCategoryID"></catalog:Categories>
         </vg-slot>
         <vg-slot name="Items">
-            <catalog:Items :Items="c.items"></catalog:Items>
+            <catalog:Items :Items="c.Items"></catalog:Items>
         </vg-slot>
         <vg-slot name="Overview">
             <order:Overview></order:Overview>
