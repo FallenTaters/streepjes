@@ -1,7 +1,6 @@
 package catalog
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -22,7 +21,6 @@ func (c *Categories) Compute(ctx vugu.ComputeCtx) {
 }
 
 func (c *Categories) classes(category domain.Category) string {
-	fmt.Println(`in categories:`, c.SelectedCategoryID, category.ID)
 	classes := `responsive extra small-margin`
 
 	if c.SelectedCategoryID == category.ID {

@@ -1,6 +1,0 @@
-<div>error..todo
-</div>
-
-<script type="application/x-go">
-type Error struct{}
-</script>

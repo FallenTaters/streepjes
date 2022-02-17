@@ -1,10 +1,16 @@
 <div>
     <button
-        vg-for="_, items := range c.Items"
+        vg-for="_, item := range c.Items"
+        :class="`responsive extra small-margin ` + c.classes(item)"
+        @click="c.OnClick(item)"
     >
-    this is an item lol todo
+        <div class="row no-wrap">
+            <div class="col" vg-content="item.Name"></div>
+            <div class="col min" vg-content="item.Price(store.Order.Club).String()"></div>
+        </div>
     </button>
 </div>
 
 <script type="application/x-go">
+import "github.com/PotatoesFall/vecty-test/frontend/store"
 </script>
