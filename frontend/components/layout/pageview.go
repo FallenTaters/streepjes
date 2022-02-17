@@ -1,7 +1,6 @@
 package layout
 
 import (
-	"github.com/PotatoesFall/vecty-test/frontend/components/pages"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/vugu/vugu"
 )
@@ -23,22 +22,8 @@ type Pageview struct {
 	Page Page
 }
 
-func (pv *Pageview) RenderPage() vugu.Builder {
-	if pv.Page == Page(0) {
-		pv.Page = PageOrder
-	}
-
-	component, err := pageComponents[pv.Page]()
-	if err != nil {
-		return &pages.Error{}
-	}
-
-	return component
-}
-
-var pageComponents = map[Page]func() (vugu.Builder, error){
-	PageOrder:   pages.NewOrder,
-	PageHistory: func() (vugu.Builder, error) { return &pages.History{}, nil },
+func (pv *Pageview) Init(vugu.InitCtx) {
+	pv.Page = PageOrder
 }
 
 func getStyles() string {

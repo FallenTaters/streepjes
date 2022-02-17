@@ -1,6 +1,11 @@
 <div>
     <layout:Header :Navigate="func(p Page) { c.Page = p }" ></layout:Header>
     <div class="full-height" :style="getStyles()">
-        <vg-comp expr="c.RenderPage()"></vg-comp>
+        <pages:Order vg-if="c.Page == PageOrder" ></pages:Order>
+        <pages:History vg-if="c.Page == PageHistory" ></pages:History>
     </div>
 </div>
+
+<script type="application/x-go">
+import "github.com/PotatoesFall/vecty-test/frontend/components/pages"
+</script>

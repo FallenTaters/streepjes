@@ -19,18 +19,17 @@ type Order struct {
 
 var ErrLoadCatalog = errors.New(`unable to load catalog`)
 
-func NewOrder() (vugu.Builder, error) {
-	order := &Order{
-		SelectedCategoryID: 1, // TODO remove this line
-	}
+func (o *Order) Init(vugu.InitCtx) {
+	go func() {
+		catalog, err := cache.Catalog()
+		if err != nil {
+			panic(err) // TODO
+		}
 
-	catalog, err := cache.Catalog()
-	if err != nil {
-		return nil, fmt.Errorf(`%w: %s`, ErrLoadCatalog, err.Error())
-	}
-	order.Catalog = catalog
-
-	return order, nil
+		global.EventEnv.Lock()
+		defer global.EventEnv.UnlockRender()
+		o.Catalog = catalog
+	}()
 }
 
 func (o *Order) filterItems() {

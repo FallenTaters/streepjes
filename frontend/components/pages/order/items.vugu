@@ -1,7 +1,0 @@
-<div>
-items... todo
-</div>
-
-<script type="application/x-go">
-type Items struct{}
-</script>
