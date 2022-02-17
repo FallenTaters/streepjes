@@ -69,7 +69,7 @@ func (o *Order) filterCategories() {
 
 	seenCategoryIDs := map[int]bool{}
 	for _, item := range o.Catalog.Items {
-		seenCategoryIDs[item.CategoryID] = item.Price(store.Order.Club) != 0
+		seenCategoryIDs[item.CategoryID] = seenCategoryIDs[item.CategoryID] || item.Price(store.Order.Club) != 0
 	}
 
 	for _, category := range o.Catalog.Categories {
