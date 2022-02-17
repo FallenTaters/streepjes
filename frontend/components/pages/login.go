@@ -2,33 +2,11 @@ package pages
 
 import (
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
-	"github.com/PotatoesFall/vecty-test/frontend/components/beercss"
-
-	"github.com/hexops/vecty"
-	"github.com/hexops/vecty/elem"
+	"github.com/vugu/vugu"
 )
 
-func Login() (vecty.Component, error) {
-	err := backend.Logout()
-	if err != nil {
-		return nil, err
-	}
+type Login struct{}
 
-	return &loginComponent{}, nil
-}
-
-type loginComponent struct {
-	vecty.Core
-}
-
-// Render implements the vecty.Component interface.
-func (h *loginComponent) Render() vecty.ComponentOrHTML {
-	return elem.Div(
-		vecty.Markup(vecty.Class(`container`)),
-		elem.Form(
-			elem.Div(
-				beercss.Input(`Username`),
-			),
-		),
-	)
+func (l *Login) Init(vugu.InitCtx) {
+	go backend.Logout()
 }

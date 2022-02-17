@@ -5,7 +5,6 @@ go 1.17
 require (
 	git.fuyu.moe/Fuyu/router v0.2.1
 	github.com/FallenTaters/bbucket v1.0.0
-	github.com/hexops/vecty v0.6.0
 	github.com/mattn/go-sqlite3 v1.14.11
 	github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9
 	github.com/vugu/vugu v0.3.4

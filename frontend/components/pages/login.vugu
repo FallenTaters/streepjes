@@ -1,0 +1,9 @@
+<div class="container">
+    <form>
+        <beercss:Input :Label="`Username`"></beercss:Input>
+    </form>
+</div>
+
+<script type="application/x-go">
+import "github.com/PotatoesFall/vecty-test/frontend/components/beercss"
+</script>

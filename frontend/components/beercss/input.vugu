@@ -1,0 +1,4 @@
+<div class="field label border">
+    <input type="text" />
+    <label vg-content="c.Label"></label>
+</div>
