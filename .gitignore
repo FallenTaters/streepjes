@@ -10,3 +10,5 @@ air.log
 streepjes.db
 
 gitignore/
+
+*_vgen.go
