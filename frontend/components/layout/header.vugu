@@ -1,11 +1,13 @@
 <div>
     <div :class="c.menuClasses()">
-        <a vg-for="_, link := range headerLinks" @click="link.onclick(c)">
-            <beercss:Icon :Icon="link.icon"></beercss:Icon>
+        <a @click="c.Navigate(PageOrder)">
+            <i>fastfood</i>
+        </a>
+        <a @click="c.Navigate(PageHistory)">
+            <i>history</i>
+        </a>
+        <a>
+            <i>person</i>
         </a>
     </div>
 </div>
-
-<script type="application/x-go">
-	import "github.com/PotatoesFall/vecty-test/frontend/components/beercss"
-</script>

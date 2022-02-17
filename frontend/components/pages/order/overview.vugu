@@ -1,5 +1,34 @@
-<div>overview...todo</div>
+<div style="margin-top:7px; padding-bottom: 3px;">
+    <article
+        vg-for="_, line := range c.Lines"
+        :class="`small-padding` + c.classes(line)"
+    >
+        <div class="row no-wrap large-text no-club">
+            <div class="col min middle-align">
+                <button class="circle left-round no-margin" @click="c.removeItem(line.Item)">
+                    <i>remove</i>
+                </button>
+            </div>
+            <div class="col min middle-align" style="text-align:center;">
+                <span class="bold" style="width:20px" vg-content="line.Amount"></span>
+            </div>
+            <div class="col min middle-align">
+                <button class="circle right-round no-margin" @click="c.addItem(line.Item)">
+                    <i>add</i>
+                </button>
+            </div>
 
-<script type="application/x-go">
-type Overview struct{}
-</script>
+             <div class="col max middle-align">
+                <span vg-content="line.Item.Name"></span>
+            </div>
+
+             <div class="col min middle-align" vg-content="line.Price().String()"></div>
+
+             <div class="col min middle-align">
+                <button class="circle error" @click="c.delete(line.Item)">
+                    <i>delete</i>
+                </button>
+             </div>
+        </div>
+    </article>
+</div>

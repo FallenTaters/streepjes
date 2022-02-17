@@ -1,106 +1,35 @@
 package order
 
-// import (
-// 	"fmt"
+import (
+	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/vugu/vugu"
+)
 
-// 	"github.com/PotatoesFall/vecty-test/frontend/components/beercss"
-// 	"github.com/PotatoesFall/vecty-test/frontend/store"
-// 	"github.com/hexops/vecty"
-// 	"github.com/hexops/vecty/elem"
-// 	"github.com/hexops/vecty/event"
-// )
+type Overview struct {
+	Lines []store.Orderline
+}
 
-// type Overview struct {
-// 	vecty.Core
-// }
+func (o *Overview) Compute(vugu.ComputeCtx) {
+	o.Lines = store.Order.Lines
+}
 
-// func (o *Overview) Render() vecty.ComponentOrHTML {
-// 	markupAndChildren := []vecty.MarkupOrChild{
-// 		vecty.Markup(vecty.Style(`margin-top`, `7px`), vecty.Style(`padding-bottom`, `3px`)),
-// 	}
+func (o *Overview) classes(ol store.Orderline) string {
+	if ol.Item.Price(store.Order.Club) == 0 {
+		return `error`
+	}
 
-// 	markupAndChildren = append(markupAndChildren, makeCards()...)
+	return ``
+}
 
-// 	return elem.Div(markupAndChildren...)
-// }
+func (o *Overview) removeItem(item domain.Item) {
+	store.Order.RemoveItem(item)
+}
 
-// func makeCards() []vecty.MarkupOrChild {
-// 	children := make([]vecty.MarkupOrChild, 0, len(store.Order.Lines))
-// 	for _, item := range store.Order.Lines {
-// 		children = append(children, makeCard(item))
-// 	}
+func (o *Overview) addItem(item domain.Item) {
+	store.Order.AddItem(item)
+}
 
-// 	return children
-// }
-
-// func makeCard(item store.Orderline) *vecty.HTML { //nolint:funlen
-// 	classList := []string{`small-padding`}
-// 	if item.Item.Price(store.Order.Club) == 0 {
-// 		classList = append(classList, `error`)
-// 	}
-
-// 	return elem.Article(
-// 		vecty.Markup(vecty.Class(classList...)),
-// 		elem.Div(
-// 			vecty.Markup(vecty.Class(`row`, `no-wrap`, `large-text`, `no-club`)),
-// 			minCol(
-// 				elem.Button(
-// 					vecty.Markup(
-// 						vecty.Class(`circle`, `left-round`, `no-margin`),
-// 						event.Click(func(*vecty.Event) { store.Order.RemoveItem(item.Item) }),
-// 					),
-// 					beercss.Icon(beercss.IconRemove),
-// 				),
-// 			),
-// 			minCol(
-// 				vecty.Markup(vecty.Style(`text-align`, `center`)),
-// 				elem.Span(
-// 					vecty.Markup(
-// 						vecty.Class(`bold`),
-// 						vecty.Style(`width`, `20px`),
-// 					),
-// 					vecty.Text(fmt.Sprint(item.Amount)),
-// 				),
-// 			),
-// 			minCol(
-// 				elem.Button(
-// 					vecty.Markup(
-// 						vecty.Class(`circle`, `right-round`, `no-margin`),
-// 						event.Click(func(*vecty.Event) { store.Order.AddItem(item.Item) }),
-// 					),
-// 					beercss.Icon(beercss.IconAdd),
-// 				),
-// 			),
-
-// 			maxCol(
-// 				elem.Span(vecty.Text(item.Item.Name)),
-// 			),
-
-// 			minCol(
-// 				vecty.Text(
-// 					item.Item.Price(store.Order.Club).Times(item.Amount).String(),
-// 				),
-// 			),
-
-// 			minCol(
-// 				elem.Button(
-// 					vecty.Markup(
-// 						vecty.Class(`circle`, `error`),
-// 						event.Click(func(*vecty.Event) { store.Order.DeleteItem(item.Item) }),
-// 					),
-// 					beercss.Icon(beercss.IconDelete),
-// 				),
-// 			),
-// 		),
-// 	)
-// }
-
-// func minCol(children ...vecty.MarkupOrChild) *vecty.HTML {
-// 	children = append(children, vecty.Markup(vecty.Class(`col`, `min`, `middle-align`)))
-// 	return elem.Div(children...)
-// }
-
-// func maxCol(children ...vecty.MarkupOrChild) *vecty.HTML {
-// 	children = append(children, vecty.Markup(vecty.Class(`col`, `max`, `middle-align`)))
-// 	return elem.Div(children...)
-// }
+func (o *Overview) delete(item domain.Item) {
+	store.Order.DeleteItem(item)
+}

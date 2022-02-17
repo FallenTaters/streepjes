@@ -23,6 +23,10 @@ type Orderline struct {
 	Amount int
 }
 
+func (ol Orderline) Price() domain.Price {
+	return ol.Item.Price(Order.Club).Times(ol.Amount)
+}
+
 type OrderStore struct {
 	Club  domain.Club
 	Lines []Orderline
