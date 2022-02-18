@@ -14,6 +14,8 @@ var (
 type User interface {
 	Get(id int) (domain.User, bool)
 
+	GetAll() []domain.User
+
 	// GetUser by token, false if not found
 	GetByToken(token string) (domain.User, bool)
 
@@ -27,5 +29,5 @@ type User interface {
 	Create(user domain.User) error
 
 	// // Delete a user by id. Return ErrUserHasOpenOrders if the month is not over, or ErrUserNotFound if id is unknown.
-	// Delete(id int) error
+	// Delete(id int) error // TOOD
 }

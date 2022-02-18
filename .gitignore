@@ -12,3 +12,5 @@ streepjes.db
 gitignore/
 
 *_vgen.go
+
+.env

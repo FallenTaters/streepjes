@@ -25,6 +25,10 @@ type Service interface {
 	// Logout deletes the users AuthToken, if found
 	// if the user is not found, it is a no-op
 	Logout(id int)
+
+	// Register registers a new user. It sets the passwordHash and ID
+	// if the username is taken, it return repo.ErrUsernameTaken
+	Register(user domain.User, password string) error
 }
 
 func New(userRepo repo.User) Service {
@@ -94,4 +98,10 @@ func (s *service) Logout(id int) {
 	user.AuthTime = time.Now().Add(-tokenDuration)
 
 	_ = s.users.Update(user)
+}
+
+func (s *service) Register(user domain.User, password string) error {
+	user.PasswordHash = hashPassword(password)
+
+	return s.users.Create(user)
 }

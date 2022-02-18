@@ -17,7 +17,11 @@ func main() {
 }
 
 func initPackages() {
-	backend.Init(window.Location())
+	u := window.Location()
+	u.Path = ``
+	u.RawQuery = ``
+	u.ForceQuery = false
+	backend.Init(u)
 }
 
 func startVugu() {

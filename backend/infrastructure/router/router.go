@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"git.fuyu.moe/Fuyu/router"
-	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/backend/application/auth"
 	"github.com/PotatoesFall/vecty-test/domain"
 )
@@ -58,16 +57,5 @@ func getStatic(assets Static) router.Handle {
 		}
 
 		return c.Bytes(http.StatusOK, asset)
-	}
-}
-
-func postLogin(authService auth.Service) func(*router.Context, api.Credentials) error {
-	return func(c *router.Context, credentials api.Credentials) error {
-		user, ok := authService.Login(credentials.Username, credentials.Password)
-		if !ok {
-			return c.NoContent(http.StatusUnauthorized)
-		}
-
-		return c.JSON(http.StatusOK, api.Token{Token: user.AuthToken})
 	}
 }

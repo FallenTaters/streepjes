@@ -19,6 +19,27 @@ type userRepo struct {
 	db *sql.DB
 }
 
+func (ur *userRepo) GetAll() []domain.User {
+	rows, err := ur.db.Query(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U;`)
+	if err != nil {
+		panic(err)
+	}
+
+	var user domain.User
+	users := make([]domain.User, 0)
+
+	for rows.Next() {
+		err := rows.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+		if err != nil {
+			panic(err)
+		}
+
+		users = append(users, user)
+	}
+
+	return users
+}
+
 func (ur *userRepo) Get(id int) (domain.User, bool) {
 	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.id = ?;`, id)
 

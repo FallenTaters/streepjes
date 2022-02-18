@@ -21,7 +21,8 @@ const (
 )
 
 type Pageview struct {
-	Page Page
+	Page       Page `vugu:"data"`
+	ShowHeader bool `vugu:"data"`
 }
 
 func (pv *Pageview) Init(vugu.InitCtx) {
@@ -31,10 +32,20 @@ func (pv *Pageview) Init(vugu.InitCtx) {
 		pv.Page = PageLogin
 	})
 
+	events.Listen(events.Login, `pageview`, func() {
+		defer global.LockAndRender()()
+
+		pv.Page = PageOrder // TODO use role ? return from postLOGIN call
+	})
+
 	pv.Page = PageOrder
 }
 
-func getStyles() string {
+func (pv *Pageview) GetStyles() string {
+	if pv.Page == PageLogin {
+		return ``
+	}
+
 	switch window.GetSize() {
 	case window.SizeL:
 		return `padding: 20px 40px 20px 120px;`

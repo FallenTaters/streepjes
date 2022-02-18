@@ -2,9 +2,12 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"git.fuyu.moe/Fuyu/router"
+	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/backend/application/auth"
+	"github.com/PotatoesFall/vecty-test/backend/global/settings"
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
@@ -14,6 +17,26 @@ func userFromContext(c *router.Context) domain.User {
 
 func authRoutes(r *router.Group, authService auth.Service) {
 	r.POST(`/logout`, postLogout(authService))
+}
+
+func postLogin(authService auth.Service) func(*router.Context, api.Credentials) error {
+	return func(c *router.Context, credentials api.Credentials) error {
+		user, ok := authService.Login(credentials.Username, credentials.Password)
+		if !ok {
+			return c.NoContent(http.StatusUnauthorized)
+		}
+
+		http.SetCookie(c.Response, &http.Cookie{
+			Name:   `auth_token`,
+			Value:  user.AuthToken,
+			Path:   ``,
+			Domain: ``,
+			MaxAge: 24 * int(time.Hour/time.Second),
+			Secure: !settings.DisableSecure,
+		})
+
+		return c.JSON(http.StatusOK, api.Token{Token: user.AuthToken})
+	}
 }
 
 func postLogout(authService auth.Service) func(c *router.Context) error {

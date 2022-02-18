@@ -1,12 +1,14 @@
-<div class="container">
+<div class="container center-align">
     <form @submit="event.PreventDefault(); c.Submit()">
         <beercss:Input :Type="`text`" :Label="`Username`" @Input="c.Username = string(event)"></beercss:Input>
         <beercss:Input :Type="`password`" :Label="`Password`" @Input="c.Password = string(event)"></beercss:Input>
-        <button type="submit">Log In</button>
+        <button :disabled="c.Loading" type="submit">Log In</button>
     </form>
-    <article class="error" vg-if="c.Error">Unable to log in.</article>
+    <article class="error" vg-if="c.Error">Login failed.</article>
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
 </div>
 
 <script type="application/x-go">
 import "github.com/PotatoesFall/vecty-test/frontend/components/beercss"
+import "github.com/PotatoesFall/vecty-test/frontend/components/ui"
 </script>

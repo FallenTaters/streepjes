@@ -1,6 +1,7 @@
 <div>
-    <layout:Header :Navigate="func(p Page) { c.Page = p }" ></layout:Header>
-    <div class="full-height" :style="getStyles()">
+    <layout:Header vg-if="c.Page != PageLogin" :Navigate="func(p Page) { c.Page = p }" ></layout:Header>
+
+    <div class="full-height" :style="c.GetStyles()">
         <pages:Order vg-if="c.Page == PageOrder" ></pages:Order>
         <pages:History vg-if="c.Page == PageHistory" ></pages:History>
         <pages:Login vg-if="c.Page == PageLogin" ></pages:Login>
