@@ -11,7 +11,11 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
-var ErrStatus = errors.New(`received unexpected status code`)
+var (
+	ErrStatus       = errors.New(`received unexpected status code`)
+	ErrUnauthorized = errors.New(`request not authorized`)
+	ErrForbidden    = errors.New(`request forbidden`)
+)
 
 func Init(endpoint *url.URL) {
 	settings.Endpoint = endpoint
@@ -27,6 +31,22 @@ func (s Settings) URL() string {
 	return s.Endpoint.String()
 }
 
+func checkStatus(code int) error {
+	if code == http.StatusOK {
+		return nil
+	}
+
+	if code == http.StatusUnauthorized {
+		return ErrUnauthorized
+	}
+
+	if code == http.StatusForbidden {
+		return ErrForbidden
+	}
+
+	return fmt.Errorf(`%w: %d`, ErrStatus, code)
+}
+
 func GetCatalog() (api.Catalog, error) {
 	resp, err := http.Get(settings.URL() + `/catalog`)
 	if err != nil {
@@ -34,14 +54,12 @@ func GetCatalog() (api.Catalog, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return api.Catalog{}, fmt.Errorf(`%w: %d`, ErrStatus, resp.StatusCode)
+	if err := checkStatus(200); err != nil {
+		return api.Catalog{}, err
 	}
 
 	var catalog api.Catalog
-	err = json.NewDecoder(resp.Body).Decode(&catalog)
-
-	return catalog, err
+	return catalog, json.NewDecoder(resp.Body).Decode(&catalog)
 }
 
 func GetMembers() ([]domain.Member, error) {

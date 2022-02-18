@@ -1,6 +1,8 @@
 package layout
 
 import (
+	"github.com/PotatoesFall/vecty-test/frontend/components/events"
+	"github.com/PotatoesFall/vecty-test/frontend/global"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/vugu/vugu"
 )
@@ -23,6 +25,13 @@ type Pageview struct {
 }
 
 func (pv *Pageview) Init(vugu.InitCtx) {
+	events.Listen(events.Unauthorized, `pageview`, func() {
+		global.EventEnv.Lock()
+		defer global.EventEnv.UnlockRender()
+
+		pv.Page = PageLogin
+	})
+
 	pv.Page = PageOrder
 }
 

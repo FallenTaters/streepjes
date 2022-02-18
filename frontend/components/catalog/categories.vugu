@@ -1,12 +1,10 @@
 <div>
-    <!-- TODO: make a beercss.Button component with a bunch of props -->
     <button
         vg-for="_, category := range c.Categories"
         :class="c.classes(category)"
         @click="c.OnClick(category)"
         vg-content="category.Name"
-    >
-    </button>
+    ></button>
 </div>
 
 <script type="application/x-go">

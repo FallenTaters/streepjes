@@ -3,6 +3,7 @@
     <div class="full-height" :style="getStyles()">
         <pages:Order vg-if="c.Page == PageOrder" ></pages:Order>
         <pages:History vg-if="c.Page == PageHistory" ></pages:History>
+        <pages:Login vg-if="c.Page == PageLogin" ></pages:Login>
     </div>
 </div>
 
