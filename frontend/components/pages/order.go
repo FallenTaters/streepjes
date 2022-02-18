@@ -6,8 +6,8 @@ import (
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
-	"github.com/PotatoesFall/vecty-test/frontend/components/events"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
+	"github.com/PotatoesFall/vecty-test/frontend/events"
 	"github.com/PotatoesFall/vecty-test/frontend/global"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/PotatoesFall/vecty-test/frontend/store"
@@ -50,8 +50,7 @@ func (o *Order) Init(vugu.InitCtx) {
 			return
 		}
 
-		global.EventEnv.Lock()
-		defer global.EventEnv.UnlockRender()
+		defer global.LockAndRender()()
 		o.Catalog = catalog
 	}()
 }
@@ -83,8 +82,7 @@ func (o *Order) filterCategories() {
 
 func (o *Order) selectCategory(category domain.Category) {
 	go func() {
-		global.EventEnv.Lock()
-		defer global.EventEnv.UnlockRender()
+		defer global.LockAndRender()()
 
 		o.SelectedCategoryID = category.ID
 		o.filterItems()

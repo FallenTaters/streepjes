@@ -1,33 +1,29 @@
 package beercss
 
 import (
-	"fmt"
-	"time"
-
+	"github.com/PotatoesFall/vecty-test/frontend/global"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/beercss"
 	"github.com/vugu/vugu"
 )
 
 type Input struct {
+	Type  string `vugu:"data"`
 	Label string `vugu:"data"`
+
+	Input InputHandler `vugu:"data"`
 }
 
-func (i *Input) Init(vugu.InitCtx) {
-	fmt.Println(`init`)
+func (i *Input) HandleChange(event vugu.DOMEvent) {
+	v := event.JSEventTarget().Get(`value`).String()
+
+	go i.Input.InputHandle(InputEvent(v))
 }
 
+// Replace with Rendered() once https://github.com/vugu/vugu/issues/224 is resolved, no lock needed
 func (i *Input) Compute(vugu.ComputeCtx) {
-	fmt.Println(`compute`)
-}
-
-func (i *Input) Rendered(vugu.RenderedCtx) {
-	fmt.Println(`rendered`)
 	go func() {
-		time.Sleep(100 * time.Millisecond)
+		defer global.LockOnly()()
+
 		beercss.UI()
 	}()
-}
-
-func (i *Input) Destroy(vugu.DestroyCtx) {
-	fmt.Println(`destroyed`)
 }

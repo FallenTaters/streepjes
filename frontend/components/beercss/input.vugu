@@ -1,4 +1,9 @@
 <div class="field label border">
-    <input type="text" />
+    <input :type="c.Type" @input="c.HandleChange(event)" />
     <label vg-content="c.Label"></label>
 </div>
+
+<script type="application/x-go">
+//vugugen:event Input
+type InputEvent string
+</script>

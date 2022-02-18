@@ -1,7 +1,10 @@
 <div class="container">
-    <form>
-        <beercss:Input :Label="`Username`"></beercss:Input>
+    <form @submit="event.PreventDefault(); c.Submit()">
+        <beercss:Input :Type="`text`" :Label="`Username`" @Input="c.Username = string(event)"></beercss:Input>
+        <beercss:Input :Type="`password`" :Label="`Password`" @Input="c.Password = string(event)"></beercss:Input>
+        <button type="submit">Log In</button>
     </form>
+    <article class="error" vg-if="c.Error">Unable to log in.</article>
 </div>
 
 <script type="application/x-go">

@@ -38,8 +38,7 @@ func Listen() {
 
 		size = newSize
 
-		global.EventEnv.Lock()
-		defer global.EventEnv.UnlockRender()
+		defer global.LockAndRender()()
 
 		for _, listener := range listeners {
 			listener(size)

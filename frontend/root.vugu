@@ -3,8 +3,8 @@
 </div>
 
 <script type="application/x-go">
-
 import "github.com/PotatoesFall/vecty-test/frontend/components/layout"
 
 type Root struct {}
+
 </script>

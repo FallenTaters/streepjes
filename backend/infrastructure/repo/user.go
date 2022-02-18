@@ -6,7 +6,10 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
-var ErrUserNotFound = errors.New(`user not found`)
+var (
+	ErrUserNotFound  = errors.New(`user not found`)
+	ErrUsernameTaken = errors.New(`username taken`)
+)
 
 type User interface {
 	Get(id int) (domain.User, bool)
@@ -20,6 +23,9 @@ type User interface {
 	// Update a specific user. Returns ErrUserNotFound if the ID is not found
 	Update(user domain.User) error
 
-	// Delete a user by id. Return ErrUserHasOpenOrders if the month is not over, or ErrUserNotFound if id is unknown.
-	Delete(id int) error
+	// Create a new user. Returns ErrUsernameTaken if the username already exists
+	Create(user domain.User) error
+
+	// // Delete a user by id. Return ErrUserHasOpenOrders if the month is not over, or ErrUserNotFound if id is unknown.
+	// Delete(id int) error
 }

@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -54,7 +55,7 @@ func GetCatalog() (api.Catalog, error) {
 	}
 	defer resp.Body.Close()
 
-	if err := checkStatus(200); err != nil {
+	if err := checkStatus(resp.StatusCode); err != nil {
 		return api.Catalog{}, err
 	}
 
@@ -69,8 +70,8 @@ func GetMembers() ([]domain.Member, error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(`%w: %d`, ErrStatus, resp.StatusCode)
+	if err := checkStatus(resp.StatusCode); err != nil {
+		return nil, err
 	}
 
 	var members []domain.Member
@@ -79,16 +80,27 @@ func GetMembers() ([]domain.Member, error) {
 	return members, err
 }
 
-func Logout() error {
+func PostLogout() error {
 	resp, err := http.Post(settings.URL()+`/logout`, ``, nil)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusUnauthorized {
-		return fmt.Errorf(`%w: %d`, ErrStatus, resp.StatusCode)
+	return checkStatus(resp.StatusCode)
+}
+
+func PostLogin(req api.Credentials) error {
+	data, err := json.Marshal(req)
+	if err != nil {
+		panic(err)
 	}
 
-	return nil
+	resp, err := http.Post(settings.URL()+`/login`, `application/json`, bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return checkStatus(resp.StatusCode)
 }
