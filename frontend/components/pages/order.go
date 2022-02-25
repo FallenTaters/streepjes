@@ -57,7 +57,7 @@ func (o *Order) filterItems() {
 	o.Items = []orderdomain.Item{}
 
 	for _, item := range o.Catalog.Items {
-		if item.CategoryID == o.SelectedCategoryID {
+		if item.CategoryID == o.SelectedCategoryID && item.Price(store.Order.Club) != 0 {
 			o.Items = append(o.Items, item)
 		}
 	}

@@ -30,6 +30,10 @@ func getCatalog(c *router.Context) error { //nolint:funlen
 				ID:   3,
 				Name: `Empty`,
 			},
+			{
+				ID:   4,
+				Name: `Empty for one club`,
+			},
 		},
 		Items: []orderdomain.Item{
 			{
@@ -86,6 +90,13 @@ func getCatalog(c *router.Context) error { //nolint:funlen
 				ID:              8,
 				CategoryID:      1,
 				Name:            `Snickers 3`,
+				PriceGladiators: 200,
+				PriceParabool:   0,
+			},
+			{
+				ID:              9,
+				CategoryID:      4,
+				Name:            `Snickers 4`,
 				PriceGladiators: 200,
 				PriceParabool:   0,
 			},
