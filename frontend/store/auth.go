@@ -1,15 +1,25 @@
 package store
 
-import "github.com/PotatoesFall/vecty-test/domain/authdomain"
+import (
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/PotatoesFall/vecty-test/frontend/events"
+)
 
 type AuthStore struct {
 	LoggedIn bool
-	Role     authdomain.Role
+	User     authdomain.User
 }
 
 var Auth AuthStore
 
-func (as *AuthStore) SetLoggedIn(role authdomain.Role) {
-	as.LoggedIn = true
-	as.Role = role
+func Init() {
+	events.Listen(events.Unauthorized, `auth-store`, func() {
+		Auth.LoggedIn = false
+		Auth.User = authdomain.User{}
+	})
+}
+
+func (auth *AuthStore) LogIn(user authdomain.User) {
+	auth.LoggedIn = true
+	auth.User = user
 }

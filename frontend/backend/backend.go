@@ -9,7 +9,9 @@ import (
 	"net/url"
 
 	"github.com/PotatoesFall/vecty-test/api"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/PotatoesFall/vecty-test/frontend/events"
 )
 
 var (
@@ -38,6 +40,7 @@ func checkStatus(code int) error {
 	}
 
 	if code == http.StatusUnauthorized {
+		events.Trigger(events.Unauthorized)
 		return ErrUnauthorized
 	}
 
@@ -85,10 +88,14 @@ func PostLogout() error {
 	}
 	defer resp.Body.Close()
 
-	return checkStatus(resp.StatusCode)
+	if resp.StatusCode == http.StatusOK {
+		return fmt.Errorf(`%w: %d`, ErrStatus, resp.StatusCode)
+	}
+
+	return nil
 }
 
-func PostLogin(req api.Credentials) (api.LoginResponse, error) {
+func PostLogin(req api.Credentials) (authdomain.User, error) {
 	data, err := json.Marshal(req)
 	if err != nil {
 		panic(err)
@@ -96,14 +103,29 @@ func PostLogin(req api.Credentials) (api.LoginResponse, error) {
 
 	resp, err := http.Post(settings.URL()+`/login`, `application/json`, bytes.NewReader(data))
 	if err != nil {
-		return api.LoginResponse{}, err
+		return authdomain.User{}, err
 	}
 	defer resp.Body.Close()
 
 	if err := checkStatus(resp.StatusCode); err != nil {
-		return api.LoginResponse{}, err
+		return authdomain.User{}, err
 	}
 
-	var response api.LoginResponse
-	return response, json.NewDecoder(resp.Body).Decode(&response)
+	var user authdomain.User
+	return user, json.NewDecoder(resp.Body).Decode(&user)
+}
+
+func PostActive() (authdomain.User, error) {
+	resp, err := http.Post(settings.URL()+`/active`, ``, nil)
+	if err != nil {
+		return authdomain.User{}, err
+	}
+	defer resp.Body.Close()
+
+	if err := checkStatus(resp.StatusCode); err != nil {
+		return authdomain.User{}, err
+	}
+
+	var user authdomain.User
+	return user, json.NewDecoder(resp.Body).Decode(&user)
 }

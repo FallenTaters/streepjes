@@ -17,6 +17,7 @@ func userFromContext(c *router.Context) authdomain.User {
 
 func authRoutes(r *router.Group, authService auth.Service) {
 	r.POST(`/logout`, postLogout(authService))
+	r.POST(`/active`, postActive)
 }
 
 func postLogin(authService auth.Service) func(*router.Context, api.Credentials) error {
@@ -35,7 +36,7 @@ func postLogin(authService auth.Service) func(*router.Context, api.Credentials) 
 			Secure: !settings.DisableSecure,
 		})
 
-		return c.JSON(http.StatusOK, api.LoginResponse{Role: user.Role, Token: user.AuthToken})
+		return c.JSON(http.StatusOK, user)
 	}
 }
 
@@ -47,6 +48,10 @@ func postLogout(authService auth.Service) func(c *router.Context) error {
 
 		return c.NoContent(http.StatusOK)
 	}
+}
+
+func postActive(c *router.Context) error {
+	return c.JSON(http.StatusOK, userFromContext(c))
 }
 
 func authMiddleware(authService auth.Service) router.Middleware {

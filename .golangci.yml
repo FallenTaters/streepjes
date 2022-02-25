@@ -30,6 +30,7 @@ linters:
     - gci
     - noctx
     - wsl
+    - godot
  
 linters-settings:
   govet:

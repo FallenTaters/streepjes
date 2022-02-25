@@ -13,6 +13,7 @@ type Page int
 
 const (
 	PageLogin Page = iota + 1
+	PageProfile
 
 	PageOrder
 	PageHistory
@@ -37,7 +38,7 @@ func (pv *Pageview) Init(vugu.InitCtx) {
 	events.Listen(events.Login, `pageview`, func() {
 		defer global.LockAndRender()()
 
-		switch store.Auth.Role {
+		switch store.Auth.User.Role {
 		case authdomain.RoleAdmin:
 			pv.Page = PageMembers
 		case authdomain.RoleBartender:

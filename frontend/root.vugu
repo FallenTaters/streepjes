@@ -1,9 +1,11 @@
 <div>
-    <layout:Pageview />
+    <auth:Activewatcher></auth:Activewatcher>
+    <layout:Pageview></layout:Pageview>
 </div>
 
 <script type="application/x-go">
 import "github.com/PotatoesFall/vecty-test/frontend/components/layout"
+import "github.com/PotatoesFall/vecty-test/frontend/components/auth"
 
 type Root struct {}
 

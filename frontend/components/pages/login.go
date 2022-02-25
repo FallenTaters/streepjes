@@ -31,7 +31,7 @@ func (l *Login) Submit() {
 			global.EventEnv.UnlockRender()
 		}()
 
-		resp, err := backend.PostLogin(api.Credentials{
+		user, err := backend.PostLogin(api.Credentials{
 			Username: l.Username,
 			Password: l.Password,
 		})
@@ -41,7 +41,9 @@ func (l *Login) Submit() {
 			return
 		}
 
-		store.Auth.SetLoggedIn(resp.Role)
+		store.Auth.LogIn(user)
+		store.Order.Club = user.Club
+		store.Order.Lines = []store.Orderline{}
 
 		events.Trigger(events.Login)
 	}()

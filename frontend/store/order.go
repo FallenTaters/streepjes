@@ -14,7 +14,7 @@ const (
 )
 
 var Order = OrderStore{
-	Club:     domain.ClubGladiators, // TODO
+	Club:     domain.ClubGladiators,
 	Lines:    nil,
 	OnChange: nil,
 }

@@ -5,6 +5,8 @@ type Event int
 const (
 	Unauthorized Event = iota + 1
 	Login
+
+	InactiveWarning
 )
 
 var listeners = make(map[Event]map[string]func())

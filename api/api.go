@@ -2,7 +2,6 @@
 package api
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
@@ -14,9 +13,4 @@ type Catalog struct {
 type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	Role  authdomain.Role `json:"role"`
-	Token string          `json:"token"`
 }

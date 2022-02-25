@@ -6,6 +6,11 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
+const (
+	TokenDuration         = 5 * time.Minute
+	LockScreenWarningTime = 3 * time.Minute
+)
+
 type User struct {
 	ID           int    `json:"id"`
 	Username     string `json:"username"`

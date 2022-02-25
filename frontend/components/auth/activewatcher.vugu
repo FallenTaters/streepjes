@@ -1,0 +1,18 @@
+<div>
+    <div vg-if="c.Show" @click="c.click()" class="active-watcher text-center">
+        <h2>You will be logged out soon.</h2>
+        <h3>Tap screen anywhere to continue</h3>
+    </div>
+</div>
+
+<style>
+.active-watcher {
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    background-color: black;
+    color: white;
+    padding-top: 35vh;
+    z-index: 10000;
+}
+</style>

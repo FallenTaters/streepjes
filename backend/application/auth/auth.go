@@ -7,8 +7,6 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
 
-const tokenDuration = 5 * time.Minute
-
 type Service interface {
 	// Login returns the user if credentials are correct
 	// otherwise, it returns false
@@ -70,7 +68,13 @@ func (s *service) Check(token string) (authdomain.User, bool) {
 		return authdomain.User{}, false
 	}
 
-	if time.Since(user.AuthTime) > tokenDuration {
+	if time.Since(user.AuthTime) > authdomain.TokenDuration {
+		return authdomain.User{}, false
+	}
+
+	user.AuthTime = time.Now()
+	err := s.users.Update(user)
+	if err != nil {
 		return authdomain.User{}, false
 	}
 
@@ -95,7 +99,7 @@ func (s *service) Logout(id int) {
 	}
 
 	user.AuthToken = ``
-	user.AuthTime = time.Now().Add(-tokenDuration)
+	user.AuthTime = time.Now().Add(-authdomain.TokenDuration)
 
 	_ = s.users.Update(user)
 }

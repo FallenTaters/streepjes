@@ -7,7 +7,6 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
-	"github.com/PotatoesFall/vecty-test/frontend/events"
 	"github.com/PotatoesFall/vecty-test/frontend/global"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
 	"github.com/PotatoesFall/vecty-test/frontend/store"
@@ -46,8 +45,7 @@ func (o *Order) Init(vugu.InitCtx) {
 	go func() {
 		catalog, err := cache.Catalog()
 		if err != nil {
-			events.Trigger(events.Unauthorized)
-			return
+			return // handle gracefully (unauthorized is already handled)
 		}
 
 		defer global.LockAndRender()()
