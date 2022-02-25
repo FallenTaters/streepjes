@@ -5,6 +5,7 @@ import (
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
 	"github.com/PotatoesFall/vecty-test/frontend/events"
 	"github.com/PotatoesFall/vecty-test/frontend/global"
+	"github.com/PotatoesFall/vecty-test/frontend/store"
 	"github.com/vugu/vugu"
 )
 
@@ -30,7 +31,7 @@ func (l *Login) Submit() {
 			global.EventEnv.UnlockRender()
 		}()
 
-		err := backend.PostLogin(api.Credentials{
+		resp, err := backend.PostLogin(api.Credentials{
 			Username: l.Username,
 			Password: l.Password,
 		})
@@ -39,6 +40,8 @@ func (l *Login) Submit() {
 			l.Error = true
 			return
 		}
+
+		store.Auth.SetLoggedIn(resp.Role)
 
 		events.Trigger(events.Login)
 	}()

@@ -29,6 +29,7 @@ linters:
     - forbidigo
     - gci
     - noctx
+    - wsl
  
 linters-settings:
   govet:
@@ -68,9 +69,6 @@ issues:
     - linters:
       - exhaustivestruct
       source: "\\{\\}"
-    - linters:
-      - wsl
-      text: "only be cuddled with assignments"
     - linters:
       - typecheck
       text: "could not import syscall/js"

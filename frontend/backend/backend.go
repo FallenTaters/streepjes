@@ -75,9 +75,7 @@ func GetMembers() ([]orderdomain.Member, error) {
 	}
 
 	var members []orderdomain.Member
-	err = json.NewDecoder(resp.Body).Decode(&members)
-
-	return members, err
+	return members, json.NewDecoder(resp.Body).Decode(&members)
 }
 
 func PostLogout() error {
@@ -90,7 +88,7 @@ func PostLogout() error {
 	return checkStatus(resp.StatusCode)
 }
 
-func PostLogin(req api.Credentials) error {
+func PostLogin(req api.Credentials) (api.LoginResponse, error) {
 	data, err := json.Marshal(req)
 	if err != nil {
 		panic(err)
@@ -98,9 +96,14 @@ func PostLogin(req api.Credentials) error {
 
 	resp, err := http.Post(settings.URL()+`/login`, `application/json`, bytes.NewReader(data))
 	if err != nil {
-		return err
+		return api.LoginResponse{}, err
 	}
 	defer resp.Body.Close()
 
-	return checkStatus(resp.StatusCode)
+	if err := checkStatus(resp.StatusCode); err != nil {
+		return api.LoginResponse{}, err
+	}
+
+	var response api.LoginResponse
+	return response, json.NewDecoder(resp.Body).Decode(&response)
 }

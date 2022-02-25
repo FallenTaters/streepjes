@@ -1,9 +1,11 @@
 package layout
 
 import (
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 	"github.com/PotatoesFall/vecty-test/frontend/events"
 	"github.com/PotatoesFall/vecty-test/frontend/global"
 	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
+	"github.com/PotatoesFall/vecty-test/frontend/store"
 	"github.com/vugu/vugu"
 )
 
@@ -35,7 +37,12 @@ func (pv *Pageview) Init(vugu.InitCtx) {
 	events.Listen(events.Login, `pageview`, func() {
 		defer global.LockAndRender()()
 
-		pv.Page = PageOrder // TODO use role ? return from postLOGIN call
+		switch store.Auth.Role {
+		case authdomain.RoleAdmin:
+			pv.Page = PageMembers
+		case authdomain.RoleBartender:
+			pv.Page = PageOrder
+		}
 	})
 
 	pv.Page = PageOrder
