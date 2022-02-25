@@ -2,6 +2,7 @@ package store
 
 import (
 	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
 type OrderEvent int
@@ -19,11 +20,11 @@ var Order = OrderStore{
 }
 
 type Orderline struct {
-	Item   domain.Item
+	Item   orderdomain.Item
 	Amount int
 }
 
-func (ol Orderline) Price() domain.Price {
+func (ol Orderline) Price() orderdomain.Price {
 	return ol.Item.Price(Order.Club).Times(ol.Amount)
 }
 
@@ -42,16 +43,16 @@ func (os *OrderStore) Emit(event OrderEvent) {
 	os.OnChange(event)
 }
 
-func (os *OrderStore) CalculateTotal() domain.Price {
-	var total domain.Price = 0
+func (os *OrderStore) CalculateTotal() orderdomain.Price {
+	var total orderdomain.Price = 0
 	for _, itemAmount := range os.Lines {
-		total += itemAmount.Item.Price(os.Club) * domain.Price(itemAmount.Amount)
+		total += itemAmount.Item.Price(os.Club) * orderdomain.Price(itemAmount.Amount)
 	}
 
 	return total
 }
 
-func (os *OrderStore) AddItem(item domain.Item) {
+func (os *OrderStore) AddItem(item orderdomain.Item) {
 	defer os.Emit(OrderEventItemsChanged)
 
 	for i, itemAmount := range os.Lines {
@@ -67,7 +68,7 @@ func (os *OrderStore) AddItem(item domain.Item) {
 	})
 }
 
-func (os *OrderStore) RemoveItem(item domain.Item) {
+func (os *OrderStore) RemoveItem(item orderdomain.Item) {
 	defer os.Emit(OrderEventItemsChanged)
 
 	for i, itemAmount := range os.Lines {
@@ -82,7 +83,7 @@ func (os *OrderStore) RemoveItem(item domain.Item) {
 	}
 }
 
-func (os *OrderStore) DeleteItem(item domain.Item) {
+func (os *OrderStore) DeleteItem(item orderdomain.Item) {
 	for i, itemAmount := range os.Lines {
 		if itemAmount.Item.ID == item.ID {
 			os.deleteAt(i)

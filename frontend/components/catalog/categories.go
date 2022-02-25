@@ -4,14 +4,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 	"github.com/vugu/vugu"
 )
 
 type Categories struct {
-	Categories         []domain.Category     `vugu:"data"`
-	SelectedCategoryID int                   `vugu:"data"`
-	OnClick            func(domain.Category) `vugu:"data"`
+	Categories         []orderdomain.Category     `vugu:"data"`
+	SelectedCategoryID int                        `vugu:"data"`
+	OnClick            func(orderdomain.Category) `vugu:"data"`
 }
 
 func (c *Categories) Compute(ctx vugu.ComputeCtx) {
@@ -20,7 +20,7 @@ func (c *Categories) Compute(ctx vugu.ComputeCtx) {
 	})
 }
 
-func (c *Categories) classes(category domain.Category) string {
+func (c *Categories) classes(category orderdomain.Category) string {
 	classes := `responsive extra small-margin`
 
 	if c.SelectedCategoryID == category.ID {

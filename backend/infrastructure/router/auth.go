@@ -8,11 +8,11 @@ import (
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/backend/application/auth"
 	"github.com/PotatoesFall/vecty-test/backend/global/settings"
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
 
-func userFromContext(c *router.Context) domain.User {
-	return c.Get(`user`).(domain.User)
+func userFromContext(c *router.Context) authdomain.User {
+	return c.Get(`user`).(authdomain.User)
 }
 
 func authRoutes(r *router.Group, authService auth.Service) {
@@ -26,7 +26,7 @@ func postLogin(authService auth.Service) func(*router.Context, api.Credentials) 
 			return c.NoContent(http.StatusUnauthorized)
 		}
 
-		http.SetCookie(c.Response, &http.Cookie{
+		http.SetCookie(c.Response, &http.Cookie{ //nolint:exhaustivestruct
 			Name:   `auth_token`,
 			Value:  user.AuthToken,
 			Path:   ``,
@@ -35,7 +35,7 @@ func postLogin(authService auth.Service) func(*router.Context, api.Credentials) 
 			Secure: !settings.DisableSecure,
 		})
 
-		return c.JSON(http.StatusOK, api.Token{Token: user.AuthToken})
+		return c.JSON(http.StatusOK, api.LoginResponse{Role: user.Role, Token: user.AuthToken})
 	}
 }
 
@@ -69,14 +69,12 @@ func authMiddleware(authService auth.Service) router.Middleware {
 	}
 }
 
-func roleMiddleware(role domain.Role) router.Middleware {
+func permissionMiddleware(permission authdomain.Permission) router.Middleware {
 	return func(next router.Handle) router.Handle {
 		return func(c *router.Context) error {
-			return next(c) // TODO temporary override
-
 			user := userFromContext(c)
 
-			if user.Role != role {
+			if !user.Role.Has(permission) {
 				return c.NoContent(http.StatusForbidden)
 			}
 

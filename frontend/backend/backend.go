@@ -9,7 +9,7 @@ import (
 	"net/url"
 
 	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
 var (
@@ -63,7 +63,7 @@ func GetCatalog() (api.Catalog, error) {
 	return catalog, json.NewDecoder(resp.Body).Decode(&catalog)
 }
 
-func GetMembers() ([]domain.Member, error) {
+func GetMembers() ([]orderdomain.Member, error) {
 	resp, err := http.Get(settings.URL() + `/members`)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func GetMembers() ([]domain.Member, error) {
 		return nil, err
 	}
 
-	var members []domain.Member
+	var members []orderdomain.Member
 	err = json.NewDecoder(resp.Body).Decode(&members)
 
 	return members, err

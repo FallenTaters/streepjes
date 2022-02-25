@@ -7,6 +7,7 @@ import (
 
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
 	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
 
 func NewUserRepo(db *sql.DB) repo.User {
@@ -19,14 +20,14 @@ type userRepo struct {
 	db *sql.DB
 }
 
-func (ur *userRepo) GetAll() []domain.User {
+func (ur *userRepo) GetAll() []authdomain.User {
 	rows, err := ur.db.Query(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U;`)
 	if err != nil {
 		panic(err)
 	}
 
-	var user domain.User
-	users := make([]domain.User, 0)
+	var user authdomain.User
+	users := make([]authdomain.User, 0)
 
 	for rows.Next() {
 		err := rows.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
@@ -40,14 +41,14 @@ func (ur *userRepo) GetAll() []domain.User {
 	return users
 }
 
-func (ur *userRepo) Get(id int) (domain.User, bool) {
+func (ur *userRepo) Get(id int) (authdomain.User, bool) {
 	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.id = ?;`, id)
 
-	var user domain.User
+	var user authdomain.User
 
 	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
 	if errors.Is(err, sql.ErrNoRows) {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 	if err != nil {
 		panic(err)
@@ -56,14 +57,14 @@ func (ur *userRepo) Get(id int) (domain.User, bool) {
 	return user, true
 }
 
-func (ur *userRepo) GetByUsername(username string) (domain.User, bool) {
+func (ur *userRepo) GetByUsername(username string) (authdomain.User, bool) {
 	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.username = ?;`, username) //nolint:lll
 
-	var user domain.User
+	var user authdomain.User
 
 	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
 	if errors.Is(err, sql.ErrNoRows) {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 	if err != nil {
 		panic(err)
@@ -72,14 +73,14 @@ func (ur *userRepo) GetByUsername(username string) (domain.User, bool) {
 	return user, true
 }
 
-func (ur *userRepo) GetByToken(token string) (domain.User, bool) {
+func (ur *userRepo) GetByToken(token string) (authdomain.User, bool) {
 	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.auth_token = ?;`, token) //nolint:lll
 
-	var user domain.User
+	var user authdomain.User
 
 	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
 	if errors.Is(err, sql.ErrNoRows) {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 	if err != nil {
 		panic(err)
@@ -88,7 +89,7 @@ func (ur *userRepo) GetByToken(token string) (domain.User, bool) {
 	return user, true
 }
 
-func (ur *userRepo) Update(user domain.User) error {
+func (ur *userRepo) Update(user authdomain.User) error {
 	res, err := ur.db.Exec(
 		`UPDATE users SET username = ?, password = ?, club = ?, name = ?, role = ?, auth_token = ?, auth_time = ? WHERE id = ?;`,
 		user.Username, user.PasswordHash, user.Club, user.Name, user.Role, user.AuthToken, user.AuthTime, user.ID,
@@ -109,8 +110,8 @@ func (ur *userRepo) Update(user domain.User) error {
 	return nil
 }
 
-func (ur *userRepo) Create(user domain.User) error {
-	if user.Username == `` || len(user.PasswordHash) == 0 || user.Club == domain.ClubUnknown || user.Name == `` || user.Role == domain.RoleNotAuthorized {
+func (ur *userRepo) Create(user authdomain.User) error {
+	if user.Username == `` || len(user.PasswordHash) == 0 || user.Club == domain.ClubUnknown || user.Name == `` || user.Role == authdomain.RoleNotAuthorized {
 		return fmt.Errorf(`User not filled for creating: %#v`, user)
 	}
 

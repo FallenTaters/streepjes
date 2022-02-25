@@ -6,6 +6,7 @@ import (
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
 func bartenderRoutes(r *router.Group) {
@@ -16,7 +17,7 @@ func bartenderRoutes(r *router.Group) {
 func getCatalog(c *router.Context) error { //nolint:funlen
 	// TODO make actual catalog
 	catalog := api.Catalog{
-		Categories: []domain.Category{
+		Categories: []orderdomain.Category{
 			{
 				ID:   1,
 				Name: `Food`,
@@ -30,7 +31,7 @@ func getCatalog(c *router.Context) error { //nolint:funlen
 				Name: `Empty`,
 			},
 		},
-		Items: []domain.Item{
+		Items: []orderdomain.Item{
 			{
 				ID:              1,
 				CategoryID:      1,
@@ -96,7 +97,7 @@ func getCatalog(c *router.Context) error { //nolint:funlen
 
 func getMembers(c *router.Context) error {
 	// TODO actual members
-	members := []domain.Member{
+	members := []orderdomain.Member{
 		{
 			ID:   1,
 			Club: domain.ClubGladiators,

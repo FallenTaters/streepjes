@@ -13,6 +13,7 @@ import (
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo/sqlite"
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/router"
 	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 	"github.com/PotatoesFall/vecty-test/static"
 )
 
@@ -39,17 +40,17 @@ func main() {
 // check if there are no users in the database, if so, insert some
 func checkNoUsers(userRepo repo.User, authService auth.Service) {
 	if len(userRepo.GetAll()) == 0 {
-		authService.Register(domain.User{
+		authService.Register(authdomain.User{
 			Username: `adminGladiators`,
 			Club:     domain.ClubGladiators,
 			Name:     `Gladiators Admin`,
-			Role:     domain.RoleAdmin,
+			Role:     authdomain.RoleAdmin,
 		}, `playlacrossebecauseitsfun`)
-		authService.Register(domain.User{
+		authService.Register(authdomain.User{
 			Username: `adminParabool`,
 			Club:     domain.ClubParabool,
 			Name:     `Parabool Admin`,
-			Role:     domain.RoleAdmin,
+			Role:     authdomain.RoleAdmin,
 		}, `groningerstudentenkorfbalcommissie`)
 	}
 }

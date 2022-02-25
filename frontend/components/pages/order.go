@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
 	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
 	"github.com/PotatoesFall/vecty-test/frontend/events"
@@ -15,11 +15,11 @@ import (
 )
 
 type Order struct {
-	Catalog            api.Catalog       `vugu:"data"`
-	Categories         []domain.Category `vugu:"data"`
-	Items              []domain.Item     `vugu:"data"`
-	SelectedCategoryID int               `vugu:"data"`
-	Large              bool              `vugu:"data"`
+	Catalog            api.Catalog            `vugu:"data"`
+	Categories         []orderdomain.Category `vugu:"data"`
+	Items              []orderdomain.Item     `vugu:"data"`
+	SelectedCategoryID int                    `vugu:"data"`
+	Large              bool                   `vugu:"data"`
 }
 
 var ErrLoadCatalog = errors.New(`unable to load catalog`)
@@ -56,7 +56,7 @@ func (o *Order) Init(vugu.InitCtx) {
 }
 
 func (o *Order) filterItems() {
-	o.Items = []domain.Item{}
+	o.Items = []orderdomain.Item{}
 
 	for _, item := range o.Catalog.Items {
 		if item.CategoryID == o.SelectedCategoryID {
@@ -66,7 +66,7 @@ func (o *Order) filterItems() {
 }
 
 func (o *Order) filterCategories() {
-	o.Categories = []domain.Category{}
+	o.Categories = []orderdomain.Category{}
 
 	seenCategoryIDs := map[int]bool{}
 	for _, item := range o.Catalog.Items {
@@ -80,7 +80,7 @@ func (o *Order) filterCategories() {
 	}
 }
 
-func (o *Order) selectCategory(category domain.Category) {
+func (o *Order) selectCategory(category orderdomain.Category) {
 	go func() {
 		defer global.LockAndRender()()
 
@@ -89,6 +89,6 @@ func (o *Order) selectCategory(category domain.Category) {
 	}()
 }
 
-func (o *Order) selectItem(item domain.Item) {
+func (o *Order) selectItem(item orderdomain.Item) {
 	store.Order.AddItem(item)
 }

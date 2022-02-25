@@ -3,7 +3,7 @@ package repo
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
 
 var (
@@ -12,21 +12,21 @@ var (
 )
 
 type User interface {
-	Get(id int) (domain.User, bool)
+	Get(id int) (authdomain.User, bool)
 
-	GetAll() []domain.User
+	GetAll() []authdomain.User
 
 	// GetUser by token, false if not found
-	GetByToken(token string) (domain.User, bool)
+	GetByToken(token string) (authdomain.User, bool)
 
 	// Get a specific user by username, returns false if not found
-	GetByUsername(username string) (domain.User, bool)
+	GetByUsername(username string) (authdomain.User, bool)
 
 	// Update a specific user. Returns ErrUserNotFound if the ID is not found
-	Update(user domain.User) error
+	Update(user authdomain.User) error
 
 	// Create a new user. Returns ErrUsernameTaken if the username already exists
-	Create(user domain.User) error
+	Create(user authdomain.User) error
 
 	// // Delete a user by id. Return ErrUserHasOpenOrders if the month is not over, or ErrUserNotFound if id is unknown.
 	// Delete(id int) error // TOOD

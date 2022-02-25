@@ -6,7 +6,7 @@ import (
 
 	"github.com/FallenTaters/bbucket"
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 
 	"go.etcd.io/bbolt"
 )
@@ -23,12 +23,12 @@ type orderRepo struct {
 	memberBucket bbucket.Bucket
 }
 
-func (or orderRepo) Get(id int) (domain.Order, bool) {
-	var o domain.Order
+func (or orderRepo) Get(id int) (orderdomain.Order, bool) {
+	var o orderdomain.Order
 
 	err := or.bucket.Get(bbucket.Itob(id), &o)
 	if errors.Is(err, bbucket.ErrObjectNotFound) {
-		return domain.Order{}, false
+		return orderdomain.Order{}, false
 	}
 	if err != nil {
 		panic(err)
@@ -37,11 +37,11 @@ func (or orderRepo) Get(id int) (domain.Order, bool) {
 	return o, true
 }
 
-func (or orderRepo) Filter(filter repo.OrderFilter) []domain.Order {
-	orders := []domain.Order{}
+func (or orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order {
+	orders := []orderdomain.Order{}
 
-	err := or.bucket.GetAll(&domain.Order{}, func(ptr interface{}) error {
-		o := *ptr.(*domain.Order)
+	err := or.bucket.GetAll(&orderdomain.Order{}, func(ptr interface{}) error {
+		o := *ptr.(*orderdomain.Order)
 
 		if filter.Bartender != nil && o.Bartender != *filter.Bartender {
 			return nil
@@ -58,7 +58,7 @@ func (or orderRepo) Filter(filter repo.OrderFilter) []domain.Order {
 	return orders
 }
 
-func (or orderRepo) Create(order domain.Order) error {
+func (or orderRepo) Create(order orderdomain.Order) error {
 	order.ID = or.bucket.NextSequence()
 	order.OrderTime = time.Now().Local()
 	order.StatusTime = order.OrderTime
@@ -68,8 +68,8 @@ func (or orderRepo) Create(order domain.Order) error {
 		return err
 	}
 
-	return or.memberBucket.Update(bbucket.Itob(order.MemberID), &domain.Member{}, func(ptr interface{}) (object interface{}, err error) {
-		member := *ptr.(*domain.Member)
+	return or.memberBucket.Update(bbucket.Itob(order.MemberID), &orderdomain.Member{}, func(ptr interface{}) (object interface{}, err error) {
+		member := *ptr.(*orderdomain.Member)
 
 		member.Debt += order.Price
 
@@ -78,13 +78,13 @@ func (or orderRepo) Create(order domain.Order) error {
 }
 
 func (or orderRepo) DeleteByID(id int) bool {
-	var order domain.Order
+	var order orderdomain.Order
 
-	err := or.bucket.Update(bbucket.Itob(id), &domain.Order{}, func(ptr interface{}) (object interface{}, err error) {
-		order = *ptr.(*domain.Order)
+	err := or.bucket.Update(bbucket.Itob(id), &orderdomain.Order{}, func(ptr interface{}) (object interface{}, err error) {
+		order = *ptr.(*orderdomain.Order)
 		o := order
 
-		o.Status = domain.OrderStatusCancelled
+		o.Status = orderdomain.OrderStatusCancelled
 		o.StatusTime = time.Now()
 
 		return o, nil
@@ -92,12 +92,12 @@ func (or orderRepo) DeleteByID(id int) bool {
 	if err != nil {
 		return false
 	}
-	if order.MemberID == 0 || order.Status != domain.OrderStatusOpen {
+	if order.MemberID == 0 || order.Status != orderdomain.OrderStatusOpen {
 		return true
 	}
 
-	err = or.memberBucket.Update(bbucket.Itob(order.MemberID), &domain.Member{}, func(ptr interface{}) (object interface{}, err error) {
-		member := *ptr.(*domain.Member)
+	err = or.memberBucket.Update(bbucket.Itob(order.MemberID), &orderdomain.Member{}, func(ptr interface{}) (object interface{}, err error) {
+		member := *ptr.(*orderdomain.Member)
 
 		member.Debt -= order.Price
 
@@ -110,6 +110,6 @@ func (or orderRepo) DeleteByID(id int) bool {
 	return true
 }
 
-func orderKey(o domain.Order) []byte {
+func orderKey(o orderdomain.Order) []byte {
 	return itob(o.ID)
 }

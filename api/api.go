@@ -1,11 +1,14 @@
 /* api package contains payload types to be used by backend and frontend */
 package api
 
-import "github.com/PotatoesFall/vecty-test/domain"
+import (
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+)
 
 type Catalog struct {
-	Categories []domain.Category `json:"categories"`
-	Items      []domain.Item     `json:"items"`
+	Categories []orderdomain.Category `json:"categories"`
+	Items      []orderdomain.Item     `json:"items"`
 }
 
 type Credentials struct {
@@ -13,6 +16,7 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-type Token struct {
-	Token string `json:"token"`
+type LoginResponse struct {
+	Role  authdomain.Role `json:"role"`
+	Token string          `json:"token"`
 }

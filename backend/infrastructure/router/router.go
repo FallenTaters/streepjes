@@ -6,7 +6,7 @@ import (
 
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/PotatoesFall/vecty-test/backend/application/auth"
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
 
 type Static func(filename string) ([]byte, error)
@@ -21,10 +21,10 @@ func New(static Static, authService auth.Service) *router.Router {
 	auth := r.Group(`/`, authMiddleware(authService))
 	authRoutes(auth, authService)
 
-	bar := auth.Group(`/`, roleMiddleware(domain.RoleBartender))
+	bar := auth.Group(`/`, permissionMiddleware(authdomain.PermissionBarStuff))
 	bartenderRoutes(bar)
 
-	admin := auth.Group(`/`, roleMiddleware(domain.RoleAdmin))
+	admin := auth.Group(`/`, permissionMiddleware(authdomain.PermissionAdminStuff))
 	adminRoutes(admin)
 
 	return r

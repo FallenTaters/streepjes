@@ -4,14 +4,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 	"github.com/vugu/vugu"
 )
 
 type Items struct {
-	Items          []domain.Item
+	Items          []orderdomain.Item
 	SelectedItemID int
-	OnClick        func(domain.Item)
+	OnClick        func(orderdomain.Item)
 }
 
 func (i *Items) Compute(ctx vugu.ComputeCtx) {
@@ -20,7 +20,7 @@ func (i *Items) Compute(ctx vugu.ComputeCtx) {
 	})
 }
 
-func (i *Items) classes(item domain.Item) string {
+func (i *Items) classes(item orderdomain.Item) string {
 	if i.SelectedItemID == item.ID {
 		return `secondary`
 	}

@@ -1,22 +1,22 @@
 package cache
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 	"github.com/PotatoesFall/vecty-test/frontend/backend"
 )
 
-func Members() ([]domain.Member, error) {
+func Members() ([]orderdomain.Member, error) {
 	data, err := getOrAdd(`members`, func() (interface{}, error) {
 		return backend.GetMembers()
 	})
 	if err != nil {
-		return []domain.Member{}, err
+		return []orderdomain.Member{}, err
 	}
 
-	return data.([]domain.Member), nil
+	return data.([]orderdomain.Member), nil
 }
 
-func FetchMembers() ([]domain.Member, error) {
+func FetchMembers() ([]orderdomain.Member, error) {
 	members, err := backend.GetMembers()
 	if err != nil {
 		return members, err

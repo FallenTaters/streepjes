@@ -1,4 +1,4 @@
-package domain
+package orderdomain
 
 import "fmt"
 

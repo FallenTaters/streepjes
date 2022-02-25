@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
 
 const tokenDuration = 5 * time.Minute
@@ -12,11 +12,11 @@ const tokenDuration = 5 * time.Minute
 type Service interface {
 	// Login returns the user if credentials are correct
 	// otherwise, it returns false
-	Login(user, pass string) (domain.User, bool)
+	Login(user, pass string) (authdomain.User, bool)
 
 	// Check gets the user with the correct token
 	// if the token is expired or unknown, it returns false
-	Check(token string) (domain.User, bool)
+	Check(token string) (authdomain.User, bool)
 
 	// Active refreshes a users token, setting AuthTime to now
 	// if the user is not found, it is a no-op
@@ -28,7 +28,7 @@ type Service interface {
 
 	// Register registers a new user. It sets the passwordHash and ID
 	// if the username is taken, it return repo.ErrUsernameTaken
-	Register(user domain.User, password string) error
+	Register(user authdomain.User, password string) error
 }
 
 func New(userRepo repo.User) Service {
@@ -39,14 +39,14 @@ type service struct {
 	users repo.User
 }
 
-func (s *service) Login(username, pass string) (domain.User, bool) {
+func (s *service) Login(username, pass string) (authdomain.User, bool) {
 	user, ok := s.users.GetByUsername(username)
 	if !ok {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 
 	if !checkPassword(user.PasswordHash, pass) {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 
 	user.AuthToken = generateToken()
@@ -60,18 +60,18 @@ func (s *service) Login(username, pass string) (domain.User, bool) {
 	return user, true
 }
 
-func (s *service) Check(token string) (domain.User, bool) {
+func (s *service) Check(token string) (authdomain.User, bool) {
 	if token == `` {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 
 	user, ok := s.users.GetByToken(token)
 	if !ok {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 
 	if time.Since(user.AuthTime) > tokenDuration {
-		return domain.User{}, false
+		return authdomain.User{}, false
 	}
 
 	return user, true
@@ -100,7 +100,7 @@ func (s *service) Logout(id int) {
 	_ = s.users.Update(user)
 }
 
-func (s *service) Register(user domain.User, password string) error {
+func (s *service) Register(user authdomain.User, password string) error {
 	user.PasswordHash = hashPassword(password)
 
 	return s.users.Create(user)

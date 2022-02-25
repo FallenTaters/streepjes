@@ -3,21 +3,21 @@ package repo
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
 type Member interface {
 	// Get all members
-	GetAll() []domain.Member
+	GetAll() []orderdomain.Member
 
 	// Get a specific member by ID, returns false if not found
-	Get(id int) (domain.Member, bool)
+	Get(id int) (orderdomain.Member, bool)
 
 	// Update a specific member. Returns ErrMemberNotFound if the ID is not found
-	UpdateMember(member domain.Member) error
+	UpdateMember(member orderdomain.Member) error
 
 	// Add a new member and return the id.
-	AddMember(member domain.Member) (int, error)
+	AddMember(member orderdomain.Member) (int, error)
 
 	// Delete a member by id. Returns false if member is not found
 	DeleteMember(id int) bool

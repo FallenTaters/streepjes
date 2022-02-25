@@ -3,18 +3,18 @@ package repo
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
 type Order interface {
 	// Get a single order by ID
-	Get(id int) (domain.Order, bool)
+	Get(id int) (orderdomain.Order, bool)
 
 	// Filter all orders
-	Filter(filter OrderFilter) []domain.Order
+	Filter(filter OrderFilter) []orderdomain.Order
 
 	// Create a new order
-	Create(domain.Order) error
+	Create(orderdomain.Order) error
 
 	// Delete an order by ID
 	DeleteByID(id int) bool

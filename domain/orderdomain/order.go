@@ -1,12 +1,16 @@
-package domain
+package orderdomain
 
-import "time"
+import (
+	"time"
+
+	"github.com/PotatoesFall/vecty-test/domain"
+)
 
 //go:generate enumer -json -linecomment -type OrderStatus
 
 type Order struct {
 	ID         int         `json:"id"`
-	Club       Club        `json:"club"`
+	Club       domain.Club `json:"club"`
 	Bartender  string      `json:"bartender"`
 	MemberID   int         `json:"memberId"`
 	Contents   string      `json:"contents"`

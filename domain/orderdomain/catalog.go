@@ -1,4 +1,6 @@
-package domain
+package orderdomain
+
+import "github.com/PotatoesFall/vecty-test/domain"
 
 type Category struct {
 	ID   int    `json:"id"`
@@ -13,13 +15,13 @@ type Item struct {
 	PriceParabool   Price  `json:"price_parabool"`
 }
 
-func (i Item) Price(c Club) Price {
+func (i Item) Price(c domain.Club) Price {
 	switch c {
-	case ClubUnknown:
+	case domain.ClubUnknown:
 		return 0
-	case ClubGladiators:
+	case domain.ClubGladiators:
 		return i.PriceGladiators
-	case ClubParabool:
+	case domain.ClubParabool:
 		return i.PriceParabool
 	}
 

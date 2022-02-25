@@ -1,7 +1,7 @@
 package order
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 	"github.com/PotatoesFall/vecty-test/frontend/store"
 	"github.com/vugu/vugu"
 )
@@ -22,14 +22,14 @@ func (o *Overview) classes(ol store.Orderline) string {
 	return ``
 }
 
-func (o *Overview) removeItem(item domain.Item) {
+func (o *Overview) removeItem(item orderdomain.Item) {
 	store.Order.RemoveItem(item)
 }
 
-func (o *Overview) addItem(item domain.Item) {
+func (o *Overview) addItem(item orderdomain.Item) {
 	store.Order.AddItem(item)
 }
 
-func (o *Overview) delete(item domain.Item) {
+func (o *Overview) delete(item orderdomain.Item) {
 	store.Order.DeleteItem(item)
 }

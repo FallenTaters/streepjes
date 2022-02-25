@@ -20,11 +20,11 @@ package bbucket
 // 	bucket bbucket.Bucket
 // }
 
-// func (ur userRepo) GetByID(id int) (domain.User, bool) {
-// 	var u domain.User
+// func (ur userRepo) GetByID(id int) (authdomain.User, bool) {
+// 	var u authdomain.User
 // 	err := ur.bucket.Get(bbucket.Itob(id), &u)
 // 	if errors.Is(err, bbucket.ErrObjectNotFound) {
-// 		return domain.User{}, false
+// 		return authdomain.User{}, false
 // 	}
 // 	if err != nil {
 // 		panic(err)
@@ -33,11 +33,11 @@ package bbucket
 // 	return u, true
 // }
 
-// func (ur userRepo) GetAll() []domain.User {
-// 	var users []domain.User
-// 	var u domain.User
+// func (ur userRepo) GetAll() []authdomain.User {
+// 	var users []authdomain.User
+// 	var u authdomain.User
 // 	err := ur.bucket.GetAll(&u, func(ptr interface{}) error {
-// 		users = append(users, *ptr.(*domain.User))
+// 		users = append(users, *ptr.(*authdomain.User))
 // 		return nil
 // 	})
 // 	if err != nil {
