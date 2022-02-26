@@ -3,6 +3,7 @@ package repo
 import (
 	"time"
 
+	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
 
@@ -21,9 +22,9 @@ type Order interface {
 }
 
 type OrderFilter struct {
-	Club      *int
-	Bartender *string
-	Member    *int
-	Status    []int
-	Month     *time.Time
+	Club        *domain.Club
+	BartenderID *int
+	MemberID    *int
+	Status      []orderdomain.Status
+	Month       *time.Time
 }

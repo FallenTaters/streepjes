@@ -6,7 +6,7 @@ import (
 	"github.com/PotatoesFall/vecty-test/domain"
 )
 
-//go:generate enumer -json -linecomment -type OrderStatus
+//go:generate enumer -json -sql -linecomment -type Status
 
 type Order struct {
 	ID          int         `json:"id"`
@@ -16,15 +16,15 @@ type Order struct {
 	Contents    string      `json:"contents"`
 	Price       Price       `json:"price"`
 	OrderTime   time.Time   `json:"orderDate"`
-	Status      OrderStatus `json:"status"`
+	Status      Status      `json:"status"`
 	StatusTime  time.Time   `json:"statusDate"`
 }
 
-type OrderStatus int
+type Status int
 
 const (
-	OrderStatusOpen      OrderStatus = iota + 1 // Open
-	OrderStatusBilled                           // Billed
-	OrderStatusPaid                             // Paid
-	OrderStatusCancelled                        // Cancelled
+	StatusOpen      Status = iota + 1 // Open
+	StatusBilled                      // Billed
+	StatusPaid                        // Paid
+	StatusCancelled                   // Cancelled
 )

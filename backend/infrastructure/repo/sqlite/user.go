@@ -25,6 +25,7 @@ func (ur *userRepo) GetAll() []authdomain.User {
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 
 	var user authdomain.User
 	users := make([]authdomain.User, 0)
@@ -36,6 +37,10 @@ func (ur *userRepo) GetAll() []authdomain.User {
 		}
 
 		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		panic(err)
 	}
 
 	return users
@@ -111,8 +116,12 @@ func (ur *userRepo) Update(user authdomain.User) error {
 }
 
 func (ur *userRepo) Create(user authdomain.User) error {
-	if user.Username == `` || len(user.PasswordHash) == 0 || user.Club == domain.ClubUnknown || user.Name == `` || user.Role == authdomain.RoleNotAuthorized {
-		return fmt.Errorf(`User not filled for creating: %#v`, user)
+	if user.Username == `` ||
+		len(user.PasswordHash) == 0 ||
+		user.Club == domain.ClubUnknown ||
+		user.Name == `` ||
+		user.Role == authdomain.RoleNotAuthorized {
+		return fmt.Errorf(`%w: %#v`, repo.ErrUserMissingFields, user)
 	}
 
 	res, err := ur.db.Exec(
@@ -121,6 +130,24 @@ func (ur *userRepo) Create(user authdomain.User) error {
 	)
 	if err != nil {
 		panic(err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if affected == 0 {
+		return repo.ErrUserNotFound
+	}
+
+	return nil
+}
+
+func (ur *userRepo) Delete(id int) error {
+	res, err := ur.db.Exec(`DELETE FROM users WHERE id = ?;`, id)
+	if err != nil {
+		panic(err) // TODO, is this where we panic when foreignkey conflict? or do we just get 0 rows affected?
 	}
 
 	affected, err := res.RowsAffected()

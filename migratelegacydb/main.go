@@ -111,7 +111,7 @@ func migrateStructs() { //nolint:funlen
 			Contents:    order.Contents,
 			Price:       orderdomain.Price(order.Price),
 			OrderTime:   order.OrderTime,
-			Status:      orderdomain.OrderStatus(order.Status), // just so happens to align, risky
+			Status:      orderdomain.Status(order.Status), // just so happens to align, risky
 			StatusTime:  order.StatusTime,
 		})
 	}

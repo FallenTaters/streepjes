@@ -40,13 +40,13 @@ func main() {
 // check if there are no users in the database, if so, insert some
 func checkNoUsers(userRepo repo.User, authService auth.Service) {
 	if len(userRepo.GetAll()) == 0 {
-		authService.Register(authdomain.User{
+		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
 			Username: `adminGladiators`,
 			Club:     domain.ClubGladiators,
 			Name:     `Gladiators Admin`,
 			Role:     authdomain.RoleAdmin,
 		}, `playlacrossebecauseitsfun`)
-		authService.Register(authdomain.User{
+		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
 			Username: `adminParabool`,
 			Club:     domain.ClubParabool,
 			Name:     `Parabool Admin`,
