@@ -13,8 +13,10 @@ var (
 )
 
 type User interface {
+	// Get gets a single user by ID. It returns false if not found.
 	Get(id int) (authdomain.User, bool)
 
+	// GetAll gets all users
 	GetAll() []authdomain.User
 
 	// GetUser by token, false if not found
