@@ -34,6 +34,7 @@ func main() {
 
 	r := router.New(static.Get, authService)
 
+	fmt.Printf("Starting server on port %d\n", settings.Port)
 	panic(r.Start(fmt.Sprintf(`:%d`, settings.Port)))
 }
 
