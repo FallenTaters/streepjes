@@ -26,5 +26,8 @@ run: generate wasm
 	@echo "Starting local server..."
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
+run-backend:
+	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
+
 build: generate wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
