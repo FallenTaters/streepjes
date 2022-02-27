@@ -1,8 +1,6 @@
 package repo
 
 import (
-	"time"
-
 	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
 )
@@ -18,7 +16,7 @@ type Order interface {
 	Create(orderdomain.Order) error
 
 	// Delete an order by ID
-	DeleteByID(id int) bool
+	Delete(id int) bool
 }
 
 type OrderFilter struct {
@@ -26,5 +24,5 @@ type OrderFilter struct {
 	BartenderID *int
 	MemberID    *int
 	Status      []orderdomain.Status
-	Month       *time.Time
+	Month       *orderdomain.Month
 }
