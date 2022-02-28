@@ -1,0 +1,6 @@
+<details class="card" :open="c.Open">
+    <summary @click="c.Open = !c.Open">
+        <vg-comp expr="c.Summary"></vg-comp>
+    </summary>
+    <vg-comp expr="c.Content"></vg-comp>
+</details>

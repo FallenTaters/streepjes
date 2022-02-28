@@ -9,6 +9,7 @@ import (
 type Input struct {
 	Type  string `vugu:"data"`
 	Label string `vugu:"data"`
+	Value string `vugu:"data"`
 
 	Input InputHandler `vugu:"data"`
 }
@@ -16,7 +17,11 @@ type Input struct {
 func (i *Input) HandleChange(event vugu.DOMEvent) {
 	v := event.JSEventTarget().Get(`value`).String()
 
-	go i.Input.InputHandle(InputEvent(v))
+	i.Value = v
+
+	if i.Input != nil {
+		go i.Input.InputHandle(InputEvent(v))
+	}
 }
 
 // Replace with Rendered() once https://github.com/vugu/vugu/issues/224 is resolved, no lock needed

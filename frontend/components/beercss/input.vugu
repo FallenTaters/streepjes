@@ -1,5 +1,5 @@
 <div class="field label border">
-    <input :type="c.Type" @input="c.HandleChange(event)" />
+    <input :type="c.Type" @input="c.HandleChange(event)" :value="c.Value"/>
     <label vg-content="c.Label"></label>
 </div>
 

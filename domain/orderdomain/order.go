@@ -28,3 +28,19 @@ const (
 	StatusPaid                        // Paid
 	StatusCancelled                   // Cancelled
 )
+
+type Month struct {
+	Year  int
+	Month time.Month
+}
+
+func MonthOf(t time.Time) Month {
+	return Month{
+		t.Year(),
+		t.Month(),
+	}
+}
+
+func (m Month) Time() time.Time {
+	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
+}

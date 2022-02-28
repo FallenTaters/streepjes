@@ -13,6 +13,9 @@ LDFLAGS := '-X "$(PACKAGE).buildCommit=$(GIT_COMMIT)" \
 generate:
 	@echo "Generating code..."
 	@go generate ./...
+	@echo "Done"
+
+vugugen:
 	@echo "Running vugugen..."
 	@bash ./frontend/generate.bash
 	@echo "Done"
@@ -22,7 +25,7 @@ wasm:
 	@GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
 	@echo "Done"
 
-run: generate wasm
+run: vugugen wasm
 	@echo "Starting local server..."
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 

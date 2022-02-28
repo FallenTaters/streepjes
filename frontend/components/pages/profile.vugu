@@ -1,0 +1,44 @@
+<div>
+    <h3 vg-content="c.User.Username"></h3>
+    <beercss:Expansion>
+        <vg-slot name="Summary">Change Password</vg-slot>
+        <vg-slot name="Content">
+            <form>
+                <beercss:Input :Type="`password`" :Label="`Current Password`"></beercss:Input>
+                <beercss:Input :Type="`password`" :Label="`New Password`"></beercss:Input>
+            </form>
+        </vg-slot>
+    </beercss:Expansion>
+   
+
+   
+    <article>
+        <h4>Change Name</h4>
+        <form>
+            <beercss:Input :Type="`text`" :Label="`New Name`" :Value="c.User.Name"></beercss:Input>
+        </form>
+    </article>
+    <article>
+        <h4>Details</h4>
+        <div class="row no-wrap middle-align divider">
+            <div class="col min">Username</div>
+            <div class="col"></div>
+            <div class="col min" vg-content="c.User.Username"></div>
+        </div>
+        <div class="row no-wrap middle-align divider">
+            <div class="col min">Name</div>
+            <div class="col"></div>
+            <div class="col min" vg-content="c.User.Name"></div>
+        </div>
+        <div class="row no-wrap middle-align divider">
+            <div class="col min">Club</div>
+            <div class="col"></div>
+            <div class="col min" vg-content="c.User.Club.String()"></div>
+        </div>
+        <div class="row no-wrap middle-align divider">
+            <div class="col min">Role</div>
+            <div class="col"></div>
+            <div class="col min" vg-content="c.User.Role.String()"></div>
+        </div>
+    </article>
+</div>
