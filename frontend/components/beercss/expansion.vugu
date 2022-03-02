@@ -1,5 +1,5 @@
-<details class="card" :open="c.Open">
-    <summary @click="c.Open = !c.Open">
+<details class="card">
+    <summary>
         <vg-comp expr="c.Summary"></vg-comp>
     </summary>
     <vg-comp expr="c.Content"></vg-comp>

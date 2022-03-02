@@ -11,7 +11,8 @@ type Input struct {
 	Label string `vugu:"data"`
 	Value string `vugu:"data"`
 
-	Input InputHandler `vugu:"data"`
+	Input        InputHandler `vugu:"data"`
+	ShowPassword bool         `vugu:"data"`
 }
 
 func (i *Input) HandleChange(event vugu.DOMEvent) {
@@ -31,4 +32,20 @@ func (i *Input) Compute(vugu.ComputeCtx) {
 
 		beercss.UI()
 	}()
+}
+
+func (i *Input) GetType() string {
+	if i.Type == `password` && i.ShowPassword {
+		return `string`
+	}
+
+	return i.Type
+}
+
+func (i *Input) Classes() string {
+	if i.Type == `password` {
+		return `prefix`
+	}
+
+	return ``
 }

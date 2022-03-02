@@ -20,8 +20,8 @@ type User struct {
 	Name string      `json:"name"`
 	Role Role        `json:"role"`
 
-	AuthToken string    `json:"authToken"`
-	AuthTime  time.Time `json:"authDate"`
+	AuthToken string    `json:"-"`
+	AuthTime  time.Time `json:"-"`
 }
 
 //go:generate enumer -type Role -linecomment -sql -json

@@ -1,44 +1,44 @@
 <div>
     <h3 vg-content="c.User.Username"></h3>
-    <beercss:Expansion>
-        <vg-slot name="Summary">Change Password</vg-slot>
-        <vg-slot name="Content">
-            <form>
-                <beercss:Input :Type="`password`" :Label="`Current Password`"></beercss:Input>
-                <beercss:Input :Type="`password`" :Label="`New Password`"></beercss:Input>
-            </form>
-        </vg-slot>
-    </beercss:Expansion>
-   
 
-   
-    <article>
-        <h4>Change Name</h4>
-        <form>
-            <beercss:Input :Type="`text`" :Label="`New Name`" :Value="c.User.Name"></beercss:Input>
+    <article class="card">
+        <h4>Account Details</h4>
+        <div class="row middle-align divider">
+            <div class="col s4 m3 l2">Username</div>
+            <div class="col s8 m9 l10" vg-content="c.User.Username"></div>
+        </div>
+        <div class="row middle-align divider">
+            <div class="col s4 m3 l2">Name</div>
+            <div class="col s8 m9 l10" vg-content="c.User.Name"></div>
+        </div>
+        <div class="row middle-align divider">
+            <div class="col s4 m3 l2">Club</div>
+            <div class="col s8 m9 l10" vg-content="c.User.Club.String()"></div>
+        </div>
+        <div class="row middle-align divider">
+            <div class="col s4 m3 l2">Role</div>
+            <div class="col s8 m9 l10" vg-content="c.User.Role.String()"></div>
+        </div>
+    </article>
+
+    <article class="card">
+        <h4>Change Password</h4>
+        <form @submit="event.PreventDefault(); c.ChangePassword()">
+            <beercss:Input :Type="`password`" :Label="`Current Password`" @Input="c.CurrentPassword = string(event)"></beercss:Input>
+            <beercss:Input :Type="`password`" :Label="`New Password`" @Input="c.NewPassword = string(event)"></beercss:Input>
+            <button type="submit">Change Password</button>
         </form>
     </article>
-    <article>
-        <h4>Details</h4>
-        <div class="row no-wrap middle-align divider">
-            <div class="col min">Username</div>
-            <div class="col"></div>
-            <div class="col min" vg-content="c.User.Username"></div>
-        </div>
-        <div class="row no-wrap middle-align divider">
-            <div class="col min">Name</div>
-            <div class="col"></div>
-            <div class="col min" vg-content="c.User.Name"></div>
-        </div>
-        <div class="row no-wrap middle-align divider">
-            <div class="col min">Club</div>
-            <div class="col"></div>
-            <div class="col min" vg-content="c.User.Club.String()"></div>
-        </div>
-        <div class="row no-wrap middle-align divider">
-            <div class="col min">Role</div>
-            <div class="col"></div>
-            <div class="col min" vg-content="c.User.Role.String()"></div>
-        </div>
+
+    <article class="card">
+        <h4>Change Name</h4>
+        <form @submit="event.PreventDefault(); c.ChangeName()">
+            <beercss:Input :Type="`text`" :Label="`New Name`" :Value="c.User.Name" @Input="c.NewName = string(event)"></beercss:Input>
+            <button type="submit">Change Name</button>
+        </form>
     </article>
+
+    <p>
+        <button @click="c.Logout()" type="submit" class="error"><i>logout</i> <span>Log Out</span></button>
+    </p>
 </div>
