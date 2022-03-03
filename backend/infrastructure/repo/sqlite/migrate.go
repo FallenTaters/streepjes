@@ -45,6 +45,7 @@ func migrate(db *sql.DB, version int) {
 
 		_, err = db.Exec(string(file))
 		if err != nil {
+			fmt.Printf("Couldn't run migration %04d.sql\n", version+1)
 			panic(err)
 		}
 

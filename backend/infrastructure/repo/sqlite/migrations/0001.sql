@@ -8,7 +8,7 @@ CREATE TABLE users (
     role TEXT NOT NULL,
 
     auth_token TEXT NOT NULL DEFAULT '',
-    auth_time DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00.000'
+    auth_time DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00.000',
 
     UNIQUE(username),
     UNIQUE(name)
