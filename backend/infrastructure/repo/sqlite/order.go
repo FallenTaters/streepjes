@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
 	"github.com/PotatoesFall/vecty-test/domain"
@@ -40,7 +39,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 
 	res, err := or.db.Exec(
 		`INSERT INTO orders (club, bartender_id, member_id, contents, price, order_time, status, status_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
-		order.Club, order.BartenderID, order.MemberID, order.Contents, order.Price, time.Now(), order.Status, time.Now(),
+		order.Club, order.BartenderID, order.MemberID, order.Contents, order.Price, order.OrderTime, order.Status, order.StatusTime,
 	)
 	if err != nil {
 		panic(err)
