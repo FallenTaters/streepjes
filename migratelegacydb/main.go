@@ -27,6 +27,7 @@ var (
 	authRepo    repo.User
 	catalogRepo repo.Catalog
 	memberRepo  repo.Member
+	orderRepo   repo.Order
 )
 
 func main() {
@@ -47,6 +48,7 @@ func main() {
 	authRepo = sqlite.NewUserRepo(db)
 	catalogRepo = sqlite.NewCatalogRepo(db)
 	memberRepo = sqlite.NewMemberRepo(db)
+	orderRepo = sqlite.NewOrderRepo(db)
 
 	getLegacyData()
 
@@ -148,6 +150,7 @@ func persist() {
 	categoryIDs := persistCategories()
 	persistItems(categoryIDs)
 	memberIDs := persistMembers()
+	persistOrders(userIDs, memberIDs)
 
 	_, _ = userIDs, memberIDs
 }
@@ -228,4 +231,18 @@ func persistMembers() map[int]int {
 
 	fmt.Printf("saved %d members\n", len(newData.Members))
 	return mapping
+}
+
+func persistOrders(userIDs, memberIDs map[int]int) {
+	for _, order := range newData.Orders {
+		order.BartenderID = userIDs[order.BartenderID]
+		order.MemberID = memberIDs[order.MemberID]
+
+		_, err := orderRepo.Create(order)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Printf("saved %d orders\n", len(newData.Orders))
 }

@@ -1,29 +1,67 @@
 package sqlite
 
-// import (
-// 	"database/sql"
-// 	"errors"
+import (
+	"database/sql"
+	"errors"
+	"fmt"
+	"time"
 
-// 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-// 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
-// )
+	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
+	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+)
 
-// func NewOrderRepo(db *sql.DB) repo.Order {
-// 	return &orderRepo{
-// 		db: db,
-// 	}
-// }
+func NewOrderRepo(db *sql.DB) repo.Order {
+	return &orderRepo{
+		db: db,
+	}
+}
 
-// type orderRepo struct {
-// 	db *sql.DB
-// }
+type orderRepo struct {
+	db *sql.DB
+}
+
+func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
+	if order.BartenderID == 0 || order.Club == domain.ClubUnknown {
+		return 0, fmt.Errorf("%w: %#v", repo.ErrOrderFieldsNotFilled, order)
+	}
+
+	row := or.db.QueryRow(`SELECT * FROM users WHERE id = ?;`, order.BartenderID)
+	if errors.Is(row.Scan(), sql.ErrNoRows) {
+		return 0, fmt.Errorf("%w with id %d\n", repo.ErrUserNotFound, order.BartenderID)
+	}
+
+	if order.MemberID != 0 {
+		row = or.db.QueryRow(`SELECT * FROM members WHERE id = ?;`, order.MemberID)
+		if errors.Is(row.Scan(), sql.ErrNoRows) {
+			return 0, fmt.Errorf("%w with id %d\n", repo.ErrMemberNotFound, order.MemberID)
+		}
+	}
+
+	res, err := or.db.Exec(
+		`INSERT INTO orders (club, bartender_id, member_id, contents, price, order_time, status, status_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+		order.Club, order.BartenderID, order.MemberID, order.Contents, order.Price, time.Now(), order.Status, time.Now(),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		panic(err)
+	}
+
+	return int(id), nil
+}
 
 // func (ur *orderRepo) Get(id int) (orderdomain.Order, bool) {
-// 	row := ur.db.QueryRow(`SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, O.price, O.order_time, O.status, O.status_time FROM orders O WHERE O.id = ?;`, id)
+// 	row := ur.db.QueryRow(
+// `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, O.price, O.order_time, O.status, O.status_time FROM orders O WHERE O.id = ?;`, id)
 
 // 	var order orderdomain.Order
 
-// 	err := row.Scan(&order.ID, &order.Club, &order.BartenderID, &order.MemberID, &order.Contents, &order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
+// 	err := row.Scan(
+// &order.ID, &order.Club, &order.BartenderID, &order.MemberID, &order.Contents, &order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
 // 	if errors.Is(err, sql.ErrNoRows) {
 // 		return orderdomain.Order{}, false
 // 	}
