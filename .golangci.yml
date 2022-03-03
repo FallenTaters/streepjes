@@ -1,6 +1,6 @@
 run:
   build-tags: []
-  skip-dirs: []
+  skip-dirs: [migratelegacydb]
   skip-files: []
  
 output:

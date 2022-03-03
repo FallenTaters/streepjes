@@ -116,7 +116,8 @@ func (s *service) Logout(id int) {
 func (s *service) Register(user authdomain.User, password string) error {
 	user.PasswordHash = hashPassword(password)
 
-	return s.users.Create(user)
+	_, err := s.users.Create(user)
+	return err
 }
 
 func (s *service) ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool {

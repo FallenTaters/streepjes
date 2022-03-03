@@ -29,8 +29,9 @@ type User interface {
 	Update(user authdomain.User) error
 
 	// Create a new user. Returns ErrUsernameTaken if the username already exists.
+	// it returns the id of the new user
 	// if mandatory fields are missing, it returns ErrUserMissingFields
-	Create(user authdomain.User) error
+	Create(user authdomain.User) (int, error)
 
 	// Delete a user by id. Return ErrUserHasOpenOrders if the month is not over, or ErrUserNotFound if id is unknown.
 	Delete(id int) error

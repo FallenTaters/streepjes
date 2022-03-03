@@ -115,13 +115,13 @@ func (ur *userRepo) Update(user authdomain.User) error {
 	return nil
 }
 
-func (ur *userRepo) Create(user authdomain.User) error {
+func (ur *userRepo) Create(user authdomain.User) (int, error) {
 	if user.Username == `` ||
 		len(user.PasswordHash) == 0 ||
 		user.Club == domain.ClubUnknown ||
 		user.Name == `` ||
 		user.Role == authdomain.RoleNotAuthorized {
-		return fmt.Errorf(`%w: %#v`, repo.ErrUserMissingFields, user)
+		return 0, fmt.Errorf(`%w: %#v`, repo.ErrUserMissingFields, user)
 	}
 
 	res, err := ur.db.Exec(
@@ -132,16 +132,12 @@ func (ur *userRepo) Create(user authdomain.User) error {
 		panic(err)
 	}
 
-	affected, err := res.RowsAffected()
+	id, err := res.LastInsertId()
 	if err != nil {
 		panic(err)
 	}
 
-	if affected == 0 {
-		return repo.ErrUserNotFound
-	}
-
-	return nil
+	return int(id), nil
 }
 
 func (ur *userRepo) Delete(id int) error {

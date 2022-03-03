@@ -16,7 +16,9 @@ CREATE TABLE users (
 
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+
+    UNIQUE(name)
 );
 
 CREATE TABLE items (
@@ -26,6 +28,7 @@ CREATE TABLE items (
     price_gladiators INTEGER NOT NULL DEFAULT 0,
     price_parabool INTEGER NOT NULL DEFAULT 0,
 
+    UNIQUE(name),
     FOREIGN KEY(category_id) REFERENCES category(id)
 );
 
@@ -33,10 +36,11 @@ CREATE TABLE members (
     id INTEGER PRIMARY KEY,
     club TEXT NOT NULL,
     name TEXT NOT NULL,
-    debt INTEGER NOT NULL DEFAULT 0
+
+    UNIQUE(name)
 );
 
-CREATE TABLE  orders (
+CREATE TABLE orders (
     id INTEGER PRIMARY KEY,
     club TEXT NOT NULL,
     bartender_id INTEGER NOT NULL,

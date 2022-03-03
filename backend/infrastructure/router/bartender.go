@@ -113,19 +113,16 @@ func getMembers(c *router.Context) error {
 			ID:   1,
 			Club: domain.ClubGladiators,
 			Name: `Gladiator 1`,
-			Debt: 120,
 		},
 		{
 			ID:   2,
 			Club: domain.ClubGladiators,
 			Name: `Gladiator 2`,
-			Debt: 12000,
 		},
 		{
 			ID:   3,
 			Club: domain.ClubParabool,
 			Name: `Parabool 1`,
-			Debt: 420,
 		},
 	}
 

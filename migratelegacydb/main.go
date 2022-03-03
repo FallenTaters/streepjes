@@ -8,7 +8,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
+	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
+	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo/sqlite"
 	"github.com/PotatoesFall/vecty-test/domain"
 	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
@@ -19,8 +23,30 @@ import (
 	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
 )
 
+var (
+	authRepo    repo.User
+	catalogRepo repo.Catalog
+	memberRepo  repo.Member
+)
+
 func main() {
+	if _, err := os.Stat(`streepjes.db`); err == nil {
+		fmt.Println(`streepjes.db already exists. Delete first.`)
+		os.Exit(1)
+	}
+
 	defer buckets.Init()() //nolint:errcheck
+
+	db, err := sqlite.OpenDB(`streepjes.db`)
+	if err != nil {
+		panic(err)
+	}
+
+	sqlite.Migrate(db)
+
+	authRepo = sqlite.NewUserRepo(db)
+	catalogRepo = sqlite.NewCatalogRepo(db)
+	memberRepo = sqlite.NewMemberRepo(db)
 
 	getLegacyData()
 
@@ -80,7 +106,7 @@ func migrateStructs() { //nolint:funlen
 			ID:   member.ID,
 			Club: domain.Club(member.Club),
 			Name: member.Name,
-			Debt: member.Debt,
+			// Debt: member.Debt,
 		})
 	}
 
@@ -118,5 +144,88 @@ func migrateStructs() { //nolint:funlen
 }
 
 func persist() {
-	// TODO
+	userIDs := persistUsers()
+	categoryIDs := persistCategories()
+	persistItems(categoryIDs)
+	memberIDs := persistMembers()
+
+	_, _ = userIDs, memberIDs
+}
+
+func persistUsers() map[int]int {
+	mapping := make(map[int]int)
+	names := make(map[string]int)
+
+	for _, user := range newData.Users {
+		// attempt to fix duplicate name, may still fail in rare cases
+		if names[user.Name] > 0 {
+			fmt.Printf("Renaming user with name %q to %q\n", user.Name, user.Name+strconv.Itoa(names[user.Name]+1))
+			user.Name += strconv.Itoa(names[user.Name] + 1)
+		}
+		names[user.Name]++
+
+		newID, err := authRepo.Create(user)
+		if err != nil {
+			panic(err)
+		}
+
+		mapping[user.ID] = newID
+	}
+
+	fmt.Printf("saved %d users\n", len(newData.Users))
+	return mapping
+}
+
+func persistCategories() map[int]int {
+	mapping := make(map[int]int)
+
+	for _, category := range newData.Categories {
+		newID, err := catalogRepo.CreateCategory(category)
+		if err != nil {
+			panic(err)
+		}
+
+		mapping[category.ID] = newID
+	}
+
+	fmt.Printf("saved %d categories\n", len(newData.Categories))
+	return mapping
+}
+
+func persistItems(categoryMapping map[int]int) {
+	names := make(map[string]int)
+
+	for _, item := range newData.Items {
+		// attempt to fix duplicate name, may still fail in rare cases
+		if names[item.Name] > 0 {
+			fmt.Printf("Renaming item with name %q to %q\n", item.Name, item.Name+strconv.Itoa(names[item.Name]+1))
+			item.Name += strconv.Itoa(names[item.Name] + 1)
+		}
+		names[item.Name]++
+
+		item.CategoryID = categoryMapping[item.CategoryID]
+
+		_, err := catalogRepo.CreateItem(item)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Printf("saved %d items\n", len(newData.Items))
+}
+
+func persistMembers() map[int]int {
+	mapping := make(map[int]int)
+
+	for _, member := range newData.Members {
+		newID, err := memberRepo.Create(member)
+		if err != nil {
+			panic(err)
+		}
+
+		mapping[member.ID] = newID
+	}
+
+	fmt.Printf("saved %d members\n", len(newData.Members))
+	return mapping
 }
