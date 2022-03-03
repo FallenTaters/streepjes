@@ -3,6 +3,7 @@ package auth
 import (
 	"time"
 
+	"github.com/PotatoesFall/vecty-test/api"
 	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
 	"github.com/PotatoesFall/vecty-test/domain/authdomain"
 )
@@ -27,6 +28,10 @@ type Service interface {
 	// Register registers a new user. It sets the passwordHash and ID
 	// if the username is taken, it return repo.ErrUsernameTaken
 	Register(user authdomain.User, password string) error
+
+	// ChangePassword verifies the original password and changes it to the new password
+	// if anything goes wrong, it returns false
+	ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool
 }
 
 func New(userRepo repo.User) Service {
@@ -108,4 +113,18 @@ func (s *service) Register(user authdomain.User, password string) error {
 	user.PasswordHash = hashPassword(password)
 
 	return s.users.Create(user)
+}
+
+func (s *service) ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool {
+	if changePassword.New == `` {
+		return false
+	}
+
+	if !checkPassword(user.PasswordHash, changePassword.Original) {
+		return false
+	}
+
+	user.PasswordHash = hashPassword(changePassword.New)
+
+	return s.users.Update(user) == nil
 }

@@ -18,6 +18,9 @@ func userFromContext(c *router.Context) authdomain.User {
 func authRoutes(r *router.Group, authService auth.Service) {
 	r.POST(`/logout`, postLogout(authService))
 	r.POST(`/active`, postActive)
+
+	r.POST(`/me/name`, postMeName(authService))
+	r.POST(`/me/password`, postMePassword(authService))
 }
 
 func postLogin(authService auth.Service) func(*router.Context, api.Credentials) error {
@@ -85,5 +88,22 @@ func permissionMiddleware(permission authdomain.Permission) router.Middleware {
 
 			return next(c)
 		}
+	}
+}
+
+func postMeName(authService auth.Service) func(string) error {
+	return func(name string) error {
+		return nil // TODO
+	}
+}
+
+func postMePassword(authService auth.Service) func(*router.Context, api.ChangePassword) error {
+	return func(c *router.Context, changePassword api.ChangePassword) error {
+		ok := authService.ChangePassword(userFromContext(c), changePassword)
+		if !ok {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }
