@@ -1,5 +1,5 @@
 <div>
-    <h3 vg-content="c.User.Username"></h3>
+    <h3 vg-content="c.User.Name"></h3>
 
     <article class="card">
         <h4>Account Details</h4>
@@ -28,6 +28,9 @@
             <beercss:Input :Type="`password`" :Label="`New Password`" @Input="c.NewPassword = string(event)"></beercss:Input>
             <button type="submit">Change Password</button>
         </form>
+        <ui:Loading vg-if="c.PasswordLoading"></ui:Loading>
+        <article class="error" vg-if="c.PasswordError != ``" vg-content="c.PasswordError"></article>
+        <article class="success" vg-if="c.PasswordSuccess != ``" vg-content="c.PasswordSuccess"></article>
     </article>
 
     <article class="card">
@@ -36,6 +39,9 @@
             <beercss:Input :Type="`text`" :Label="`New Name`" :Value="c.User.Name" @Input="c.NewName = string(event)"></beercss:Input>
             <button type="submit">Change Name</button>
         </form>
+        <ui:Loading vg-if="c.NameLoading"></ui:Loading>
+        <article class="error" vg-if="c.NameError != ``" vg-content="c.NameError"></article>
+        <article class="success" vg-if="c.NameSuccess != ``" vg-content="c.NameSuccess"></article>
     </article>
 
     <p>

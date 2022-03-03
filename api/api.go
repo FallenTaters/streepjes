@@ -14,3 +14,8 @@ type Credentials struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type ChangePassword struct {
+	Original string `json:"original"`
+	New      string `json:"new"`
+}

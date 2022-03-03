@@ -44,7 +44,7 @@ func (i *Input) GetType() string {
 
 func (i *Input) Classes() string {
 	if i.Type == `password` {
-		return `prefix`
+		return `suffix`
 	}
 
 	return ``

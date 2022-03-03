@@ -1,9 +1,9 @@
 <div :class="`field label border ` + c.Classes()">
-    <i vg-if="c.Type == `password` && !c.ShowPassword" @click="c.ShowPassword = true">visibility</i>
-    <i vg-if="c.Type == `password` && c.ShowPassword" @click="c.ShowPassword = false">visibility_off</i>
-
     <input :type="c.GetType()" @input="c.HandleChange(event)" :value="c.Value"/>
     <label vg-content="c.Label"></label>
+
+    <i vg-if="c.Type == `password` && !c.ShowPassword" @click="c.ShowPassword = true">visibility</i>
+    <i vg-if="c.Type == `password` && c.ShowPassword" @click="c.ShowPassword = false">visibility_off</i>
 </div>
 
 <script type="application/x-go">

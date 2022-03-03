@@ -91,9 +91,14 @@ func permissionMiddleware(permission authdomain.Permission) router.Middleware {
 	}
 }
 
-func postMeName(authService auth.Service) func(string) error {
-	return func(name string) error {
-		return nil // TODO
+func postMeName(authService auth.Service) func(*router.Context, string) error {
+	return func(c *router.Context, name string) error {
+		ok := authService.ChangeName(userFromContext(c), name)
+		if !ok {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }
 

@@ -32,6 +32,10 @@ type Service interface {
 	// ChangePassword verifies the original password and changes it to the new password
 	// if anything goes wrong, it returns false
 	ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool
+
+	// ChangeName attempts to change the name of the user
+	// if anything goes wrong, it returns false
+	ChangeName(user authdomain.User, name string) bool
 }
 
 func New(userRepo repo.User) Service {
@@ -78,7 +82,7 @@ func (s *service) Check(token string) (authdomain.User, bool) {
 	}
 
 	user.AuthTime = time.Now()
-	err := s.users.Update(user)
+	err := s.users.Update(user) //nolint:ifshort
 	if err != nil {
 		return authdomain.User{}, false
 	}
@@ -125,6 +129,16 @@ func (s *service) ChangePassword(user authdomain.User, changePassword api.Change
 	}
 
 	user.PasswordHash = hashPassword(changePassword.New)
+
+	return s.users.Update(user) == nil
+}
+
+func (s *service) ChangeName(user authdomain.User, name string) bool {
+	if name == `` {
+		return false
+	}
+
+	user.Name = name
 
 	return s.users.Update(user) == nil
 }
