@@ -1,4 +1,4 @@
-<div>
+<div class="container">
     <h3 vg-content="c.User.Name"></h3>
 
     <article class="card">
