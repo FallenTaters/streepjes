@@ -5,7 +5,7 @@
     >
         <div class="row no-wrap large-text no-club">
             <div class="col min middle-align">
-                <button class="circle left-round no-margin" @click="c.removeItem(line.Item)">
+                <button class="circle flat left-round no-margin" @click="c.removeItem(line.Item)">
                     <i>remove</i>
                 </button>
             </div>
@@ -13,7 +13,7 @@
                 <span class="bold" style="width:20px" vg-content="line.Amount"></span>
             </div>
             <div class="col min middle-align">
-                <button class="circle right-round no-margin" @click="c.addItem(line.Item)">
+                <button class="circle flat right-round no-margin" @click="c.addItem(line.Item)">
                     <i>add</i>
                 </button>
             </div>
@@ -25,7 +25,7 @@
              <div class="col min middle-align" vg-content="line.Price().String()"></div>
 
              <div class="col min middle-align">
-                <button class="circle error" @click="c.delete(line.Item)">
+                <button class="circle flat error" @click="c.delete(line.Item)">
                     <i>delete</i>
                 </button>
              </div>
