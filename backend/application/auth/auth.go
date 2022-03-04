@@ -59,7 +59,7 @@ func (s *service) Login(username, pass string) (authdomain.User, bool) {
 	user.AuthToken = generateToken()
 	user.AuthTime = time.Now()
 
-	err := s.users.Update(user) //nolint:ifshort
+	err := s.users.Update(user)
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +82,7 @@ func (s *service) Check(token string) (authdomain.User, bool) {
 	}
 
 	user.AuthTime = time.Now()
-	err := s.users.Update(user) //nolint:ifshort
+	err := s.users.Update(user)
 	if err != nil {
 		return authdomain.User{}, false
 	}
@@ -114,7 +114,7 @@ func (s *service) Logout(id int) {
 }
 
 func (s *service) Register(user authdomain.User, password string) error {
-	user.PasswordHash = hashPassword(password)
+	user.PasswordHash = HashPassword(password)
 
 	_, err := s.users.Create(user)
 	return err
@@ -129,7 +129,7 @@ func (s *service) ChangePassword(user authdomain.User, changePassword api.Change
 		return false
 	}
 
-	user.PasswordHash = hashPassword(changePassword.New)
+	user.PasswordHash = HashPassword(changePassword.New)
 
 	return s.users.Update(user) == nil
 }

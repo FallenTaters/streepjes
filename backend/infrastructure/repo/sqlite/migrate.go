@@ -14,7 +14,7 @@ func Migrate(db *sql.DB) {
 
 	var version int
 
-	err := row.Scan(&version) //nolint:ifshort
+	err := row.Scan(&version)
 	if err != nil {
 		createVersionTable(db)
 	}

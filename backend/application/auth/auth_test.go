@@ -1,4 +1,4 @@
-package auth
+package auth_test
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"git.fuyu.moe/Fuyu/assert"
+	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/mockdb"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -15,11 +16,11 @@ func TestLogin(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := New(mock)
+	s := auth.New(mock)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:           1,
 		Username:     `username`,
-		PasswordHash: hashPassword(`password`),
+		PasswordHash: auth.HashPassword(`password`),
 	}
 
 	mock.GetByUsernameFunc = func(username string) (authdomain.User, bool) {
@@ -78,11 +79,11 @@ func TestCheck(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := New(mock)
+	s := auth.New(mock)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:           1,
 		Username:     `username`,
-		PasswordHash: hashPassword(`password`),
+		PasswordHash: auth.HashPassword(`password`),
 		AuthToken:    `abcdefg`,
 		AuthTime:     time.Now().Add(-time.Minute),
 	}
@@ -146,7 +147,7 @@ func TestActive(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := New(mock)
+	s := auth.New(mock)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID: 1,
 	}
