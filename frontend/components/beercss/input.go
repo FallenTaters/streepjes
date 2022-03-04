@@ -10,6 +10,7 @@ type Input struct {
 	Type  string `vugu:"data"`
 	Label string `vugu:"data"`
 	Value string `vugu:"data"`
+	ID    string `vugu:"data"`
 
 	Input        InputHandler `vugu:"data"`
 	ShowPassword bool         `vugu:"data"`

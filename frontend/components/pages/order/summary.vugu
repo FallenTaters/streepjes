@@ -7,7 +7,7 @@
         </button>
     </div>
     <div style="justify-self:center">
-        <button @click="c.ShowMemberModal = true" class="extra" style="width:100px;">
+        <button @click="c.ChooseMember()" class="extra" style="width:100px;">
             <i>person</i>
             <label>Member</label>
         </button>
@@ -15,12 +15,12 @@
     <modal vg-if="c.ShowMemberModal" class="modal right active">
         <ui:Loading vg-if="c.Loading"></ui:Loading>
         <article class="error" vg-if="c.Error">Couldn't load members.</article>
-        <header class="fixed" >
+        <header class="fixed" class="no-club">
             <a @click="c.ShowMemberModal = false">
                 <i>arrow_backward</i>
                 <h5>Back</h5>
             </a>
-            <beercss:Input :Type="`text`"></beercss:Input>
+            <beercss:Input :Label="`Search Members`" :ID="`memberSearchInput`" :Type="`text`" @Input="c.MemberSearch = string(event)"></beercss:Input>
         </header>
         <div style="width:300px;overflow:auto">
             <members:Members :Members="c.GetMembers()"></members:Members>
