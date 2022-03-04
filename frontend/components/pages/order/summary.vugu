@@ -1,6 +1,36 @@
-<div class="row no-wrap">
-    <h3 class="col min">Total</h3>
-    <div class="col max"></div>
-    <h3 class="col min" vg-content="c.total()"></h3>
+<div style="display:grid; grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;grid-template-areas: 'total total' 'button1 button2';">
+    <h3 style="grid-area:total;justify-self:right">Total <span vg-content="c.total()"></span></h3>
+    <div style="justify-self:center">
+        <button class="extra" style="width:100px;">
+            <i>payment</i>
+            <label>Anonymous</label>
+        </button>
+    </div>
+    <div style="justify-self:center">
+        <button @click="c.ShowMemberModal = true" class="extra" style="width:100px;">
+            <i>person</i>
+            <label>Member</label>
+        </button>
+    </div>
+    <modal vg-if="c.ShowMemberModal" class="modal right active">
+        <ui:Loading vg-if="c.Loading"></ui:Loading>
+        <article class="error" vg-if="c.Error">Couldn't load members.</article>
+        <header class="fixed" >
+            <a @click="c.ShowMemberModal = false">
+                <i>arrow_backward</i>
+                <h5>Back</h5>
+            </a>
+            <beercss:Input :Type="`text`"></beercss:Input>
+        </header>
+        <div style="width:300px;overflow:auto">
+            <members:Members :Members="c.GetMembers()"></members:Members>
+        </div>
+    </modal>
 </div>
+
+<script type="application/x-go">
+import "github.com/FallenTaters/streepjes/frontend/components/members"
+import "github.com/FallenTaters/streepjes/frontend/components/ui"
+import "github.com/FallenTaters/streepjes/frontend/components/beercss"
+</script>
 

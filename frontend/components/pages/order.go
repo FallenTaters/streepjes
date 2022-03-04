@@ -45,7 +45,7 @@ func (o *Order) Init(vugu.InitCtx) {
 	go func() {
 		catalog, err := cache.Catalog()
 		if err != nil {
-			return // handle gracefully (unauthorized is already handled)
+			return // TODO handle gracefully (unauthorized is already handled)
 		}
 
 		defer global.LockAndRender()()

@@ -13,10 +13,14 @@ const (
 	OrderEventClubChanged
 )
 
+type OrderStore struct {
+	Club  domain.Club
+	Lines []Orderline
+}
+
 var Order = OrderStore{
-	Club:     domain.ClubGladiators,
-	Lines:    nil,
-	OnChange: nil,
+	Club:  domain.ClubGladiators,
+	Lines: nil,
 }
 
 type Orderline struct {
@@ -26,21 +30,6 @@ type Orderline struct {
 
 func (ol Orderline) Price() orderdomain.Price {
 	return ol.Item.Price(Order.Club).Times(ol.Amount)
-}
-
-type OrderStore struct {
-	Club  domain.Club
-	Lines []Orderline
-
-	OnChange func(OrderEvent)
-}
-
-func (os *OrderStore) Emit(event OrderEvent) {
-	if os.OnChange == nil {
-		return
-	}
-
-	os.OnChange(event)
 }
 
 func (os *OrderStore) CalculateTotal() orderdomain.Price {
@@ -53,8 +42,6 @@ func (os *OrderStore) CalculateTotal() orderdomain.Price {
 }
 
 func (os *OrderStore) AddItem(item orderdomain.Item) {
-	defer os.Emit(OrderEventItemsChanged)
-
 	for i, itemAmount := range os.Lines {
 		if itemAmount.Item.ID == item.ID {
 			os.Lines[i].Amount++
@@ -69,8 +56,6 @@ func (os *OrderStore) AddItem(item orderdomain.Item) {
 }
 
 func (os *OrderStore) RemoveItem(item orderdomain.Item) {
-	defer os.Emit(OrderEventItemsChanged)
-
 	for i, itemAmount := range os.Lines {
 		if itemAmount.Item.ID == item.ID {
 			if itemAmount.Amount <= 1 {
@@ -89,8 +74,6 @@ func (os *OrderStore) DeleteItem(item orderdomain.Item) {
 			os.deleteAt(i)
 		}
 	}
-
-	os.Emit(OrderEventItemsChanged)
 }
 
 func (os *OrderStore) deleteAt(i int) {
@@ -108,6 +91,4 @@ func (os *OrderStore) ToggleClub() {
 	} else {
 		os.Club = domain.ClubGladiators
 	}
-
-	os.Emit(OrderEventClubChanged)
 }
