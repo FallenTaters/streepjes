@@ -19,6 +19,31 @@ type memberRepo struct {
 	db *sql.DB
 }
 
+func (mr *memberRepo) GetAll() []orderdomain.Member {
+	rows, err := mr.db.Query(`SELECT id, club, name FROM members;`)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var members []orderdomain.Member
+	for rows.Next() {
+		var member orderdomain.Member
+		err := rows.Scan(&member.ID, &member.Club, &member.Name)
+		if err != nil {
+			panic(err)
+		}
+
+		members = append(members, member)
+	}
+
+	if err := rows.Err(); err != nil {
+		panic(err)
+	}
+
+	return members
+}
+
 func (mr *memberRepo) Create(member orderdomain.Member) (int, error) {
 	if member.Name == `` || member.Club == domain.ClubUnknown {
 		return 0, fmt.Errorf(`%w: %#v`, repo.ErrMemberFieldsNotFilled, member)

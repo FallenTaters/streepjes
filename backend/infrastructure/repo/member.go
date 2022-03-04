@@ -12,8 +12,8 @@ var (
 )
 
 type Member interface {
-	// // Get all members
-	// GetAll() []orderdomain.Member
+	// Get all members in the database
+	GetAll() []orderdomain.Member
 
 	// // Get a specific member by ID, returns false if not found
 	// Get(id int) (orderdomain.Member, bool)

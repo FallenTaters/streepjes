@@ -6,12 +6,13 @@ import (
 
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
+	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
 type Static func(filename string) ([]byte, error)
 
-func New(static Static, authService auth.Service) *router.Router {
+func New(static Static, authService auth.Service, orderService order.Service) *router.Router {
 	r := router.New()
 
 	r.ErrorHandler = panicHandler
@@ -22,7 +23,7 @@ func New(static Static, authService auth.Service) *router.Router {
 	authRoutes(auth, authService)
 
 	bar := auth.Group(`/`, permissionMiddleware(authdomain.PermissionBarStuff))
-	bartenderRoutes(bar)
+	bartenderRoutes(bar, orderService)
 
 	admin := auth.Group(`/`, permissionMiddleware(authdomain.PermissionAdminStuff))
 	adminRoutes(admin)

@@ -5,13 +5,13 @@ import (
 
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/FallenTaters/streepjes/api"
-	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-func bartenderRoutes(r *router.Group) {
+func bartenderRoutes(r *router.Group, orderService order.Service) {
 	r.GET(`/catalog`, getCatalog)
-	r.GET(`/members`, getMembers)
+	r.GET(`/members`, getMembers(orderService))
 }
 
 func getCatalog(c *router.Context) error { //nolint:funlen
@@ -106,25 +106,10 @@ func getCatalog(c *router.Context) error { //nolint:funlen
 	return c.JSON(http.StatusOK, catalog)
 }
 
-func getMembers(c *router.Context) error {
-	// TODO actual members
-	members := []orderdomain.Member{
-		{
-			ID:   1,
-			Club: domain.ClubGladiators,
-			Name: `Gladiator 1`,
-		},
-		{
-			ID:   2,
-			Club: domain.ClubGladiators,
-			Name: `Gladiator 2`,
-		},
-		{
-			ID:   3,
-			Club: domain.ClubParabool,
-			Name: `Parabool 1`,
-		},
-	}
+func getMembers(orderService order.Service) router.Handle {
+	return func(c *router.Context) error {
+		members := orderService.GetAllMembers()
 
-	return c.JSON(http.StatusOK, members)
+		return c.JSON(http.StatusOK, members)
+	}
 }
