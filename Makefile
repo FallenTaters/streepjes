@@ -32,5 +32,5 @@ run: vugugen wasm
 run-backend:
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
-build: generate wasm
+build: generate vugugen wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
