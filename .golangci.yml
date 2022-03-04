@@ -33,7 +33,7 @@ linters:
     - godot
     - paralleltest
     - tparallel
-    - testpackage
+    - ifshort
  
 linters-settings:
   govet:

@@ -32,5 +32,12 @@ run: vugugen wasm
 run-backend:
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
+test:
+	@echo "Testing..."
+	@go test ./backend/... -cover
+
+lint:
+	@golangci-lint run ./backend/...
+
 build: generate vugugen wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
