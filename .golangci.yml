@@ -31,6 +31,8 @@ linters:
     - noctx
     - wsl
     - godot
+    - paralleltest
+    - tparallel
  
 linters-settings:
   govet:
