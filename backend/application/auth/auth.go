@@ -52,7 +52,7 @@ func (s *service) Login(username, pass string) (authdomain.User, bool) {
 		return authdomain.User{}, false
 	}
 
-	if !checkPassword(user.PasswordHash, pass) {
+	if !CheckPassword(user.PasswordHash, pass) {
 		return authdomain.User{}, false
 	}
 
@@ -125,7 +125,7 @@ func (s *service) ChangePassword(user authdomain.User, changePassword api.Change
 		return false
 	}
 
-	if !checkPassword(user.PasswordHash, changePassword.Original) {
+	if !CheckPassword(user.PasswordHash, changePassword.Original) {
 		return false
 	}
 
