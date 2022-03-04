@@ -1,7 +1,7 @@
 package catalog
 
 import (
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 )
 
 func getCatalog() (Catalog, error) {

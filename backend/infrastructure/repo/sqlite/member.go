@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
+	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 func NewMemberRepo(db *sql.DB) repo.Member {

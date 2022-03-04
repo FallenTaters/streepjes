@@ -1,7 +1,7 @@
 package mockdb
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
 type User struct {

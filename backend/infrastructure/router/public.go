@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"git.fuyu.moe/Fuyu/router"
-	"github.com/PotatoesFall/vecty-test/backend/application/auth"
+	"github.com/FallenTaters/streepjes/backend/application/auth"
 )
 
 func publicRoutes(r *router.Router, static Static, authService auth.Service) {

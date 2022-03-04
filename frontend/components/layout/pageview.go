@@ -1,11 +1,11 @@
 package layout
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/frontend/events"
-	"github.com/PotatoesFall/vecty-test/frontend/global"
-	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/frontend/events"
+	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/window"
+	"github.com/FallenTaters/streepjes/frontend/store"
 	"github.com/vugu/vugu"
 )
 

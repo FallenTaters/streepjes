@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"git.fuyu.moe/Fuyu/router"
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/backend/application/auth"
-	"github.com/PotatoesFall/vecty-test/backend/global/settings"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/backend/application/auth"
+	"github.com/FallenTaters/streepjes/backend/global/settings"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
 func userFromContext(c *router.Context) authdomain.User {

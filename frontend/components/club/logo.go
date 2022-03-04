@@ -3,7 +3,7 @@ package club
 import (
 	"fmt"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/FallenTaters/streepjes/domain"
 )
 
 type Logo struct {

@@ -7,14 +7,14 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/PotatoesFall/vecty-test/backend/application/auth"
-	"github.com/PotatoesFall/vecty-test/backend/global/settings"
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo/sqlite"
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/router"
-	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/static"
+	"github.com/FallenTaters/streepjes/backend/application/auth"
+	"github.com/FallenTaters/streepjes/backend/global/settings"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/sqlite"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/router"
+	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/static"
 )
 
 func main() {

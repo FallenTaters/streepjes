@@ -3,9 +3,9 @@ package auth
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
 type Service interface {

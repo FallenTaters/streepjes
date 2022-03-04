@@ -1,6 +1,6 @@
 package catalog
 
-import "github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+import "github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 
 type Catalog struct {
 	Categories []Category `json:"categories"`

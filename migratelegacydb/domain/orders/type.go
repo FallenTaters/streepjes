@@ -3,9 +3,9 @@ package orders
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/null"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/null"
 )
 
 type OrderStatus int

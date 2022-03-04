@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/FallenTaters/bbucket"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 )
 
 var repo memberRepo = defaultRepo{}

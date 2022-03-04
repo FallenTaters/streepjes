@@ -3,7 +3,7 @@ package window
 import (
 	"syscall/js"
 
-	"github.com/PotatoesFall/vecty-test/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/global"
 )
 
 type Size int

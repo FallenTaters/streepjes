@@ -3,11 +3,11 @@
 package main
 
 import (
-	"github.com/PotatoesFall/vecty-test/frontend/authroutine"
-	"github.com/PotatoesFall/vecty-test/frontend/backend"
-	"github.com/PotatoesFall/vecty-test/frontend/global"
-	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/frontend/authroutine"
+	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/window"
+	"github.com/FallenTaters/streepjes/frontend/store"
 	"github.com/vugu/vugu"
 	"github.com/vugu/vugu/domrender"
 )

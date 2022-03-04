@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/FallenTaters/bbucket"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/members"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/members"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 )
 
 func GetAll() ([]Order, error) {

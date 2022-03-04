@@ -1,8 +1,8 @@
 package store
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/frontend/events"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/frontend/events"
 )
 
 type AuthStore struct {

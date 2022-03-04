@@ -38,8 +38,8 @@
 
 <script type="application/x-go">
 import (
-    "github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
-    "github.com/PotatoesFall/vecty-test/frontend/components/catalog"
+    "github.com/FallenTaters/streepjes/frontend/components/pages/order"
+    "github.com/FallenTaters/streepjes/frontend/components/catalog"
 )
 </script>
 

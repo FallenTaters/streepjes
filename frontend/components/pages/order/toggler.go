@@ -1,8 +1,8 @@
 package order
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/frontend/store"
 	"github.com/vugu/vugu"
 )
 

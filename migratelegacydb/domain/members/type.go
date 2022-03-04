@@ -1,8 +1,8 @@
 package members
 
 import (
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 )
 
 type Member struct {

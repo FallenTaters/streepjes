@@ -3,7 +3,7 @@ package orderdomain
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/FallenTaters/streepjes/domain"
 )
 
 //go:generate enumer -json -sql -linecomment -type Status

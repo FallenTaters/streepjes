@@ -2,7 +2,7 @@
 package api
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 type Catalog struct {

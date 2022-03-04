@@ -3,9 +3,9 @@ package orders
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/members"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/users"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/members"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/users"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared"
 )
 
 var (

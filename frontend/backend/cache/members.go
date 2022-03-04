@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
-	"github.com/PotatoesFall/vecty-test/frontend/backend"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/frontend/backend"
 )
 
 func Members() ([]orderdomain.Member, error) {

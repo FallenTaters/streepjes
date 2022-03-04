@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/vugu/vugu"
 )
 

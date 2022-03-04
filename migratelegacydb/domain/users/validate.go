@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/FallenTaters/bbucket"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared"
 )
 
 var (

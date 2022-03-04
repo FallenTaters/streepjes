@@ -1,7 +1,7 @@
 package order
 
 import (
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/frontend/store"
 )
 
 type Summary struct{}

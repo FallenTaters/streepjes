@@ -1,4 +1,4 @@
-module github.com/PotatoesFall/vecty-test
+module github.com/FallenTaters/streepjes
 
 go 1.17
 

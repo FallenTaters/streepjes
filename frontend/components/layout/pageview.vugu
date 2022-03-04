@@ -10,5 +10,5 @@
 </div>
 
 <script type="application/x-go">
-import "github.com/PotatoesFall/vecty-test/frontend/components/pages"
+import "github.com/FallenTaters/streepjes/frontend/components/pages"
 </script>

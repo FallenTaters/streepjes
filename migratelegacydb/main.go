@@ -11,16 +11,16 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo/sqlite"
-	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/catalog"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/members"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/orders"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/users"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/sqlite"
+	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/catalog"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/members"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/orders"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/users"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 )
 
 var (

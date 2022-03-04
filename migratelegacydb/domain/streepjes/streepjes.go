@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/members"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/orders"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/members"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/orders"
 )
 
 func DeleteMember(id int) error {

@@ -9,6 +9,6 @@
 </div>
 
 <script type="application/x-go">
-import "github.com/PotatoesFall/vecty-test/frontend/components/beercss"
-import "github.com/PotatoesFall/vecty-test/frontend/components/ui"
+import "github.com/FallenTaters/streepjes/frontend/components/beercss"
+import "github.com/FallenTaters/streepjes/frontend/components/ui"
 </script>

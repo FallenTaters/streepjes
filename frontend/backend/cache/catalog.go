@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/frontend/backend"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/frontend/backend"
 )
 
 func Catalog() (api.Catalog, error) {

@@ -1,8 +1,8 @@
 package beercss
 
 import (
-	"github.com/PotatoesFall/vecty-test/frontend/global"
-	"github.com/PotatoesFall/vecty-test/frontend/jscall/beercss"
+	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/beercss"
 	"github.com/vugu/vugu"
 )
 

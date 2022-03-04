@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/PotatoesFall/vecty-test/frontend/events"
+	"github.com/FallenTaters/streepjes/frontend/events"
 )
 
 func checkStatus(code int) error {

@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 func NewCatalogRepo(db *sql.DB) repo.Catalog {

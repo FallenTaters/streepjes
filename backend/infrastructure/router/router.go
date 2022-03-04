@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"git.fuyu.moe/Fuyu/router"
-	"github.com/PotatoesFall/vecty-test/backend/application/auth"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/FallenTaters/streepjes/backend/application/auth"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
 type Static func(filename string) ([]byte, error)

@@ -3,7 +3,7 @@ package authdomain
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/domain"
+	"github.com/FallenTaters/streepjes/domain"
 )
 
 const (

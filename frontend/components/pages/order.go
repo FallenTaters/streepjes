@@ -3,13 +3,13 @@ package pages
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
-	"github.com/PotatoesFall/vecty-test/frontend/backend/cache"
-	"github.com/PotatoesFall/vecty-test/frontend/components/pages/order"
-	"github.com/PotatoesFall/vecty-test/frontend/global"
-	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/frontend/backend/cache"
+	"github.com/FallenTaters/streepjes/frontend/components/pages/order"
+	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/window"
+	"github.com/FallenTaters/streepjes/frontend/store"
 	"github.com/vugu/vugu"
 )
 

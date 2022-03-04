@@ -3,8 +3,8 @@ package repo
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 var ErrOrderFieldsNotFilled = errors.New(`order fields not filled`)

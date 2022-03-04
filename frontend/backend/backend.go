@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 var (

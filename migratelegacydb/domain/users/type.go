@@ -3,7 +3,7 @@ package users
 import (
 	"time"
 
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared"
 )
 
 type Credentials struct {

@@ -1,6 +1,6 @@
 package orderdomain
 
-import "github.com/PotatoesFall/vecty-test/domain"
+import "github.com/FallenTaters/streepjes/domain"
 
 type Member struct {
 	ID   int         `json:"id"`

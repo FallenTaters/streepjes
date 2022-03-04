@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/FallenTaters/bbucket"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/users"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/null"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/users"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/null"
 )
 
 var (

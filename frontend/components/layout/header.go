@@ -1,9 +1,9 @@
 package layout
 
 import (
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/frontend/jscall/window"
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/frontend/jscall/window"
+	"github.com/FallenTaters/streepjes/frontend/store"
 )
 
 type Header struct {

@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/PotatoesFall/vecty-test/frontend/events"
-	"github.com/PotatoesFall/vecty-test/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/events"
+	"github.com/FallenTaters/streepjes/frontend/global"
 )
 
 type Activewatcher struct {

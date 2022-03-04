@@ -3,5 +3,5 @@
 </div>
 
 <script type="application/x-go">
-    import "github.com/PotatoesFall/vecty-test/frontend/components/club"
+    import "github.com/FallenTaters/streepjes/frontend/components/club"
 </script>

@@ -1,7 +1,7 @@
 package users
 
 import (
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared/buckets"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared/buckets"
 	"golang.org/x/crypto/bcrypt"
 )
 

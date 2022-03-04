@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"git.fuyu.moe/Fuyu/assert"
-	"github.com/PotatoesFall/vecty-test/backend/infrastructure/repo/mockdb"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/mockdb"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 

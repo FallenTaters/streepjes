@@ -3,12 +3,12 @@ package pages
 import (
 	"fmt"
 
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
-	"github.com/PotatoesFall/vecty-test/frontend/backend"
-	"github.com/PotatoesFall/vecty-test/frontend/events"
-	"github.com/PotatoesFall/vecty-test/frontend/global"
-	"github.com/PotatoesFall/vecty-test/frontend/store"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/events"
+	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/store"
 )
 
 // TODO make forms and buttons work

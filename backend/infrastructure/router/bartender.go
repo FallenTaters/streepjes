@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"git.fuyu.moe/Fuyu/router"
-	"github.com/PotatoesFall/vecty-test/api"
-	"github.com/PotatoesFall/vecty-test/domain"
-	"github.com/PotatoesFall/vecty-test/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/domain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 func bartenderRoutes(r *router.Group) {

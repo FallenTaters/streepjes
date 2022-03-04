@@ -3,7 +3,7 @@ package repo
 import (
 	"errors"
 
-	"github.com/PotatoesFall/vecty-test/domain/authdomain"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
 var (

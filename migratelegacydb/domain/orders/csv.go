@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/domain/members"
-	"github.com/PotatoesFall/vecty-test/migratelegacydb/shared"
+	"github.com/FallenTaters/streepjes/migratelegacydb/domain/members"
+	"github.com/FallenTaters/streepjes/migratelegacydb/shared"
 )
 
 func MakeCSV(orders []Order) ([]byte, error) {
