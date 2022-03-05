@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 
 	"git.fuyu.moe/Fuyu/router"
 	"github.com/FallenTaters/streepjes/api"
@@ -12,6 +13,7 @@ import (
 func bartenderRoutes(r *router.Group, orderService order.Service) {
 	r.GET(`/catalog`, getCatalog)
 	r.GET(`/members`, getMembers(orderService))
+	r.GET(`/member/:id`, getMember(orderService))
 }
 
 func getCatalog(c *router.Context) error { //nolint:funlen
@@ -111,5 +113,21 @@ func getMembers(orderService order.Service) router.Handle {
 		members := orderService.GetAllMembers()
 
 		return c.JSON(http.StatusOK, members)
+	}
+}
+
+func getMember(orderService order.Service) router.Handle {
+	return func(c *router.Context) error {
+		id, err := strconv.Atoi(c.Param(`id`))
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
+		member, ok := orderService.GetMemberDetails(id)
+		if !ok {
+			return c.NoContent(http.StatusNotFound)
+		}
+
+		return c.JSON(http.StatusOK, member)
 	}
 }

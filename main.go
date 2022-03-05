@@ -30,11 +30,12 @@ func main() {
 
 	userRepo := sqlite.NewUserRepo(db)
 	memberRepo := sqlite.NewMemberRepo(db)
+	orderRepo := sqlite.NewOrderRepo(db)
 
 	authService := auth.New(userRepo)
 	checkNoUsers(userRepo, authService)
 
-	orderService := order.New(memberRepo)
+	orderService := order.New(memberRepo, orderRepo)
 
 	r := router.New(static.Get, authService, orderService)
 

@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
@@ -60,4 +61,20 @@ func (mr *memberRepo) Create(member orderdomain.Member) (int, error) {
 	}
 
 	return int(id), nil
+}
+
+func (mr *memberRepo) Get(id int) (orderdomain.Member, bool) {
+	row := mr.db.QueryRow(`SELECT id, club, name FROM members WHERE id = ?;`, id)
+
+	var member orderdomain.Member
+
+	err := row.Scan(&member.ID, &member.Club, &member.Name)
+	if errors.Is(err, sql.ErrNoRows) {
+		return orderdomain.Member{}, false
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	return member, true
 }

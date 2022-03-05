@@ -1,11 +1,18 @@
 package cache
 
-var cache = map[string]interface{}{}
+import "time"
 
-func getOrAdd(key string, addFunc func() (interface{}, error)) (interface{}, error) {
-	data, exists := cache[key]
-	if exists {
-		return data, nil
+type value struct {
+	data    interface{}
+	expires time.Time
+}
+
+var cache = map[string]value{}
+
+func getOrAdd(key string, duration time.Duration, addFunc func() (interface{}, error)) (interface{}, error) {
+	val, exists := cache[key]
+	if exists && val.expires.After(time.Now()) {
+		return val.data, nil
 	}
 
 	data, err := addFunc()
@@ -13,11 +20,14 @@ func getOrAdd(key string, addFunc func() (interface{}, error)) (interface{}, err
 		return nil, err
 	}
 
-	add(key, data)
+	add(key, value{
+		data:    data,
+		expires: time.Now().Add(duration),
+	})
 
 	return data, nil
 }
 
-func add(key string, v interface{}) {
+func add(key string, v value) {
 	cache[key] = v
 }

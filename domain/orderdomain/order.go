@@ -44,3 +44,7 @@ func MonthOf(t time.Time) Month {
 func (m Month) Time() time.Time {
 	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
 }
+
+func CurrentMonth() Month {
+	return MonthOf(time.Now())
+}

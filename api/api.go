@@ -19,3 +19,9 @@ type ChangePassword struct {
 	Original string `json:"original"`
 	New      string `json:"new"`
 }
+
+type MemberDetails struct {
+	orderdomain.Member
+
+	Debt orderdomain.Price `json:"debt"`
+}

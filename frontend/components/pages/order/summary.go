@@ -1,7 +1,6 @@
 package order
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
@@ -12,11 +11,16 @@ import (
 )
 
 type Summary struct {
-	ShowMemberModal bool                 `vugu:"data"`
-	Members         []orderdomain.Member `vugu:"data"`
-	MemberSearch    string               `vugu:"data"`
-	Loading         bool                 `vugu:"data"`
-	Error           bool                 `vugu:"data"`
+	Members []orderdomain.Member `vugu:"data"`
+
+	ShowMemberModal bool   `vugu:"data"`
+	MemberSearch    string `vugu:"data"`
+	Loading         bool   `vugu:"data"`
+	Error           bool   `vugu:"data"`
+
+	ShowMemberPaymentModal bool `vugu:"data"`
+	LoadingMember          bool `vugu:"data"`
+	ErrorMember            bool `vugu:"data"`
 }
 
 func (s *Summary) total() string {
@@ -56,8 +60,6 @@ func (s *Summary) Init() {
 			return
 		}
 
-		fmt.Println(members)
-
 		defer global.LockOnly()()
 		s.Members = members
 	}()
@@ -73,4 +75,14 @@ func (s *Summary) ChooseMember() {
 		defer global.LockOnly()()
 		jscall.Focus(`memberSearchInput`)
 	}()
+}
+
+func (s *Summary) DisableButtons() bool {
+	return len(store.Order.Lines) == 0
+}
+
+func (s *Summary) selectMember(member orderdomain.Member) {
+	store.Order.Member = member
+	s.ShowMemberModal = false
+	s.ShowMemberPaymentModal = true
 }

@@ -14,13 +14,15 @@ const (
 )
 
 type OrderStore struct {
-	Club  domain.Club
-	Lines []Orderline
+	Club   domain.Club
+	Lines  []Orderline
+	Member orderdomain.Member
 }
 
 var Order = OrderStore{
-	Club:  domain.ClubGladiators,
-	Lines: nil,
+	Club:   domain.ClubGladiators,
+	Lines:  nil,
+	Member: orderdomain.Member{},
 }
 
 type Orderline struct {

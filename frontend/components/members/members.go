@@ -6,6 +6,5 @@ import (
 
 type Members struct {
 	Members []orderdomain.Member `vugu:"data"`
+	OnClick func(orderdomain.Member)
 }
-
-

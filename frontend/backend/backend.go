@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -38,6 +39,11 @@ func GetCatalog() (api.Catalog, error) {
 func GetMembers() ([]orderdomain.Member, error) {
 	var members []orderdomain.Member
 	return members, get(`/members`, &members)
+}
+
+func GetMember(id int) (api.MemberDetails, error) {
+	var member api.MemberDetails
+	return member, get(`/member/`+strconv.Itoa(id), &member)
 }
 
 func PostLogout() error {
