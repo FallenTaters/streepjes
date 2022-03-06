@@ -7,10 +7,12 @@ import (
 )
 
 type Input struct {
-	Type  string `vugu:"data"`
-	Label string `vugu:"data"`
-	Value string `vugu:"data"`
-	ID    string `vugu:"data"`
+	Type                string `vugu:"data"`
+	Label               string `vugu:"data"`
+	Name                string `vugu:"data"`
+	Value               string `vugu:"data"`
+	ID                  string `vugu:"data"`
+	DisableAutocomplete bool   `vugu:"data"`
 
 	Input        InputHandler `vugu:"data"`
 	ShowPassword bool         `vugu:"data"`
@@ -49,4 +51,12 @@ func (i *Input) Classes() string {
 	}
 
 	return ``
+}
+
+func (i *Input) autocomplete() string {
+	if i.Type == `password` || i.DisableAutocomplete {
+		return `off`
+	}
+
+	return `on`
 }

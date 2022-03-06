@@ -1,5 +1,5 @@
 <div style="margin-top:7px; padding-bottom: 3px;">
-    <article
+    <div
         vg-for="_, line := range c.Lines"
         :class="`small-padding ` + c.classes(line)"
     >
@@ -30,5 +30,5 @@
                 </button>
              </div>
         </div>
-    </article>
+    </div>
 </div>
