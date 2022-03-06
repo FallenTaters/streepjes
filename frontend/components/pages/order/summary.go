@@ -85,4 +85,15 @@ func (s *Summary) selectMember(member orderdomain.Member) {
 	store.Order.Member = member
 	s.ShowMemberModal = false
 	s.ShowMemberPaymentModal = true
+	s.MemberSearch = ``
+}
+
+func (s *Summary) SubmitMemberSearch() {
+	members := s.GetMembers()
+
+	if len(members) < 0 {
+		return
+	}
+
+	s.selectMember(members[0])
 }

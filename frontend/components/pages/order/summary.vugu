@@ -22,7 +22,9 @@
                     <i>arrow_backward</i>
                     <h5>Back</h5>
                 </a>
-                <beercss:Input :Name="`member_search`" :DisableAutocomplete="true" :Label="`Search Members`" :ID="`memberSearchInput`" :Type="`text`" @Input="c.MemberSearch = string(event)"></beercss:Input>
+                <form @submit="event.PreventDefault(); c.SubmitMemberSearch()">
+                    <beercss:Input :Name="`member_search`" :DisableAutocomplete="true" :Label="`Search Members`" :ID="`memberSearchInput`" :Type="`text`" @Input="c.MemberSearch = string(event)"></beercss:Input>
+                </form>
             </header>
             <div style="width:300px;overflow:auto">
                 <members:Members :Members="c.GetMembers()" :OnClick="c.selectMember"></members:Members>
