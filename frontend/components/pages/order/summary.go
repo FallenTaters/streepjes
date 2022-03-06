@@ -1,6 +1,7 @@
 package order
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
@@ -36,6 +37,10 @@ func (s *Summary) GetMembers() []orderdomain.Member {
 		}
 	}
 
+	sort.Slice(members, func(i, j int) bool {
+		return members[i].LastOrder.After(members[j].LastOrder) // TODO check if this sorts correctly
+	})
+
 	return members
 }
 
@@ -65,8 +70,6 @@ func (s *Summary) Init() {
 	}()
 }
 
-// TODO order members by last order
-// TODO autoselect member if pressing enter while typing (top-most ?)
 func (s *Summary) ChooseMember() {
 	s.ShowMemberModal = true
 

@@ -21,7 +21,7 @@ type memberRepo struct {
 }
 
 func (mr *memberRepo) GetAll() []orderdomain.Member {
-	rows, err := mr.db.Query(`SELECT id, club, name FROM members;`)
+	rows, err := mr.db.Query(`SELECT id, club, name, last_order FROM members;`)
 	if err != nil {
 		panic(err)
 	}
@@ -30,7 +30,7 @@ func (mr *memberRepo) GetAll() []orderdomain.Member {
 	var members []orderdomain.Member
 	for rows.Next() {
 		var member orderdomain.Member
-		err := rows.Scan(&member.ID, &member.Club, &member.Name)
+		err := rows.Scan(&member.ID, &member.Club, &member.Name, &member.LastOrder)
 		if err != nil {
 			panic(err)
 		}
@@ -64,11 +64,11 @@ func (mr *memberRepo) Create(member orderdomain.Member) (int, error) {
 }
 
 func (mr *memberRepo) Get(id int) (orderdomain.Member, bool) {
-	row := mr.db.QueryRow(`SELECT id, club, name FROM members WHERE id = ?;`, id)
+	row := mr.db.QueryRow(`SELECT id, club, name, last_order FROM members WHERE id = ?;`, id)
 
 	var member orderdomain.Member
 
-	err := row.Scan(&member.ID, &member.Club, &member.Name)
+	err := row.Scan(&member.ID, &member.Club, &member.Name, &member.LastOrder)
 	if errors.Is(err, sql.ErrNoRows) {
 		return orderdomain.Member{}, false
 	}
