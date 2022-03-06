@@ -112,6 +112,7 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 
 	var orders []orderdomain.Order
 	for rows.Next() {
