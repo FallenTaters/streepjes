@@ -1,7 +1,7 @@
 <div class="container center-align">
     <form @submit="event.PreventDefault(); c.Submit()">
-        <beercss:Input :Name="`username`" :Type="`text`" :Label="`Username`" @Input="c.Username = string(event)"></beercss:Input>
-        <beercss:Input :Name="`password`" :Type="`password`" :Label="`Password`" @Input="c.Password = string(event)"></beercss:Input>
+        <beercss:Input id="login-username" name="username" type="text" :Label="`Username`" @Input="c.Username = string(event)"></beercss:Input>
+        <beercss:Input id="login-password" name="password" type="password" :Label="`Password`" @Input="c.Password = string(event)"></beercss:Input>
         <button :disabled="c.Loading" type="submit">Log In</button>
     </form>
     <article class="error" vg-if="c.Error">Login failed.</article>

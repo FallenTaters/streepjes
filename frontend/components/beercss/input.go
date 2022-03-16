@@ -7,12 +7,10 @@ import (
 )
 
 type Input struct {
-	Type                string `vugu:"data"`
-	Label               string `vugu:"data"`
-	Name                string `vugu:"data"`
-	Value               string `vugu:"data"`
-	ID                  string `vugu:"data"`
-	DisableAutocomplete bool   `vugu:"data"`
+	AttrMap vugu.AttrMap
+
+	Label string `vugu:"data"`
+	Value string `vugu:"data"`
 
 	Input        InputHandler `vugu:"data"`
 	ShowPassword bool         `vugu:"data"`
@@ -37,26 +35,27 @@ func (i *Input) Compute(vugu.ComputeCtx) {
 	}()
 }
 
-func (i *Input) GetType() string {
-	if i.Type == `password` && i.ShowPassword {
-		return `string`
+func (i *Input) IsPassword() bool {
+	return i.AttrMap[`type`] == `password`
+}
+
+func (i *Input) Attrs() vugu.AttrMap {
+	attrs := make(vugu.AttrMap)
+	for k, v := range i.AttrMap {
+		attrs[k] = v
 	}
 
-	return i.Type
+	if i.IsPassword() && i.ShowPassword {
+		attrs[`type`] = `text`
+	}
+
+	return attrs
 }
 
 func (i *Input) Classes() string {
-	if i.Type == `password` {
+	if i.AttrMap[`type`] == `password` {
 		return `suffix`
 	}
 
 	return ``
-}
-
-func (i *Input) autocomplete() string {
-	if i.Type == `password` || i.DisableAutocomplete {
-		return `off`
-	}
-
-	return `on`
 }

@@ -23,7 +23,7 @@
                     <h5>Back</h5>
                 </a>
                 <form @submit="event.PreventDefault(); c.SubmitMemberSearch()">
-                    <beercss:Input :Name="`member_search`" :DisableAutocomplete="true" :Label="`Search Members`" :ID="`memberSearchInput`" :Type="`text`" @Input="c.MemberSearch = string(event)"></beercss:Input>
+                    <beercss:Input name="member_search" autocomplete="off" :Label="`Search Members`" id="memberSearchInput" type="text" @Input="c.MemberSearch = string(event)"></beercss:Input>
                 </form>
             </header>
             <div style="width:300px;overflow:auto">
