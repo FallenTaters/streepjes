@@ -10,14 +10,14 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-func NewMemberRepo(db *sql.DB) repo.Member {
+func NewMemberRepo(db Queryable) repo.Member {
 	return &memberRepo{
 		db: db,
 	}
 }
 
 type memberRepo struct {
-	db *sql.DB
+	db Queryable
 }
 
 func (mr *memberRepo) GetAll() []orderdomain.Member {

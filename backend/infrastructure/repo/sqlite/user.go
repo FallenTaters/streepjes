@@ -10,14 +10,14 @@ import (
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
-func NewUserRepo(db *sql.DB) repo.User {
+func NewUserRepo(db Queryable) repo.User {
 	return &userRepo{
 		db: db,
 	}
 }
 
 type userRepo struct {
-	db *sql.DB
+	db Queryable
 }
 
 func (ur *userRepo) GetAll() []authdomain.User {

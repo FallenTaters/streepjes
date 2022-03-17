@@ -45,10 +45,15 @@ func main() {
 
 	sqlite.Migrate(db)
 
-	authRepo = sqlite.NewUserRepo(db)
-	catalogRepo = sqlite.NewCatalogRepo(db)
-	memberRepo = sqlite.NewMemberRepo(db)
-	orderRepo = sqlite.NewOrderRepo(db)
+	tx, err := db.Begin()
+	if err != nil {
+		panic(err)
+	}
+
+	authRepo = sqlite.NewUserRepo(tx)
+	catalogRepo = sqlite.NewCatalogRepo(tx)
+	memberRepo = sqlite.NewMemberRepo(tx)
+	orderRepo = sqlite.NewOrderRepo(tx)
 
 	getLegacyData()
 
@@ -61,6 +66,11 @@ func main() {
 	migrateStructs()
 
 	persist()
+
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
+	}
 }
 
 var legacyData struct {

@@ -10,14 +10,14 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-func NewOrderRepo(db *sql.DB) repo.Order {
+func NewOrderRepo(db Queryable) repo.Order {
 	return &orderRepo{
 		db: db,
 	}
 }
 
 type orderRepo struct {
-	db *sql.DB
+	db Queryable
 }
 
 func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
