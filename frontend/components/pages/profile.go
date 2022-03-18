@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"fmt"
-
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
@@ -11,7 +9,6 @@ import (
 	"github.com/FallenTaters/streepjes/frontend/store"
 )
 
-// TODO make forms and buttons work
 type Profile struct {
 	User authdomain.User `vugu:"data"`
 
@@ -83,7 +80,6 @@ func (p *Profile) ChangeName() {
 		}()
 
 		err := backend.PostChangeName(p.NewName)
-		fmt.Println(err)
 		if err != nil {
 			defer global.LockOnly()()
 			p.NameError = `That didn't work.`

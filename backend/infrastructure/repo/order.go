@@ -3,7 +3,6 @@ package repo
 import (
 	"errors"
 
-	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
@@ -13,8 +12,8 @@ type Order interface {
 	// // Get a single order by ID
 	// Get(id int) (orderdomain.Order, bool)
 
-	// // Filter all orders
-	// Filter(filter OrderFilter) []orderdomain.Order
+	// Filter all orders
+	Filter(filter OrderFilter) []orderdomain.Order
 
 	// Create a new order and return the id
 	// if member id is unknown, it returns repo.ErrMemberNotFound
@@ -26,9 +25,9 @@ type Order interface {
 }
 
 type OrderFilter struct {
-	Club        *domain.Club
-	BartenderID *int
-	MemberID    *int
-	Status      []orderdomain.Status
-	Month       *orderdomain.Month
+	// Club        domain.Club
+	// BartenderID int
+	MemberID int
+	// Status      []orderdomain.Status
+	Month orderdomain.Month
 }

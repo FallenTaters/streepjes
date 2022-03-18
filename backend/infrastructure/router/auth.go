@@ -4,18 +4,18 @@ import (
 	"net/http"
 	"time"
 
-	"git.fuyu.moe/Fuyu/router"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/global/settings"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/labstack/echo/v4"
 )
 
-func userFromContext(c *router.Context) authdomain.User {
+func userFromContext(c echo.Context) authdomain.User {
 	return c.Get(`user`).(authdomain.User)
 }
 
-func authRoutes(r *router.Group, authService auth.Service) {
+func authRoutes(r *echo.Group, authService auth.Service) {
 	r.POST(`/logout`, postLogout(authService))
 	r.POST(`/active`, postActive)
 
@@ -23,14 +23,19 @@ func authRoutes(r *router.Group, authService auth.Service) {
 	r.POST(`/me/password`, postMePassword(authService))
 }
 
-func postLogin(authService auth.Service) func(*router.Context, api.Credentials) error {
-	return func(c *router.Context, credentials api.Credentials) error {
+func postLogin(authService auth.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		credentials, ok := readJSON[api.Credentials](c)
+		if !ok {
+			return nil
+		}
+
 		user, ok := authService.Login(credentials.Username, credentials.Password)
 		if !ok {
 			return c.NoContent(http.StatusUnauthorized)
 		}
 
-		http.SetCookie(c.Response, &http.Cookie{ //nolint:exhaustivestruct
+		http.SetCookie(c.Response(), &http.Cookie{ //nolint:exhaustivestruct
 			Name:   `auth_token`,
 			Value:  user.AuthToken,
 			Path:   ``,
@@ -43,8 +48,8 @@ func postLogin(authService auth.Service) func(*router.Context, api.Credentials) 
 	}
 }
 
-func postLogout(authService auth.Service) func(c *router.Context) error {
-	return func(c *router.Context) error {
+func postLogout(authService auth.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		user := userFromContext(c)
 
 		authService.Logout(user.ID)
@@ -53,14 +58,14 @@ func postLogout(authService auth.Service) func(c *router.Context) error {
 	}
 }
 
-func postActive(c *router.Context) error {
+func postActive(c echo.Context) error {
 	return c.JSON(http.StatusOK, userFromContext(c))
 }
 
-func authMiddleware(authService auth.Service) router.Middleware {
-	return func(next router.Handle) router.Handle {
-		return func(c *router.Context) error {
-			token, err := c.Request.Cookie(`auth_token`)
+func authMiddleware(authService auth.Service) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			token, err := c.Request().Cookie(`auth_token`)
 			if err != nil {
 				return c.NoContent(http.StatusUnauthorized)
 			}
@@ -77,9 +82,9 @@ func authMiddleware(authService auth.Service) router.Middleware {
 	}
 }
 
-func permissionMiddleware(permission authdomain.Permission) router.Middleware {
-	return func(next router.Handle) router.Handle {
-		return func(c *router.Context) error {
+func permissionMiddleware(permission authdomain.Permission) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
 			user := userFromContext(c)
 
 			if !user.Role.Has(permission) {
@@ -91,10 +96,14 @@ func permissionMiddleware(permission authdomain.Permission) router.Middleware {
 	}
 }
 
-func postMeName(authService auth.Service) func(*router.Context, string) error {
-	return func(c *router.Context, name string) error {
-		ok := authService.ChangeName(userFromContext(c), name)
+func postMeName(authService auth.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		name, ok := readJSON[string](c)
 		if !ok {
+			return nil
+		}
+
+		if !authService.ChangeName(userFromContext(c), name) {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
@@ -102,10 +111,14 @@ func postMeName(authService auth.Service) func(*router.Context, string) error {
 	}
 }
 
-func postMePassword(authService auth.Service) func(*router.Context, api.ChangePassword) error {
-	return func(c *router.Context, changePassword api.ChangePassword) error {
-		ok := authService.ChangePassword(userFromContext(c), changePassword)
+func postMePassword(authService auth.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		changePassword, ok := readJSON[api.ChangePassword](c)
 		if !ok {
+			return nil
+		}
+
+		if !authService.ChangePassword(userFromContext(c), changePassword) {
 			return c.NoContent(http.StatusBadRequest)
 		}
 

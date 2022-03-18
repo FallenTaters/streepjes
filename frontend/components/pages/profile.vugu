@@ -24,8 +24,8 @@
     <article class="card">
         <h4>Change Password</h4>
         <form @submit="event.PreventDefault(); c.ChangePassword()">
-            <beercss:Input :Type="`password`" :Label="`Current Password`" @Input="c.CurrentPassword = string(event)"></beercss:Input>
-            <beercss:Input :Type="`password`" :Label="`New Password`" @Input="c.NewPassword = string(event)"></beercss:Input>
+            <beercss:Input name="password_old" type="password" :Label="`Current Password`" @Input="c.CurrentPassword = string(event)"></beercss:Input>
+            <beercss:Input name="password_new" type="password" :Label="`New Password`" @Input="c.NewPassword = string(event)"></beercss:Input>
             <button type="submit">Change Password</button>
         </form>
         <ui:Loading vg-if="c.PasswordLoading"></ui:Loading>
@@ -36,7 +36,7 @@
     <article class="card">
         <h4>Change Name</h4>
         <form @submit="event.PreventDefault(); c.ChangeName()">
-            <beercss:Input :Type="`text`" :Label="`New Name`" :Value="c.User.Name" @Input="c.NewName = string(event)"></beercss:Input>
+            <beercss:Input name="name_new" type="text" :Label="`New Name`" :Value="c.User.Name" @Input="c.NewName = string(event)"></beercss:Input>
             <button type="submit">Change Name</button>
         </form>
         <ui:Loading vg-if="c.NameLoading"></ui:Loading>

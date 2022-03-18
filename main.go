@@ -4,10 +4,12 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
 	"github.com/FallenTaters/streepjes/backend/application/auth"
+	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/backend/global/settings"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/sqlite"
@@ -28,14 +30,18 @@ func main() {
 	sqlite.Migrate(db)
 
 	userRepo := sqlite.NewUserRepo(db)
+	memberRepo := sqlite.NewMemberRepo(db)
+	orderRepo := sqlite.NewOrderRepo(db)
 
 	authService := auth.New(userRepo)
 	checkNoUsers(userRepo, authService)
 
-	r := router.New(static.Get, authService)
+	orderService := order.New(memberRepo, orderRepo)
+
+	handler := router.New(static.Get, authService, orderService)
 
 	fmt.Printf("Starting server on port %d\n", settings.Port)
-	panic(r.Start(fmt.Sprintf(`:%d`, settings.Port)))
+	panic(http.ListenAndServe(fmt.Sprintf(`:%d`, settings.Port), handler))
 }
 
 // check if there are no users in the database, if so, insert some

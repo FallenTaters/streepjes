@@ -8,14 +8,14 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-func NewCatalogRepo(db *sql.DB) repo.Catalog {
+func NewCatalogRepo(db Queryable) repo.Catalog {
 	return &catalogRepo{
 		db: db,
 	}
 }
 
 type catalogRepo struct {
-	db *sql.DB
+	db Queryable
 }
 
 func (cr catalogRepo) CreateItem(item orderdomain.Item) (int, error) {

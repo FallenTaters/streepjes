@@ -1,0 +1,6 @@
+<div>
+    <button vg-for="_, member := range c.Members" class="responsive extra small-margin" @click="c.OnClick(member)">
+        <div style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;" vg-content="member.Name">
+        </div>
+    </button>
+</div>
