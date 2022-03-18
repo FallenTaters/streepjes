@@ -9,7 +9,6 @@ import (
 	"github.com/FallenTaters/streepjes/frontend/store"
 )
 
-// TODO make forms and buttons work
 type Profile struct {
 	User authdomain.User `vugu:"data"`
 

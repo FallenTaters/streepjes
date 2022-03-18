@@ -38,7 +38,7 @@ func (s *Summary) GetMembers() []orderdomain.Member {
 	}
 
 	sort.Slice(members, func(i, j int) bool {
-		return members[i].LastOrder.After(members[j].LastOrder) // TODO check if this sorts correctly
+		return members[i].LastOrder.After(members[j].LastOrder)
 	})
 
 	return members

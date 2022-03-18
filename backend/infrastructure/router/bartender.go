@@ -110,9 +110,7 @@ func getCatalog(c echo.Context) error { //nolint:funlen
 
 func getMembers(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		members := orderService.GetAllMembers()
-
-		return c.JSON(http.StatusOK, members)
+		return c.JSON(http.StatusOK, orderService.GetAllMembers())
 	}
 }
 
