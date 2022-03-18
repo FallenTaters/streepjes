@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strconv"
 
@@ -37,10 +38,10 @@ func main() {
 
 	orderService := order.New(memberRepo, orderRepo)
 
-	r := router.New(static.Get, authService, orderService)
+	handler := router.New(static.Get, authService, orderService)
 
 	fmt.Printf("Starting server on port %d\n", settings.Port)
-	panic(r.Start(fmt.Sprintf(`:%d`, settings.Port)))
+	panic(http.ListenAndServe(fmt.Sprintf(`:%d`, settings.Port), handler))
 }
 
 // check if there are no users in the database, if so, insert some

@@ -1,6 +1,6 @@
 package router
 
-import "git.fuyu.moe/Fuyu/router"
+import "github.com/labstack/echo/v4"
 
-func adminRoutes(r *router.Group) {
+func adminRoutes(r *echo.Group) {
 }

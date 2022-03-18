@@ -1,10 +1,12 @@
 package router
 
 import (
+	"encoding/json"
 	"net/http"
-	"strings"
 
-	"git.fuyu.moe/Fuyu/router"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -12,51 +14,36 @@ import (
 
 type Static func(filename string) ([]byte, error)
 
-func New(static Static, authService auth.Service, orderService order.Service) *router.Router {
-	r := router.New()
+func New(static Static, authService auth.Service, orderService order.Service) http.Handler {
+	r := echo.New()
 
-	r.ErrorHandler = panicHandler
+	r.Use(middleware.Recover())
+	r.HTTPErrorHandler = func(err error, ctx echo.Context) {
+		r.DefaultHTTPErrorHandler(err, ctx)
+	}
 
-	publicRoutes(r, static, authService)
-
-	auth := r.Group(`/`, authMiddleware(authService))
+	auth := r.Group(``, authMiddleware(authService))
 	authRoutes(auth, authService)
 
-	bar := auth.Group(`/`, permissionMiddleware(authdomain.PermissionBarStuff))
+	bar := auth.Group(``, permissionMiddleware(authdomain.PermissionBarStuff))
 	bartenderRoutes(bar, orderService)
 
-	admin := auth.Group(`/`, permissionMiddleware(authdomain.PermissionAdminStuff))
+	admin := auth.Group(``, permissionMiddleware(authdomain.PermissionAdminStuff))
 	adminRoutes(admin)
+
+	// must go last because of https://github.com/labstack/echo/issues/2141
+	publicRoutes(r, static, authService)
 
 	return r
 }
 
-func getVersion(c *router.Context) error {
-	return c.String(http.StatusOK, version())
-}
-
-func getIndex(assets Static) router.Handle {
-	return func(c *router.Context) error {
-		index, err := assets(`index.html`)
-		if err != nil {
-			panic(err)
-		}
-
-		c.Response.Header().Set(`Content-Type`, `text/html`)
-
-		return c.Bytes(http.StatusOK, index)
+func readJSON[T any](c echo.Context) (T, bool) {
+	var t T
+	err := json.NewDecoder(c.Request().Body).Decode(&t)
+	if err != nil {
+		c.NoContent(http.StatusBadRequest)
+		return t, false
 	}
-}
 
-func getStatic(assets Static) router.Handle {
-	return func(c *router.Context) error {
-		name := strings.TrimPrefix(c.Param(`name`), `/`)
-
-		asset, err := assets(name)
-		if err != nil {
-			return c.NoContent(http.StatusNotFound)
-		}
-
-		return c.Bytes(http.StatusOK, asset)
-	}
+	return t, true
 }

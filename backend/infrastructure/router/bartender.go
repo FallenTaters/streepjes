@@ -4,19 +4,19 @@ import (
 	"net/http"
 	"strconv"
 
-	"git.fuyu.moe/Fuyu/router"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"github.com/labstack/echo/v4"
 )
 
-func bartenderRoutes(r *router.Group, orderService order.Service) {
+func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.GET(`/catalog`, getCatalog)
 	r.GET(`/members`, getMembers(orderService))
 	r.GET(`/member/:id`, getMember(orderService))
 }
 
-func getCatalog(c *router.Context) error { //nolint:funlen
+func getCatalog(c echo.Context) error { //nolint:funlen
 	// TODO make actual catalog
 	catalog := api.Catalog{
 		Categories: []orderdomain.Category{
@@ -108,16 +108,16 @@ func getCatalog(c *router.Context) error { //nolint:funlen
 	return c.JSON(http.StatusOK, catalog)
 }
 
-func getMembers(orderService order.Service) router.Handle {
-	return func(c *router.Context) error {
+func getMembers(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		members := orderService.GetAllMembers()
 
 		return c.JSON(http.StatusOK, members)
 	}
 }
 
-func getMember(orderService order.Service) router.Handle {
-	return func(c *router.Context) error {
+func getMember(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
 		id, err := strconv.Atoi(c.Param(`id`))
 		if err != nil {
 			return c.NoContent(http.StatusBadRequest)
