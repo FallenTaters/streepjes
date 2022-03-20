@@ -25,18 +25,16 @@ func (l *Login) Submit() {
 	l.Loading = true
 
 	go func() {
-		defer func() {
-			global.EventEnv.Lock()
-			l.Loading = false
-			global.EventEnv.UnlockRender()
-		}()
-
+		// execute request before locking
 		user, err := backend.PostLogin(api.Credentials{
 			Username: l.Username,
 			Password: l.Password,
 		})
+
+		defer global.LockAndRender()()
+		defer func() { l.Loading = false }()
+
 		if err != nil {
-			defer global.LockOnly()()
 			l.Error = true
 			return
 		}

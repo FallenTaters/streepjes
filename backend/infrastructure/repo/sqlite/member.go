@@ -78,3 +78,24 @@ func (mr *memberRepo) Get(id int) (orderdomain.Member, bool) {
 
 	return member, true
 }
+
+func (mr *memberRepo) Update(member orderdomain.Member) error {
+	res, err := mr.db.Exec(
+		`UPDATE members SET club = ?, name = ?, last_order = ? WHERE id = ?;`,
+		member.Club, member.Name, member.LastOrder, member.ID,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if affected == 0 {
+		return repo.ErrMemberNotFound
+	}
+
+	return nil
+}

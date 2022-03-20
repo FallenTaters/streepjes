@@ -104,9 +104,13 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 		q += `WHERE `
 	}
 
-	for _, condition := range conditions {
-		q += condition + ` `
+	for i, condition := range conditions {
+		q += condition
+		if i < len(conditions)-1 {
+			q += ` AND `
+		}
 	}
+	q += `;`
 
 	rows, err := ur.db.Query(q, args...)
 	if err != nil {

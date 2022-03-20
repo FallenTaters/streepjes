@@ -19,7 +19,7 @@ type Member interface {
 	Get(id int) (orderdomain.Member, bool)
 
 	// // Update a specific member. Returns ErrMemberNotFound if the ID is not found
-	// UpdateMember(member orderdomain.Member) error
+	Update(member orderdomain.Member) error
 
 	// Create a new member and return the id
 	// if name is taken for the club, it returns ErrMemberNameTaken
