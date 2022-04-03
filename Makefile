@@ -37,10 +37,8 @@ test:
 	@go test ./backend/... -cover
 
 lint:
-	@echo "Linting Backend..."
-	@golangci-lint run ./backend/... ./api/... ./domain/...
-	@echo "Linting Frontend..."
-	@golangci-lint run ./frontend/... --build-tags "js wasm"
+	@echo "Linting..."
+	@golangci-lint run ./...
 	@echo "Done"
 
 build: generate vugugen wasm
