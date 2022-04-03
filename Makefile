@@ -37,7 +37,9 @@ test:
 	@go test ./backend/... -cover
 
 lint:
-	@golangci-lint run ./backend/... ./api/... ./domain/...
+	@echo "Linting..."
+	@golangci-lint run ./...
+	@echo "Done"
 
 build: generate vugugen wasm
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
