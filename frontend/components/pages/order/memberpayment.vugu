@@ -1,3 +1,18 @@
 <div>
     <h4 vg-content="c.Member().Name"></h4>
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
+    <article class="error" vg-if="c.Error">Unable to load member.</article>
+    <div vg-if="!c.Loading && !c.Error">
+        <div class="row no-wrap large-text">
+            <span class="col">Current Bill</span>
+            <span class="col min" vg-content="c.MemberDetails.Debt"></span>
+        </div>
+        <div style="font-size:2em;margin-bottom:15px" class="row no-wrap">
+            <span class="col">Price</span>
+            <span class="col min" vg-content="c.Price()"></span>
+        </div>
+        <button class="responsive large" @click="c.PlaceOrder()" :disabled="c.LoadingPayment">Add to Bill</button>
+        <ui:Loading vg-if="c.LoadingPayment"></ui:Loading>
+        <article style="margin-top:10px;" class="error" vg-if="c.ErrorPayment">Unable to place order.</article>
+    </div>
 </div>

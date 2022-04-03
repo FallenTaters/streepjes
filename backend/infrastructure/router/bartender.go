@@ -14,6 +14,7 @@ func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.GET(`/catalog`, getCatalog)
 	r.GET(`/members`, getMembers(orderService))
 	r.GET(`/member/:id`, getMember(orderService))
+	r.POST(`/order`, postOrder(orderService))
 }
 
 func getCatalog(c echo.Context) error { //nolint:funlen
@@ -127,5 +128,20 @@ func getMember(orderService order.Service) echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, member)
+	}
+}
+
+func postOrder(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		order, ok := readJSON[orderdomain.Order](c)
+		if !ok {
+			return nil
+		}
+
+		if err := orderService.PlaceOrder(order, userFromContext(c)); err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }

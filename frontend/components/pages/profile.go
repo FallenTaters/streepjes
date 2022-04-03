@@ -44,23 +44,19 @@ func (p *Profile) ChangePassword() {
 	p.PasswordLoading = true
 
 	go func() {
-		defer func() {
-			global.EventEnv.Lock()
-			p.PasswordLoading = false
-			global.EventEnv.UnlockRender()
-		}()
-
+		// do request before locking
 		err := backend.PostChangePassword(api.ChangePassword{
 			Original: p.CurrentPassword,
 			New:      p.NewPassword,
 		})
+
+		defer global.LockAndRender()()
+		defer func() { p.PasswordLoading = false }()
 		if err != nil {
-			defer global.LockOnly()()
 			p.PasswordError = `That didn't work.`
 			return
 		}
 
-		defer global.LockOnly()()
 		p.NewPassword = ``
 		p.CurrentPassword = ``
 		p.PasswordSuccess = `Password changed successfully.`
@@ -73,20 +69,17 @@ func (p *Profile) ChangeName() {
 	p.NameLoading = true
 
 	go func() {
-		defer func() {
-			global.EventEnv.Lock()
-			p.NameLoading = false
-			global.EventEnv.UnlockRender()
-		}()
-
+		// do request before locking
 		err := backend.PostChangeName(p.NewName)
+
+		defer global.LockAndRender()()
+		defer func() { p.NameLoading = false }()
+
 		if err != nil {
-			defer global.LockOnly()()
 			p.NameError = `That didn't work.`
 			return
 		}
 
-		defer global.LockOnly()()
 		p.NewName = ``
 		p.NameSuccess = `Name changed successfully.`
 	}()

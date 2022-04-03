@@ -1,6 +1,9 @@
 package store
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
@@ -93,4 +96,29 @@ func (os *OrderStore) ToggleClub() {
 	} else {
 		os.Club = domain.ClubGladiators
 	}
+}
+
+func (os *OrderStore) Contents() string {
+	data, err := json.Marshal(os.Lines)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(data))
+	return string(data)
+}
+
+func (os *OrderStore) Make() orderdomain.Order {
+	return orderdomain.Order{ //nolint:exhaustivestruct
+		Club:     os.Club,
+		MemberID: os.Member.ID,
+		Contents: os.Contents(),
+		Price:    os.CalculateTotal(),
+		Status:   orderdomain.StatusOpen,
+	}
+}
+
+func (os *OrderStore) Clear() {
+	os.Lines = nil
+	os.Member = orderdomain.Member{}
 }
