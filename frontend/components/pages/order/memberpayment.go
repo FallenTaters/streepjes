@@ -4,6 +4,7 @@ import (
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/backend/cache"
 	"github.com/FallenTaters/streepjes/frontend/global"
 	"github.com/FallenTaters/streepjes/frontend/store"
 )
@@ -15,6 +16,8 @@ type Memberpayment struct {
 
 	LoadingPayment bool `vugu:"data"`
 	ErrorPayment   bool `vugu:"data"`
+
+	Close CloseHandler `vugu:"data"`
 }
 
 func (m *Memberpayment) Init() {
@@ -58,7 +61,8 @@ func (m *Memberpayment) PlaceOrder() {
 			return
 		}
 
-		// TODO: reload order page
-		// TODO: invalidate member cache (last_order) --> fetch?
+		store.Order.Clear()
+		cache.InvalidateMembers()
+		m.Close.CloseHandle(CloseEvent{})
 	}()
 }

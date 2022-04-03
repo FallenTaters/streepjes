@@ -117,3 +117,8 @@ func (os *OrderStore) Make() orderdomain.Order {
 		Status:   orderdomain.StatusOpen,
 	}
 }
+
+func (os *OrderStore) Clear() {
+	os.Lines = nil
+	os.Member = orderdomain.Member{}
+}

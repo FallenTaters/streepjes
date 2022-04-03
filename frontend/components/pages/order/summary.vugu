@@ -34,15 +34,13 @@
     <div vg-if="c.ShowMemberPaymentModal">
         <div class="modal-backdrop" @click="c.ShowMemberPaymentModal = false"></div>
         <modal class="modal active">
-            <ui:Loading vg-if="c.LoadingMember"></ui:Loading>
-            <article class="error" vg-if="c.ErrorMember">Couldn't load member.</article>
             <header class="fixed" class="no-club">
                 <a @click="c.ShowMemberPaymentModal = false">
                     <i>arrow_backward</i>
                     <h5>Back</h5>
                 </a>
             </header>
-            <order:Memberpayment></order:Memberpayment>
+            <order:Memberpayment @Close="c.ShowMemberPaymentModal = false"></order:Memberpayment>
         </modal>
     </div>
 </div>
@@ -51,6 +49,9 @@
 import "github.com/FallenTaters/streepjes/frontend/components/members"
 import "github.com/FallenTaters/streepjes/frontend/components/ui"
 import "github.com/FallenTaters/streepjes/frontend/components/beercss"
+
+//vugugen:event Close
+type CloseEvent struct{}
 </script>
 
 <style>

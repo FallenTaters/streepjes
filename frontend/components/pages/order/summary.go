@@ -20,8 +20,6 @@ type Summary struct {
 	Error           bool   `vugu:"data"`
 
 	ShowMemberPaymentModal bool `vugu:"data"`
-	LoadingMember          bool `vugu:"data"`
-	ErrorMember            bool `vugu:"data"`
 }
 
 func (s *Summary) total() string {

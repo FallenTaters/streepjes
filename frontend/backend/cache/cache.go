@@ -31,3 +31,7 @@ func getOrAdd(key string, duration time.Duration, addFunc func() (interface{}, e
 func add(key string, v value) {
 	cache[key] = v
 }
+
+func remove(key string) {
+	delete(cache, key)
+}

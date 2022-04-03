@@ -18,13 +18,6 @@ func Members() ([]orderdomain.Member, error) {
 	return data.([]orderdomain.Member), nil
 }
 
-// func Member(id int) ([]orderdomain.Member, error) {
-// 	data, err := getOrAdd(`member`+strconv., func() (interface{}, error) {
-// 		return backend.GetMember(id)
-// 	})
-// 	if err != nil {
-// 		return []orderdomain.Member{}, err
-// 	}
-
-// 	return data.([]orderdomain.Member), nil
-// }
+func InvalidateMembers() {
+	remove(`members`)
+}
