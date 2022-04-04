@@ -17,8 +17,11 @@ var (
 )
 
 type Catalog interface {
-	// // Get entire catalog
-	// Get() (api.Catalog, error)
+	// Get all categories
+	GetCategories() []orderdomain.Category
+
+	// Get all items
+	GetItems() []orderdomain.Item
 
 	// // GetItem gets a single item. If not found, it returns false
 	// GetItem(id int) (orderdomain.Item, bool)

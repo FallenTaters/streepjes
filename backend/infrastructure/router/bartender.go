@@ -4,109 +4,23 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/labstack/echo/v4"
 )
 
 func bartenderRoutes(r *echo.Group, orderService order.Service) {
-	r.GET(`/catalog`, getCatalog)
+	r.GET(`/catalog`, getCatalog(orderService))
 	r.GET(`/members`, getMembers(orderService))
 	r.GET(`/member/:id`, getMember(orderService))
 	r.POST(`/order`, postOrder(orderService))
 }
 
-func getCatalog(c echo.Context) error { //nolint:funlen
-	// TODO make actual catalog
-	catalog := api.Catalog{
-		Categories: []orderdomain.Category{
-			{
-				ID:   1,
-				Name: `Food`,
-			},
-			{
-				ID:   2,
-				Name: `Drinks`,
-			},
-			{
-				ID:   3,
-				Name: `Empty`,
-			},
-			{
-				ID:   4,
-				Name: `Empty for one club`,
-			},
-		},
-		Items: []orderdomain.Item{
-			{
-				ID:              1,
-				CategoryID:      1,
-				Name:            `Chicken Fingers`,
-				PriceGladiators: 250,
-				PriceParabool:   200,
-			},
-			{
-				ID:              2,
-				CategoryID:      1,
-				Name:            `Snickers`,
-				PriceGladiators: 200,
-				PriceParabool:   150,
-			},
-
-			{
-				ID:              3,
-				CategoryID:      2,
-				Name:            `Beer`,
-				PriceGladiators: 150,
-				PriceParabool:   120,
-			},
-			{
-				ID:              4,
-				CategoryID:      2,
-				Name:            `Wine`,
-				PriceGladiators: 250,
-				PriceParabool:   220,
-			},
-			{
-				ID:              5,
-				CategoryID:      1,
-				Name:            `Chicken Fingers 2`,
-				PriceGladiators: 250,
-				PriceParabool:   200,
-			},
-			{
-				ID:              6,
-				CategoryID:      1,
-				Name:            `Snickers 2`,
-				PriceGladiators: 200,
-				PriceParabool:   150,
-			},
-			{
-				ID:              7,
-				CategoryID:      1,
-				Name:            `Chicken Fingers 3`,
-				PriceGladiators: 250,
-				PriceParabool:   200,
-			},
-			{
-				ID:              8,
-				CategoryID:      1,
-				Name:            `Snickers 3`,
-				PriceGladiators: 200,
-				PriceParabool:   0,
-			},
-			{
-				ID:              9,
-				CategoryID:      4,
-				Name:            `Snickers 4`,
-				PriceGladiators: 200,
-				PriceParabool:   0,
-			},
-		},
+func getCatalog(orderService order.Service) func(echo.Context) error {
+	return func(c echo.Context) error {
+		catalog := orderService.GetCatalog()
+		return c.JSON(http.StatusOK, catalog)
 	}
-
-	return c.JSON(http.StatusOK, catalog)
 }
 
 func getMembers(orderService order.Service) echo.HandlerFunc {
