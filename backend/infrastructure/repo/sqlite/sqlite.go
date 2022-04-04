@@ -7,7 +7,17 @@ import (
 )
 
 func OpenDB(dbname string) (*sql.DB, error) {
-	return sql.Open(`sqlite3`, dbname)
+	db, err := sql.Open(`sqlite3`, dbname)
+	if err != nil {
+		return db, err
+	}
+
+	_, err = db.Exec(`PRAGMA foreign_keys = ON;`)
+	if err != nil {
+		panic(err)
+	}
+
+	return db, nil
 }
 
 type Queryable interface {

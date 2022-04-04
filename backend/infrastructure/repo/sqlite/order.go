@@ -36,10 +36,14 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 			return 0, fmt.Errorf("%w with id %d\n", repo.ErrMemberNotFound, order.MemberID)
 		}
 	}
+	memberID := sql.NullInt64{
+		Valid: order.MemberID != 0,
+		Int64: int64(order.MemberID),
+	}
 
 	res, err := or.db.Exec(
 		`INSERT INTO orders (club, bartender_id, member_id, contents, price, order_time, status, status_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
-		order.Club, order.BartenderID, order.MemberID, order.Contents, order.Price, order.OrderTime, order.Status, order.StatusTime,
+		order.Club, order.BartenderID, memberID, order.Contents, order.Price, order.OrderTime, order.Status, order.StatusTime,
 	)
 	if err != nil {
 		panic(err)
