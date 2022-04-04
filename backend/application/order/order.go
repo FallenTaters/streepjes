@@ -21,18 +21,23 @@ type Service interface {
 	// GetMemberDetails gets a member and fills in details
 	GetMemberDetails(id int) (api.MemberDetails, bool)
 
+	// GetCatalog fetches the catalog
+	GetCatalog() api.Catalog
+
 	// PlaceOrder places the order for the bartender
 	PlaceOrder(order orderdomain.Order, bartender authdomain.User) error
 }
 
-func New(memberRepo repo.Member, orderRepo repo.Order) Service {
+func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
 	return &service{
 		members: memberRepo,
 		orders:  orderRepo,
+		catalog: catalogRepo,
 	}
 }
 
 type service struct {
+	catalog repo.Catalog
 	members repo.Member
 	orders  repo.Order
 }
@@ -57,6 +62,13 @@ func (s *service) GetMemberDetails(id int) (api.MemberDetails, bool) {
 	}
 
 	return memberDetails, true
+}
+
+func (s *service) GetCatalog() api.Catalog {
+	return api.Catalog{
+		Categories: s.catalog.GetCategories(),
+		Items:      s.catalog.GetItems(),
+	}
 }
 
 func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User) error {
