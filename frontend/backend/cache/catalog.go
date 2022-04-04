@@ -32,12 +32,6 @@ func FetchCatalog() (api.Catalog, error) {
 	return catalog, err
 }
 
-// TODO: fix all this. make a map of enum to getFunc.
-// enum is strings (keys) of type cache.Key
-// then have: cache.Get(cache.Catalog) en zo
-// remove the expiration thing
-// instad also have a cache.Invalidate(key) thing
-// for complex keys, like member-id, make builder functions that make values
-// like cache.MemberKey(id) cache.Key
-// don't cache non-generic
-// remove the fetch thing
+func InvalidateCatalog() {
+	remove(`catalog`)
+}

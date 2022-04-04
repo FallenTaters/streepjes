@@ -29,13 +29,14 @@ CREATE TABLE items (
     price_parabool INTEGER NOT NULL DEFAULT 0,
 
     UNIQUE(name),
-    FOREIGN KEY(category_id) REFERENCES category(id)
+    FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
 CREATE TABLE members (
     id INTEGER PRIMARY KEY,
     club TEXT NOT NULL,
     name TEXT NOT NULL,
+    last_order DATETIME DEFAULT '2000-01-01 00:00:00.000',
 
     UNIQUE(name)
 );
@@ -51,6 +52,6 @@ CREATE TABLE orders (
     status TEXT NOT NULL,
     status_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY(member_id) REFERENCES member(id),
-    FOREIGN KEY(bartender_id) REFERENCES user(id)
+    FOREIGN KEY(member_id) REFERENCES members(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    FOREIGN KEY(bartender_id) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );

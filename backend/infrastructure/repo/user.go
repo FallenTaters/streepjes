@@ -10,6 +10,7 @@ var (
 	ErrUserNotFound      = errors.New(`user not found`)
 	ErrUsernameTaken     = errors.New(`username taken`)
 	ErrUserMissingFields = errors.New(`user object is missing fields`)
+	ErrUserHasOrders     = errors.New(`cannot delete user with orders`)
 )
 
 type User interface {
@@ -33,6 +34,6 @@ type User interface {
 	// if mandatory fields are missing, it returns ErrUserMissingFields
 	Create(user authdomain.User) (int, error)
 
-	// Delete a user by id. Return ErrUserHasOpenOrders if the month is not over, or ErrUserNotFound if id is unknown.
+	// Delete a user by id. Returns ErrUserHasOrders if there is a foreign key conflict, or ErrUserNotFound if id is unknown.
 	Delete(id int) error
 }

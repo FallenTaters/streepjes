@@ -143,7 +143,11 @@ func (ur *userRepo) Create(user authdomain.User) (int, error) {
 func (ur *userRepo) Delete(id int) error {
 	res, err := ur.db.Exec(`DELETE FROM users WHERE id = ?;`, id)
 	if err != nil {
-		panic(err) // TODO, is this where we panic when foreignkey conflict? or do we just get 0 rows affected?
+		if err.Error() == `FOREIGN KEY constraint failed` {
+			return repo.ErrUserHasOrders
+		}
+
+		panic(err)
 	}
 
 	affected, err := res.RowsAffected()
