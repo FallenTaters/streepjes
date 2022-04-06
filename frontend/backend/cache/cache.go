@@ -9,6 +9,8 @@ type value struct {
 
 var cache = map[string]value{}
 
+// TODO: mutex
+
 func getOrAdd(key string, duration time.Duration, addFunc func() (interface{}, error)) (interface{}, error) {
 	val, exists := cache[key]
 	if exists && val.expires.After(time.Now()) {
