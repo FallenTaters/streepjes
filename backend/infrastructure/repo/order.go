@@ -12,7 +12,7 @@ type Order interface {
 	// // Get a single order by ID
 	// Get(id int) (orderdomain.Order, bool)
 
-	// Filter all orders
+	// Filter all orders. The zero value for any filter is ignored.
 	Filter(filter OrderFilter) []orderdomain.Order
 
 	// Create a new order and return the id
@@ -30,4 +30,5 @@ type OrderFilter struct {
 	MemberID int
 	// Status      []orderdomain.Status
 	Month orderdomain.Month
+	Limit int
 }

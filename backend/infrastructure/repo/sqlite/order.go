@@ -75,7 +75,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 // 	return order, true
 // }
 
-func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen
+func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,cyclop
 	q := `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
 		`O.price, O.order_time, O.status, O.status_time FROM orders O `
 	var conditions []string
@@ -107,12 +107,15 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	if len(conditions) > 0 {
 		q += `WHERE `
 	}
-
 	for i, condition := range conditions {
 		q += condition
 		if i < len(conditions)-1 {
 			q += ` AND `
 		}
+	}
+	if filter.Limit > 0 {
+		args = append(args, filter.Limit)
+		q += ` LIMIT ?`
 	}
 	q += `;`
 

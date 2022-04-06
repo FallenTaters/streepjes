@@ -6,6 +6,7 @@ import (
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend/cache"
+	"github.com/FallenTaters/streepjes/frontend/events"
 	"github.com/FallenTaters/streepjes/frontend/global"
 	"github.com/FallenTaters/streepjes/frontend/jscall"
 	"github.com/FallenTaters/streepjes/frontend/store"
@@ -49,6 +50,7 @@ func contains(str, substr string) bool {
 func (s *Summary) Init() {
 	s.Loading = true
 	s.Error = false
+	s.Members = nil
 
 	go func() {
 		defer func() {
@@ -66,6 +68,11 @@ func (s *Summary) Init() {
 		defer global.LockOnly()()
 		s.Members = members
 	}()
+
+	events.Listen(events.OrderPlaced, `memberlist-sorting`, func() {
+		defer global.LockOnly()()
+		s.Init() // reload members
+	})
 }
 
 func (s *Summary) ChooseMember() {

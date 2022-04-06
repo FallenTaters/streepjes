@@ -15,8 +15,6 @@
     <div vg-if="c.ShowMemberModal">
         <div class="modal-backdrop" @click="c.ShowMemberModal = false"></div>
         <modal class="modal right active">
-            <ui:Loading vg-if="c.Loading"></ui:Loading>
-            <article class="error" vg-if="c.Error">Couldn't load members.</article>
             <header class="fixed" class="no-club">
                 <a @click="c.ShowMemberModal = false">
                     <i>arrow_backward</i>
@@ -26,6 +24,8 @@
                     <beercss:Input name="member_search" autocomplete="off" :Label="`Search Members`" id="memberSearchInput" type="text" @Input="c.MemberSearch = string(event)"></beercss:Input>
                 </form>
             </header>
+            <ui:Loading vg-if="c.Loading"></ui:Loading>
+            <article class="error" vg-if="c.Error">Couldn't load members.</article>
             <div style="width:300px;overflow:auto">
                 <members:Members :Members="c.GetMembers()" :OnClick="c.selectMember"></members:Members>
             </div>

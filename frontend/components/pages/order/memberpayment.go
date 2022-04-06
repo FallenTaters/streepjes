@@ -5,6 +5,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
 	"github.com/FallenTaters/streepjes/frontend/backend/cache"
+	"github.com/FallenTaters/streepjes/frontend/events"
 	"github.com/FallenTaters/streepjes/frontend/global"
 	"github.com/FallenTaters/streepjes/frontend/store"
 )
@@ -38,6 +39,10 @@ func (m *Memberpayment) Init() {
 	}()
 }
 
+func (m *Memberpayment) Destroy() {
+	events.Listen(events.OrderPlaced, `memberlist-sorting`, nil)
+}
+
 func (m *Memberpayment) Member() orderdomain.Member {
 	return store.Order.Member
 }
@@ -62,6 +67,7 @@ func (m *Memberpayment) PlaceOrder() {
 		}
 
 		store.Order.Clear()
+		events.Trigger(events.OrderPlaced)
 		cache.InvalidateMembers()
 		m.Close.CloseHandle(CloseEvent{})
 	}()
