@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
@@ -104,7 +103,6 @@ func (os *OrderStore) Contents() string {
 		panic(err)
 	}
 
-	fmt.Println(string(data))
 	return string(data)
 }
 
