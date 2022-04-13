@@ -128,14 +128,16 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	var orders []orderdomain.Order
 	for rows.Next() {
 		var order orderdomain.Order
+		var memberID sql.NullInt64
 
 		err := rows.Scan(
-			&order.ID, &order.Club, &order.BartenderID, &order.MemberID, &order.Contents,
+			&order.ID, &order.Club, &order.BartenderID, &memberID, &order.Contents,
 			&order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
 		if err != nil {
 			panic(err)
 		}
 
+		order.MemberID = int(memberID.Int64)
 		orders = append(orders, order)
 	}
 

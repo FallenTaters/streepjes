@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -83,7 +82,5 @@ func PostChangeName(name string) error {
 }
 
 func PostOrder(order orderdomain.Order) error {
-	time.Sleep(time.Second) // TODO remove
-
 	return post(`/order`, order, nil)
 }
