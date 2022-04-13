@@ -1,7 +1,7 @@
 <div style="display:grid; grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;grid-template-areas: 'total total' 'button1 button2';">
     <h3 style="grid-area:total;justify-self:right">Total <span vg-content="c.total()"></span></h3>
     <div style="justify-self:center">
-        <button class="extra" style="width:100px;" :disabled="c.DisableButtons()">
+        <button @click="c.Anonymous()" class="extra" style="width:100px;" :disabled="c.DisableButtons()">
             <i>payment</i>
             <label>Anonymous</label>
         </button>
@@ -34,13 +34,26 @@
     <div vg-if="c.ShowMemberPaymentModal">
         <div class="modal-backdrop" @click="c.ShowMemberPaymentModal = false"></div>
         <modal class="modal active">
-            <header class="fixed" class="no-club">
+            <header class="fixed no-club">
                 <a @click="c.ShowMemberPaymentModal = false">
                     <i>arrow_backward</i>
                     <h5>Back</h5>
                 </a>
             </header>
             <order:Memberpayment @Close="c.ShowMemberPaymentModal = false"></order:Memberpayment>
+        </modal>
+    </div>
+            <!-- TODO: make a proper modal component with a slot -->
+    <div vg-if="c.ShowAnonPaymentModal">
+        <div class="modal-backdrop" @click="c.ShowAnonPaymentModal = false"></div>
+        <modal class="modal active">
+            <header class="fixed no-club">
+                <a @click="c.ShowAnonPaymentModal = false">
+                    <i>arrow_backward</i>
+                    <h5>Back</h5>
+                </a>
+            </header>
+            <order:Anonymouspayment @Close="c.ShowAnonPaymentModal = false"></order:Anonymouspayment>
         </modal>
     </div>
 </div>

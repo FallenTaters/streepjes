@@ -21,6 +21,7 @@ type Summary struct {
 	Error           bool   `vugu:"data"`
 
 	ShowMemberPaymentModal bool `vugu:"data"`
+	ShowAnonPaymentModal   bool `vugu:"data"`
 }
 
 func (s *Summary) total() string {
@@ -104,4 +105,8 @@ func (s *Summary) SubmitMemberSearch() {
 	}
 
 	s.selectMember(members[0])
+}
+
+func (s *Summary) Anonymous() {
+	s.ShowAnonPaymentModal = true
 }
