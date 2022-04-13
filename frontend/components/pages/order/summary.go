@@ -59,7 +59,7 @@ func (s *Summary) Init() {
 			s.Loading = false
 		}()
 
-		members, err := cache.Members()
+		members, err := cache.Members.Get()
 		if err != nil {
 			defer global.LockOnly()()
 			s.Error = true

@@ -81,10 +81,10 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	var conditions []string
 	var args []interface{}
 
-	// if filter.BartenderID != nil {
-	// 	conditions = append(conditions, `O.bartender_id = ?`)
-	// 	args = append(args, *filter.BartenderID)
-	// }
+	if filter.BartenderID != 0 {
+		conditions = append(conditions, `O.bartender_id = ?`)
+		args = append(args, filter.BartenderID)
+	}
 
 	// if filter.Club != nil {
 	// 	conditions = append(conditions, `O.club = ?`)

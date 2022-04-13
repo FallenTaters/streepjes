@@ -12,13 +12,13 @@ type History struct {
 
 func (h *History) Init() {
 	go func() {
-		orders, err := cache.Orders()
+		orders, err := cache.Orders.Get()
 		if err != nil {
 			return
 		}
 		h.Orders = orders
 
-		members, err := cache.Members()
+		members, err := cache.Members.Get()
 		if err != nil {
 			return
 		}

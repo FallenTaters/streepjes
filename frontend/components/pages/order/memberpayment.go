@@ -68,7 +68,7 @@ func (m *Memberpayment) PlaceOrder() {
 
 		store.Order.Clear()
 		events.Trigger(events.OrderPlaced)
-		cache.InvalidateMembers()
+		cache.Members.Invalidate()
 		m.Close.CloseHandle(CloseEvent{})
 	}()
 }

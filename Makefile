@@ -11,7 +11,7 @@ LDFLAGS := '-X "$(PACKAGE).buildCommit=$(GIT_COMMIT)" \
 		-X "$(PACKAGE).buildVersion=$(GIT_TAG)"'
 
 generate:
-	@echo "Generating code..."
+	@echo -n "Generating code..."
 	@go generate ./...
 	@echo "Done"
 
@@ -21,7 +21,7 @@ vugugen:
 	@echo "Done"
 
 wasm:
-	@echo "Compiling frontend..."
+	@echo -n "Compiling frontend..."
 	@GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
 	@echo "Done"
 
@@ -33,13 +33,16 @@ run-backend:
 	@go run -ldflags "-X $(PACKAGE).buildVersion=development" .
 
 test:
-	@echo "Testing..."
+	@echo -n "Testing..."
 	@go test ./backend/... -cover
+	@echo "Done"
 
 lint:
-	@echo "Linting..."
+	@echo -n "Linting..."
 	@golangci-lint run ./...
 	@echo "Done"
 
 build: generate vugugen wasm
+	@echo -n "Compiling backend..."
 	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
+	@echo "Done"

@@ -26,8 +26,8 @@ type Order interface {
 
 type OrderFilter struct {
 	// Club        domain.Club
-	// BartenderID int
-	MemberID int
+	BartenderID int
+	MemberID    int
 	// Status      []orderdomain.Status
 	Month orderdomain.Month
 	Limit int

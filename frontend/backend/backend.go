@@ -47,6 +47,11 @@ func GetMember(id int) (api.MemberDetails, error) {
 	return member, get(`/member/`+strconv.Itoa(id), &member)
 }
 
+func GetOrders() ([]orderdomain.Order, error) {
+	var orders []orderdomain.Order
+	return orders, get(`/orders`, &orders)
+}
+
 func PostLogout() error {
 	resp, err := http.Post(settings.URL()+`/logout`, ``, nil)
 	if err != nil {

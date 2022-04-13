@@ -13,6 +13,7 @@ func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.GET(`/catalog`, getCatalog(orderService))
 	r.GET(`/members`, getMembers(orderService))
 	r.GET(`/member/:id`, getMember(orderService))
+	r.GET(`/orders`, getOrders(orderService))
 	r.POST(`/order`, postOrder(orderService))
 }
 
@@ -42,6 +43,14 @@ func getMember(orderService order.Service) echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, member)
+	}
+}
+
+func getOrders(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := userFromContext(c)
+		orders := orderService.GetOrdersForBartender(user.ID)
+		return c.JSON(http.StatusOK, orders)
 	}
 }
 

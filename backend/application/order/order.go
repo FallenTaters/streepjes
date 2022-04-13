@@ -24,6 +24,9 @@ type Service interface {
 	// GetCatalog fetches the catalog
 	GetCatalog() api.Catalog
 
+	// GetOrdersForBartender gets all order for that bartender for the current month
+	GetOrdersForBartender(id int) []orderdomain.Order
+
 	// PlaceOrder places the order for the bartender
 	PlaceOrder(order orderdomain.Order, bartender authdomain.User) error
 }
@@ -69,6 +72,13 @@ func (s *service) GetCatalog() api.Catalog {
 		Categories: s.catalog.GetCategories(),
 		Items:      s.catalog.GetItems(),
 	}
+}
+
+func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
+	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		BartenderID: id,
+		Month:       orderdomain.MonthOf(time.Now()),
+	})
 }
 
 func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User) error {

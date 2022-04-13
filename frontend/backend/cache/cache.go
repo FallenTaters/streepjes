@@ -1,39 +1,61 @@
 package cache
 
-import "time"
+import (
+	"sync"
+	"time"
 
-type value struct {
-	data    interface{}
-	expires time.Time
+	"github.com/FallenTaters/streepjes/frontend/backend"
+)
+
+var (
+	Members = New(time.Minute, backend.GetMembers)
+	Catalog = New(time.Minute, backend.GetCatalog)
+	Orders  = New(time.Minute, backend.GetOrders)
+)
+
+type Cache[T any] struct {
+	sync.Mutex
+
+	data  T
+	valid bool
+	added time.Time
+
+	addFunc  func() (T, error)
+	lifetime time.Duration
 }
 
-var cache = map[string]value{}
+func New[T any](lifetime time.Duration, addFunc func() (T, error)) Cache[T] {
+	return Cache[T]{
+		addFunc:  addFunc,
+		lifetime: lifetime,
+	}
+}
 
-// TODO: mutex
+func (c *Cache[T]) Get() (T, error) {
+	c.Lock()
+	defer c.Unlock()
 
-func getOrAdd(key string, duration time.Duration, addFunc func() (interface{}, error)) (interface{}, error) {
-	val, exists := cache[key]
-	if exists && val.expires.After(time.Now()) {
-		return val.data, nil
+	if c.valid {
+		if time.Since(c.added) > c.lifetime {
+			return c.data, nil
+		} else {
+			c.valid = false
+		}
 	}
 
-	data, err := addFunc()
-	if err != nil {
-		return nil, err
+	v, err := c.addFunc()
+	if err == nil {
+		c.data = v
+		c.valid = true
+		c.added = time.Now()
 	}
 
-	add(key, value{
-		data:    data,
-		expires: time.Now().Add(duration),
-	})
-
-	return data, nil
+	return v, err
 }
 
-func add(key string, v value) {
-	cache[key] = v
-}
+func (c *Cache[T]) Invalidate() {
+	c.Lock()
+	defer c.Unlock()
 
-func remove(key string) {
-	delete(cache, key)
+	c.valid = false
 }
