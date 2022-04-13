@@ -55,7 +55,7 @@ func (s *service) GetMemberDetails(id int) (api.MemberDetails, bool) {
 	}
 	memberDetails.Member = member
 
-	orders := s.orders.Filter(repo.OrderFilter{MemberID: id, Month: orderdomain.CurrentMonth()})
+	orders := s.orders.Filter(repo.OrderFilter{MemberID: id, Month: orderdomain.CurrentMonth()}) //nolint:exhaustivestruct
 
 	for _, order := range orders {
 		memberDetails.Debt += order.Price
@@ -79,9 +79,15 @@ func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User)
 		return fmt.Errorf(`%w: price is %s`, ErrInvalidOrder, order.Price)
 	}
 
-	member, ok := s.members.Get(order.MemberID)
-	if !ok {
-		return repo.ErrMemberNotFound
+	if order.MemberID != 0 {
+		member, ok := s.members.Get(order.MemberID)
+		if !ok {
+			return repo.ErrMemberNotFound
+		}
+
+		member.LastOrder = time.Now()
+		// ignore error to avoid successful order being reported as failed
+		_ = s.members.Update(member)
 	}
 
 	order.BartenderID = bartender.ID
@@ -93,11 +99,6 @@ func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User)
 	if err != nil {
 		return err
 	}
-
-	member.LastOrder = time.Now()
-
-	// ignore error to avoid successful order being reported as failed
-	_ = s.members.Update(member)
 
 	return nil
 }
