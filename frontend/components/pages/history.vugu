@@ -1,3 +1,26 @@
-<div>
-    <h1>This is the history page</h1>
+<div style="height:100%">
+    <h2>Order History</h2>
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
+    <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load order history.</article>
+    <div style="overflow:auto">
+        <button
+            vg-for="_, order := range c.Orders"
+            :class="`responsive extra small-margin ` + order.Club.String()"
+            @click="c.Click(order)"
+        >
+            <div class="row no-wrap large-text">
+                <div class="col min middle-align" style="min-width:200px" vg-content="c.formatDate(order.OrderTime)"></div>
+                <div class="col middle-align" vg-content="c.MembersByID[order.MemberID].Name"></div>
+                <div class="col min middle-align" vg-content="order.Price"></div>
+            </div>
+        </button>
+    </div>
+    
+    <ui:Modal :Show="c.ShowOrderModal" @Close="c.ShowOrderModal = false">
+        <history:Ordermodal @Close="c.ShowOrderModal = false" :Order="c.SelectedOrder"></history:Ordermodal>
+    </ui:Modal>
 </div>
+
+<script type="application/x-go">
+import "github.com/FallenTaters/streepjes/frontend/components/pages/history"
+</script>

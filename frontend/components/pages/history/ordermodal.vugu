@@ -1,0 +1,12 @@
+<div>
+    <h4 vg-content="c.Order.Member.Name"></h4>
+    <article style="margin-top:10px;" class="error" vg-if="c.ParseError">Unable to load order contents.</article>
+    TODO display orderlines (if parsed successfully):
+    <div vg-for="_, orderline := range c.Contents" vg-content="orderline"></div>
+    <button>TODO delete button (club ?)</button>
+</div>
+
+<script type="application/x-go">
+//vugugen:event Close
+type CloseEvent struct{}
+</script>

@@ -31,31 +31,12 @@
             </div>
         </modal>
     </div>
-    <div vg-if="c.ShowMemberPaymentModal">
-        <div class="modal-backdrop" @click="c.ShowMemberPaymentModal = false"></div>
-        <modal class="modal active">
-            <header class="fixed no-club">
-                <a @click="c.ShowMemberPaymentModal = false">
-                    <i>arrow_backward</i>
-                    <h5>Back</h5>
-                </a>
-            </header>
-            <order:Memberpayment @Close="c.ShowMemberPaymentModal = false"></order:Memberpayment>
-        </modal>
-    </div>
-            <!-- TODO: make a proper modal component with a slot -->
-    <div vg-if="c.ShowAnonPaymentModal">
-        <div class="modal-backdrop" @click="c.ShowAnonPaymentModal = false"></div>
-        <modal class="modal active">
-            <header class="fixed no-club">
-                <a @click="c.ShowAnonPaymentModal = false">
-                    <i>arrow_backward</i>
-                    <h5>Back</h5>
-                </a>
-            </header>
-            <order:Anonymouspayment @Close="c.ShowAnonPaymentModal = false"></order:Anonymouspayment>
-        </modal>
-    </div>
+    <ui:Modal :Show="c.ShowMemberPaymentModal" @Close="c.ShowMemberPaymentModal = false">
+        <order:Memberpayment @Close="c.ShowMemberPaymentModal = false"></order:Memberpayment>
+    </ui:Modal>
+    <ui:Modal :Show="c.ShowAnonPaymentModal" @Close="c.ShowAnonPaymentModal = false">
+        <order:Anonymouspayment @Close="c.ShowAnonPaymentModal = false"></order:Anonymouspayment>
+    </ui:Modal>
 </div>
 
 <script type="application/x-go">
