@@ -27,10 +27,10 @@ func prettyDate(t, now time.Time) string {
 	}
 
 	if now.Year() == t.Year() {
-		t.Format(`2nd Jan`)
+		t.Format(`2 Jan`)
 	}
 
-	return t.Format(`2nd Jan 2006`)
+	return t.Format(`2 Jan 2006`)
 }
 
 func prettyTime(t, now time.Time) string {

@@ -29,3 +29,7 @@ func (o *Ordermodal) Init() {
 		o.ParseError = true
 	}
 }
+
+func (o *Ordermodal) Delete() {
+	// TODO
+}

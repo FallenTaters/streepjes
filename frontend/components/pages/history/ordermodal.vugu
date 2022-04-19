@@ -1,9 +1,20 @@
 <div>
     <h4 vg-content="c.Order.Member.Name"></h4>
     <article style="margin-top:10px;" class="error" vg-if="c.ParseError">Unable to load order contents.</article>
-    TODO display orderlines (if parsed successfully):
-    <div vg-for="_, orderline := range c.Contents" vg-content="orderline"></div>
-    <button>TODO delete button (club ?)</button>
+    TODO display name and date here?
+    <div vg-for="_, orderline := range c.Contents" class="row no-wrap">
+        <div class="col min" vg-content="orderline.Amount"></div>
+        <div class="col max" vg-content="orderline.Item.Name"></div>
+        <div class="col min" vg-content="orderline.Price()"></div>
+    </div>
+    <h4 class="row no-wrap">
+        <div class="col min">Total</div>
+        <div class="col"></div>
+        <div class="col min" vg-content="c.Order.Price"></div>
+    </h4>
+    <button class="responsive error" @click="c.Delete()" style="margin-top:30px">
+        <i>delete</i> Delete
+    </button>
 </div>
 
 <script type="application/x-go">
