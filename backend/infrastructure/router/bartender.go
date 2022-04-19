@@ -15,6 +15,8 @@ func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.GET(`/member/:id`, getMember(orderService))
 	r.GET(`/orders`, getOrders(orderService))
 	r.POST(`/order`, postOrder(orderService))
+
+	r.POST(`/order/:id/delete`, postDeleteOrder(orderService))
 }
 
 func getCatalog(orderService order.Service) func(echo.Context) error {
@@ -66,5 +68,15 @@ func postOrder(orderService order.Service) echo.HandlerFunc {
 		}
 
 		return c.NoContent(http.StatusOK)
+	}
+}
+
+func postDeleteOrder(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		bartenderID := userFromContext(c).ID
+		orderID := c.Param(`id`)
+
+		orderService.BartenderDeleteOrder(bartenderID, orderID)
+		// TODO
 	}
 }
