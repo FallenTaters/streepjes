@@ -63,7 +63,7 @@ func (h *History) Init() {
 func (h *History) Click(order orderdomain.Order) {
 	h.SelectedOrder = history.MemberOrder{
 		Order:  order,
-		Member: h.MembersByID[order.ID],
+		Member: h.MembersByID[order.MemberID],
 	}
 	h.ShowOrderModal = true
 }

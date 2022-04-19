@@ -2,6 +2,7 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -83,4 +84,8 @@ func PostChangeName(name string) error {
 
 func PostOrder(order orderdomain.Order) error {
 	return post(`/order`, order, nil)
+}
+
+func PostDeleteOrder(id int) error {
+	return post(fmt.Sprintf(`/order/%d/delete`, id), nil, nil)
 }
