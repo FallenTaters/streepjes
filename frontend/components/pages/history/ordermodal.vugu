@@ -1,5 +1,8 @@
 <div>
-    <h5 vg-content="c.Order.Member.Name"></h5>
+    <h5>
+        <span vg-content="c.Order.Member.Name"></span>
+        (<span vg-content="c.Order.Member.Club.String()"></span>)
+    </h5>
     <article style="margin-top:10px;" class="error" vg-if="c.ParseError">Unable to load order contents.</article>
     <div vg-for="_, orderline := range c.Contents" class="row no-wrap">
         <div class="col min" vg-content="orderline.Amount"></div>
@@ -11,7 +14,7 @@
         <div class="col"></div>
         <div class="col min" vg-content="c.Order.Price"></div>
     </h4>
-    <button class="responsive error" @click="c.Delete()" style="margin-top:30px">
+    <button vg-if="c.Order.Status != orderdomain.StatusCancelled" class="responsive error" @click="c.Delete()" style="margin-top:30px">
         <i>delete</i> Delete
     </button>
     <ui:Loading vg-if="c.Loading"></ui:Loading>
@@ -20,6 +23,7 @@
 
 <script type="application/x-go">
 import "github.com/FallenTaters/streepjes/frontend/components/ui"
+import "github.com/FallenTaters/streepjes/domain/orderdomain"
 
 //vugugen:event Close
 type CloseEvent struct{}

@@ -74,9 +74,16 @@ func postOrder(orderService order.Service) echo.HandlerFunc {
 func postDeleteOrder(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		bartenderID := userFromContext(c).ID
-		orderID := c.Param(`id`)
+		orderID, err := strconv.Atoi(c.Param(`id`))
+		if err != nil {
+			return c.String(http.StatusUnprocessableEntity, `order id must be integer`)
+		}
 
-		orderService.BartenderDeleteOrder(bartenderID, orderID)
-		// TODO
+		ok := orderService.BartenderDeleteOrder(bartenderID, orderID)
+		if !ok {
+			return c.NoContent(http.StatusNotFound)
+		}
+
+		return c.NoContent(http.StatusOK)
 	}
 }

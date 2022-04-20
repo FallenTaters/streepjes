@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain"
@@ -18,6 +19,27 @@ func NewOrderRepo(db Queryable) repo.Order {
 
 type orderRepo struct {
 	db Queryable
+}
+
+func (or *orderRepo) Get(id int) (orderdomain.Order, bool) {
+	row := or.db.QueryRow(`SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, `+
+		`O.price, O.order_time, O.status, O.status_time FROM orders O WHERE id = ?;`, id)
+
+	var order orderdomain.Order
+	var memberID sql.NullInt64
+
+	err := row.Scan(&order.ID, &order.Club, &order.BartenderID, &memberID, &order.Contents,
+		&order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
+	if errors.Is(err, sql.ErrNoRows) {
+		return order, false
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	order.MemberID = int(memberID.Int64)
+
+	return order, true
 }
 
 func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
@@ -57,24 +79,6 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 	return int(id), nil
 }
 
-// func (ur *orderRepo) Get(id int) (orderdomain.Order, bool) {
-// 	row := ur.db.QueryRow(
-// `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, O.price, O.order_time, O.status, O.status_time FROM orders O WHERE O.id = ?;`, id)
-
-// 	var order orderdomain.Order
-
-// 	err := row.Scan(
-// &order.ID, &order.Club, &order.BartenderID, &order.MemberID, &order.Contents, &order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
-// 	if errors.Is(err, sql.ErrNoRows) {
-// 		return orderdomain.Order{}, false
-// 	}
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	return order, true
-// }
-
 func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,cyclop
 	q := `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
 		`O.price, O.order_time, O.status, O.status_time FROM orders O `
@@ -90,6 +94,13 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	// 	conditions = append(conditions, `O.club = ?`)
 	// 	args = append(args, *filter.Club)
 	// }
+
+	if len(filter.StatusNot) > 0 {
+		conditions = append(conditions, `O.status NOT IN (?`+strings.Repeat(`,?`, len(filter.StatusNot)-1)+`)`)
+		for _, statusNot := range filter.StatusNot {
+			args = append(args, statusNot)
+		}
+	}
 
 	if filter.MemberID != 0 {
 		conditions = append(conditions, `O.member_id = ?`)
@@ -146,4 +157,18 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	}
 
 	return orders
+}
+
+func (or *orderRepo) Delete(id int) bool {
+	result, err := or.db.Exec(`UPDATE orders SET status = ? WHERE id = ?;`, orderdomain.StatusCancelled, id)
+	if err != nil {
+		panic(err)
+	}
+
+	affected, err := result.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	return affected == 1
 }

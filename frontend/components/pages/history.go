@@ -7,6 +7,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend/cache"
 	"github.com/FallenTaters/streepjes/frontend/components/pages/history"
+	"github.com/FallenTaters/streepjes/frontend/events"
 	"github.com/FallenTaters/streepjes/frontend/global"
 	"github.com/FallenTaters/streepjes/shared"
 )
@@ -58,6 +59,11 @@ func (h *History) Init() {
 		}
 		h.MembersByID = membersByID
 	}()
+
+	events.Listen(events.OrderDeleted, `history-reload`, func() {
+		defer global.LockAndRender()()
+		h.Init()
+	})
 }
 
 func (h *History) Click(order orderdomain.Order) {
@@ -70,4 +76,16 @@ func (h *History) Click(order orderdomain.Order) {
 
 func (h *History) formatDate(t time.Time) string {
 	return shared.PrettyDatetime(t)
+}
+
+func (h *History) classes(order orderdomain.Order) string {
+	classes := `responsive extra small-margin `
+
+	if order.Status == orderdomain.StatusCancelled {
+		classes += `grey`
+	} else {
+		classes += order.Club.String()
+	}
+
+	return classes
 }

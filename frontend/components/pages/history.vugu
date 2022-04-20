@@ -5,7 +5,7 @@
     <div style="overflow:auto">
         <button
             vg-for="_, order := range c.Orders"
-            :class="`responsive extra small-margin ` + order.Club.String()"
+            :class="c.classes(order)"
             @click="c.Click(order)"
         >
             <div class="row no-wrap large-text">

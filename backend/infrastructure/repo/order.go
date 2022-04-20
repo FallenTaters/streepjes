@@ -9,8 +9,8 @@ import (
 var ErrOrderFieldsNotFilled = errors.New(`order fields not filled`)
 
 type Order interface {
-	// // Get a single order by ID
-	// Get(id int) (orderdomain.Order, bool)
+	// Get a single order by ID
+	Get(id int) (orderdomain.Order, bool)
 
 	// Filter all orders. The zero value for any filter is ignored.
 	Filter(filter OrderFilter) []orderdomain.Order
@@ -20,8 +20,8 @@ type Order interface {
 	// if bartender id is unknown, it returns repo.ErrUserNotFound
 	Create(orderdomain.Order) (int, error)
 
-	// // Delete an order by ID
-	// Delete(id int) bool
+	// Delete an order by ID
+	Delete(id int) bool
 }
 
 type OrderFilter struct {
@@ -29,6 +29,7 @@ type OrderFilter struct {
 	BartenderID int
 	MemberID    int
 	// Status      []orderdomain.Status
-	Month orderdomain.Month
-	Limit int
+	StatusNot []orderdomain.Status
+	Month     orderdomain.Month
+	Limit     int
 }
