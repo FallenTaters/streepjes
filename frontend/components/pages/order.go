@@ -43,7 +43,7 @@ func (o *Order) club() string {
 
 func (o *Order) Init(vugu.InitCtx) {
 	go func() {
-		catalog, err := cache.Catalog()
+		catalog, err := cache.Catalog.Get()
 		if err != nil {
 			return // show empty catalog, good enough
 		}

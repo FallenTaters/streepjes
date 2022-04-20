@@ -12,50 +12,26 @@
             <label>Member</label>
         </button>
     </div>
-    <div vg-if="c.ShowMemberModal">
-        <div class="modal-backdrop" @click="c.ShowMemberModal = false"></div>
-        <modal class="modal right active">
-            <header class="fixed" class="no-club">
-                <a @click="c.ShowMemberModal = false">
-                    <i>arrow_backward</i>
-                    <h5>Back</h5>
-                </a>
-                <form @submit="event.PreventDefault(); c.SubmitMemberSearch()">
-                    <beercss:Input name="member_search" autocomplete="off" :Label="`Search Members`" id="memberSearchInput" type="text" @Input="c.MemberSearch = string(event)"></beercss:Input>
-                </form>
-            </header>
+    <ui:Modal :Show="c.ShowMemberModal" @Close="c.ShowMemberModal = false" :Side="`right`">
+        <vg-slot name="DefaultSlot">
             <ui:Loading vg-if="c.Loading"></ui:Loading>
             <article class="error" vg-if="c.Error">Couldn't load members.</article>
             <div style="width:300px;overflow:auto">
                 <members:Members :Members="c.GetMembers()" :OnClick="c.selectMember"></members:Members>
             </div>
-        </modal>
-    </div>
-    <div vg-if="c.ShowMemberPaymentModal">
-        <div class="modal-backdrop" @click="c.ShowMemberPaymentModal = false"></div>
-        <modal class="modal active">
-            <header class="fixed no-club">
-                <a @click="c.ShowMemberPaymentModal = false">
-                    <i>arrow_backward</i>
-                    <h5>Back</h5>
-                </a>
-            </header>
-            <order:Memberpayment @Close="c.ShowMemberPaymentModal = false"></order:Memberpayment>
-        </modal>
-    </div>
-            <!-- TODO: make a proper modal component with a slot -->
-    <div vg-if="c.ShowAnonPaymentModal">
-        <div class="modal-backdrop" @click="c.ShowAnonPaymentModal = false"></div>
-        <modal class="modal active">
-            <header class="fixed no-club">
-                <a @click="c.ShowAnonPaymentModal = false">
-                    <i>arrow_backward</i>
-                    <h5>Back</h5>
-                </a>
-            </header>
-            <order:Anonymouspayment @Close="c.ShowAnonPaymentModal = false"></order:Anonymouspayment>
-        </modal>
-    </div>
+        </vg-slot>
+        <vg-slot name="InHeader">
+                <form @submit="event.PreventDefault(); c.SubmitMemberSearch()">
+                <beercss:Input name="member_search" autocomplete="off" :Label="`Search Members`" id="memberSearchInput" type="text" @Input="c.MemberSearch = string(event)"></beercss:Input>
+            </form>
+        </vg-slot>
+    </ui:Modal>
+    <ui:Modal :Show="c.ShowMemberPaymentModal" @Close="c.ShowMemberPaymentModal = false">
+        <order:Memberpayment @Close="c.ShowMemberPaymentModal = false"></order:Memberpayment>
+    </ui:Modal>
+    <ui:Modal :Show="c.ShowAnonPaymentModal" @Close="c.ShowAnonPaymentModal = false">
+        <order:Anonymouspayment @Close="c.ShowAnonPaymentModal = false"></order:Anonymouspayment>
+    </ui:Modal>
 </div>
 
 <script type="application/x-go">
@@ -66,16 +42,3 @@ import "github.com/FallenTaters/streepjes/frontend/components/beercss"
 //vugugen:event Close
 type CloseEvent struct{}
 </script>
-
-<style>
-.modal-backdrop {
-    background-color: black;
-    opacity: 50%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 99;
-    height: 100vh;
-    width:100vw;
-}
-</style>

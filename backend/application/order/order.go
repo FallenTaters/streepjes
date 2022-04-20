@@ -24,8 +24,15 @@ type Service interface {
 	// GetCatalog fetches the catalog
 	GetCatalog() api.Catalog
 
+	// GetOrdersForBartender gets all order for that bartender for the current month
+	GetOrdersForBartender(id int) []orderdomain.Order
+
 	// PlaceOrder places the order for the bartender
 	PlaceOrder(order orderdomain.Order, bartender authdomain.User) error
+
+	// BartenderDeleteOrder marks an order as deleted for a bartender
+	// if the bartender does not have access or if the order is not found, it returns false
+	BartenderDeleteOrder(bartenderID, orderID int) bool
 }
 
 func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
@@ -55,7 +62,11 @@ func (s *service) GetMemberDetails(id int) (api.MemberDetails, bool) {
 	}
 	memberDetails.Member = member
 
-	orders := s.orders.Filter(repo.OrderFilter{MemberID: id, Month: orderdomain.CurrentMonth()}) //nolint:exhaustivestruct
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		MemberID:  id,
+		Month:     orderdomain.CurrentMonth(),
+		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
+	})
 
 	for _, order := range orders {
 		memberDetails.Debt += order.Price
@@ -69,6 +80,13 @@ func (s *service) GetCatalog() api.Catalog {
 		Categories: s.catalog.GetCategories(),
 		Items:      s.catalog.GetItems(),
 	}
+}
+
+func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
+	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		BartenderID: id,
+		Month:       orderdomain.MonthOf(time.Now()),
+	})
 }
 
 func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User) error {
@@ -101,4 +119,13 @@ func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User)
 	}
 
 	return nil
+}
+
+func (s *service) BartenderDeleteOrder(bartenderID, orderID int) bool {
+	order, ok := s.orders.Get(orderID)
+	if !ok || order.BartenderID != bartenderID {
+		return false
+	}
+
+	return s.orders.Delete(order.ID)
 }

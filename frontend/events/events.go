@@ -11,6 +11,7 @@ const (
 	InactiveWarning
 
 	OrderPlaced
+	OrderDeleted
 )
 
 var (

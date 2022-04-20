@@ -2,10 +2,10 @@ package backend
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -47,6 +47,11 @@ func GetMember(id int) (api.MemberDetails, error) {
 	return member, get(`/member/`+strconv.Itoa(id), &member)
 }
 
+func GetOrders() ([]orderdomain.Order, error) {
+	var orders []orderdomain.Order
+	return orders, get(`/orders`, &orders)
+}
+
 func PostLogout() error {
 	resp, err := http.Post(settings.URL()+`/logout`, ``, nil)
 	if err != nil {
@@ -78,7 +83,9 @@ func PostChangeName(name string) error {
 }
 
 func PostOrder(order orderdomain.Order) error {
-	time.Sleep(time.Second) // TODO remove
-
 	return post(`/order`, order, nil)
+}
+
+func PostDeleteOrder(id int) error {
+	return post(fmt.Sprintf(`/order/%d/delete`, id), nil, nil)
 }

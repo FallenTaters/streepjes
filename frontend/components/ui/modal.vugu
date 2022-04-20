@@ -1,0 +1,33 @@
+<div>
+    <div vg-if="c.Show">
+        <div class="modal-backdrop" @click="c.CloseModal()"></div>
+        <modal :class="c.class()">
+            <header class="fixed no-club">
+                <a @click="c.CloseModal()">
+                    <i>arrow_backward</i>
+                    <h5>Back</h5>
+                </a>
+                <vg-comp expr="c.InHeader"></vg-comp>
+            </header>
+            <vg-comp expr='c.DefaultSlot'></vg-comp>
+        </modal>
+    </div>
+</div>
+
+<script type="application/x-go">
+//vugugen:event Close
+type CloseEvent struct{}
+</script>
+
+<style>
+.modal-backdrop {
+    background-color: black;
+    opacity: 50%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    height: 100vh;
+    width:100vw;
+}
+</style>

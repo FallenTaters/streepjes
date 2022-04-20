@@ -13,7 +13,10 @@ func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.GET(`/catalog`, getCatalog(orderService))
 	r.GET(`/members`, getMembers(orderService))
 	r.GET(`/member/:id`, getMember(orderService))
+	r.GET(`/orders`, getOrders(orderService))
 	r.POST(`/order`, postOrder(orderService))
+
+	r.POST(`/order/:id/delete`, postDeleteOrder(orderService))
 }
 
 func getCatalog(orderService order.Service) func(echo.Context) error {
@@ -45,6 +48,14 @@ func getMember(orderService order.Service) echo.HandlerFunc {
 	}
 }
 
+func getOrders(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		user := userFromContext(c)
+		orders := orderService.GetOrdersForBartender(user.ID)
+		return c.JSON(http.StatusOK, orders)
+	}
+}
+
 func postOrder(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		order, ok := readJSON[orderdomain.Order](c)
@@ -54,6 +65,23 @@ func postOrder(orderService order.Service) echo.HandlerFunc {
 
 		if err := orderService.PlaceOrder(order, userFromContext(c)); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
+}
+
+func postDeleteOrder(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		bartenderID := userFromContext(c).ID
+		orderID, err := strconv.Atoi(c.Param(`id`))
+		if err != nil {
+			return c.String(http.StatusUnprocessableEntity, `order id must be integer`)
+		}
+
+		ok := orderService.BartenderDeleteOrder(bartenderID, orderID)
+		if !ok {
+			return c.NoContent(http.StatusNotFound)
 		}
 
 		return c.NoContent(http.StatusOK)
