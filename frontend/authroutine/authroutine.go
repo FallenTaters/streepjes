@@ -4,10 +4,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/backend/cache"
 	"github.com/FallenTaters/streepjes/frontend/events"
 	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/document"
 	"github.com/FallenTaters/streepjes/frontend/jscall/window"
 	"github.com/FallenTaters/streepjes/frontend/store"
 )
@@ -22,6 +25,11 @@ var tracker struct {
 var checkInterval time.Duration = time.Second
 
 func Start() {
+	events.Listen(events.Unauthorized, `logout-invalidate`, func() {
+		document.DeleteCookie(api.AuthTokenCookieName)
+		cache.InvalidateAll()
+	})
+
 	tracker.lastActivity = time.Now()
 
 	window.OnClick(onActivity)

@@ -13,6 +13,12 @@ var (
 	Orders  = New(time.Minute, backend.GetOrders)
 )
 
+func InvalidateAll() {
+	Members.Invalidate()
+	Catalog.Invalidate()
+	Orders.Invalidate()
+}
+
 type Cache[T any] struct {
 	sync.Mutex
 
