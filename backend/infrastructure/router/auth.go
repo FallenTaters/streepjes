@@ -36,7 +36,7 @@ func postLogin(authService auth.Service) echo.HandlerFunc {
 		}
 
 		http.SetCookie(c.Response(), &http.Cookie{ //nolint:exhaustivestruct
-			Name:   `auth_token`,
+			Name:   api.AuthTokenCookieName,
 			Value:  user.AuthToken,
 			Path:   ``,
 			Domain: ``,

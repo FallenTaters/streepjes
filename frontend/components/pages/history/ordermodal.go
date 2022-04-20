@@ -56,7 +56,5 @@ func (o *Ordermodal) Delete() {
 		o.Close.CloseHandle(CloseEvent{})
 		cache.Orders.Invalidate()
 		events.Trigger(events.OrderDeleted)
-		// TODO: somewhere else we need to listen for events.Unauthorized and invalidate all caches?
-		// also check if this happens upon logout!
 	}()
 }

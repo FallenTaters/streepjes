@@ -5,6 +5,8 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
+const AuthTokenCookieName = `auth_token`
+
 type Catalog struct {
 	Categories []orderdomain.Category `json:"categories"`
 	Items      []orderdomain.Item     `json:"items"`
