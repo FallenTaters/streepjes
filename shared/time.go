@@ -4,7 +4,12 @@ import "time"
 
 func PrettyDatetime(t time.Time) string {
 	t, now := t.In(time.Local), time.Now()
-	return prettyDate(t, now) + ` ` + prettyTime(t, now)
+	timePretty := prettyTime(t, now)
+	if timePretty == `Just now` {
+		return timePretty
+	}
+
+	return prettyDate(t, now) + ` ` + timePretty
 }
 
 func PrettyDate(t time.Time) string {
