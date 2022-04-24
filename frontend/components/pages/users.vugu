@@ -1,14 +1,52 @@
-<div style="height:100%">
-    <h2>Users</h2>
-    <ui:Loading vg-if="c.Loading"></ui:Loading>
-    <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load users.</article>
-    <button :class="user.Club.String() + ` responsive extra`" vg-for="_, user := range c.Users">
-        <span vg-content="user.Name"></span>
-    </button>
+<div class="users-container">
+    <div style="grid-area: userlist;overflow:auto;">
+        <ui:Loading vg-if="c.Loading"></ui:Loading>
+        <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load users.</article>
+        <h2>Users</h2>
+        <button class="no-club responsive extra" @click="c.NewUser()" style="margin:5px;">+</button>
+        <button
+                vg-for="_, user := range c.Users"
+                :class="user.Club.String() + ` responsive extra`"
+                vg-content="user.Name"
+                @click="c.Select(user)"
+                style="margin:5px;"
+        ></button>
+    </div>
+    <div style="grid-area: userform" vg-if="c.ShowForm">
+        <h3 vg-content="c.FormTitle()"></h3>
+        <form @submit="event.PreventDefault(); c.Submit()">
+            <beercss:Input
+                    id="user-username"
+                    name="username"
+                    type="text"
+                    :Label="`Username`"
+                    :Value="c.Username"
+                    @Input="c.Username = string(event)"
+            ></beercss:Input>
+            <beercss:Input
+                    id="user-password"
+                    name="password"
+                    type="password"
+                    :Label="`Password`"
+                    :Value="c.Password"
+                    @Input="c.Password = string(event)"
+            ></beercss:Input>
+            <!-- TODO distabled thing -->
+            <button
+                :disabled="false"
+                type="submit"
+                vg-content="c.SaveButtonText()"></button>
+        </form>
+    </div>
 </div>
 
 <style>
-.usersGrid {
-    /* TODO */
+.users-container {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 1fr;
+    grid-template-areas: 'userlist userform';
 }
 </style>
