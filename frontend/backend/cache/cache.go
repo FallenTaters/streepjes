@@ -11,6 +11,7 @@ var (
 	Members = New(time.Minute, backend.GetMembers)
 	Catalog = New(time.Minute, backend.GetCatalog)
 	Orders  = New(time.Minute, backend.GetOrders)
+	Users   = New(time.Minute, backend.GetUsers)
 )
 
 func InvalidateAll() {

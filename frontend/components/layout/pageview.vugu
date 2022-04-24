@@ -6,6 +6,7 @@
         <pages:History vg-if="c.Page == PageHistory" ></pages:History>
         <pages:Login vg-if="c.Page == PageLogin" ></pages:Login>
         <pages:Profile vg-if="c.Page == PageProfile" ></pages:Profile>
+        <pages:Users vg-if="c.Page == PageUsers" ></pages:Users>
     </div>
 </div>
 

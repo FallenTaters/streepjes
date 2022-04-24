@@ -19,7 +19,7 @@ func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.POST(`/order/:id/delete`, postDeleteOrder(orderService))
 }
 
-func getCatalog(orderService order.Service) func(echo.Context) error {
+func getCatalog(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		catalog := orderService.GetCatalog()
 		return c.JSON(http.StatusOK, catalog)

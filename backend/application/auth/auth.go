@@ -36,6 +36,9 @@ type Service interface {
 	// ChangeName attempts to change the name of the user
 	// if anything goes wrong, it returns false
 	ChangeName(user authdomain.User, name string) bool
+
+	// GetUsers gets all users
+	GetUsers() []authdomain.User
 }
 
 func New(userRepo repo.User) Service {
@@ -142,4 +145,8 @@ func (s *service) ChangeName(user authdomain.User, name string) bool {
 	user.Name = name
 
 	return s.users.Update(user) == nil
+}
+
+func (s *service) GetUsers() []authdomain.User {
+	return s.users.GetAll()
 }

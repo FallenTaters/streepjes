@@ -1,0 +1,14 @@
+<div style="height:100%">
+    <h2>Users</h2>
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
+    <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load users.</article>
+    <button :class="user.Club.String() + ` responsive extra`" vg-for="_, user := range c.Users">
+        <span vg-content="user.Name"></span>
+    </button>
+</div>
+
+<style>
+.usersGrid {
+    /* TODO */
+}
+</style>
