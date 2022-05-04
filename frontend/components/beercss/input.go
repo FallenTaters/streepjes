@@ -3,7 +3,6 @@ package beercss
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 
 	"github.com/FallenTaters/streepjes/frontend/global"
 	"github.com/FallenTaters/streepjes/frontend/jscall/beercss"
@@ -56,8 +55,9 @@ func (i *Input) Compute(vugu.ComputeCtx) {
 
 		beercss.UI()
 
-		if i.Value != i.OriginalValue && i.Value != i.LastUpdate && i.Value != i.BeforeLastUpdate {
-			fmt.Println(i.Value, i.OriginalValue, i.LastUpdate)
+		if i.Value != i.OriginalValue &&
+			(i.Value != i.LastUpdate || i.LastUpdate == ``) &&
+			(i.Value != i.BeforeLastUpdate || i.BeforeLastUpdate == ``) {
 			elem, ok := document.GetElementById(i.ID)
 			if !ok {
 				return
