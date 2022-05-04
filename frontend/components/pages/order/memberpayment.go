@@ -39,10 +39,6 @@ func (m *Memberpayment) Init() {
 	}()
 }
 
-func (m *Memberpayment) Destroy() {
-	events.Listen(events.OrderPlaced, `memberlist-sorting`, nil)
-}
-
 func (m *Memberpayment) Member() orderdomain.Member {
 	return store.Order.Member
 }

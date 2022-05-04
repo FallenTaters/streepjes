@@ -1,18 +1,29 @@
 package pages
 
 import (
+	"fmt"
+	"os"
 	"sort"
+	"strconv"
 	"strings"
 
+	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/frontend/backend"
 	"github.com/FallenTaters/streepjes/frontend/backend/cache"
 	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/document"
+	"github.com/vugu/vugu"
 )
 
 type Users struct {
 	Loading bool `vugu:"data"`
 	Error   bool `vugu:"data"`
+
+	SubmitLoading bool   `vugu:"data"`
+	SubmitError   string `vugu:"data"`
+	DeleteConfirm bool   `vugu:"data"`
 
 	Users        []authdomain.User `vugu:"data"`
 	SelectedUser authdomain.User   `vugu:"data"`
@@ -29,6 +40,14 @@ func (u *Users) Init() {
 	u.Loading = true
 	u.Error = false
 
+	u.Username = ``
+	u.Password = ``
+	u.Name = ``
+	u.Role = authdomain.RoleNotAuthorized
+	u.Club = domain.ClubUnknown
+	u.ShowForm = false
+	u.DeleteConfirm = false
+
 	go func() {
 		users, err := cache.Users.Get()
 		defer global.LockAndRender()()
@@ -41,14 +60,18 @@ func (u *Users) Init() {
 		}
 
 		sort.Slice(users, func(i, j int) bool {
-			return strings.Compare(users[i].Name, users[j].Name) < 0
+			n1, n2 := strings.ToLower(users[i].Name), strings.ToLower(users[j].Name)
+			return strings.Compare(n1, n2) < 0
 		})
 
 		u.Users = users
 	}()
 }
 
-func (u *Users) Select(user authdomain.User) {
+func (u *Users) SelectUser(user authdomain.User) {
+	u.SubmitError = ``
+	u.DeleteConfirm = false
+
 	u.SelectedUser = user
 
 	u.Name = user.Name
@@ -57,10 +80,16 @@ func (u *Users) Select(user authdomain.User) {
 	u.Role = user.Role
 	u.Club = user.Club
 
+	go u.selectClub(user.Club)
+	go u.selectRole(user.Role)
+
 	u.ShowForm = true
 }
 
 func (u *Users) NewUser() {
+	u.SubmitError = ``
+	u.DeleteConfirm = false
+
 	u.SelectedUser = authdomain.User{}
 
 	u.Name = ``
@@ -70,23 +99,9 @@ func (u *Users) NewUser() {
 	u.Club = domain.ClubUnknown
 
 	u.ShowForm = true
-}
 
-// TODO use this to prevent accidentally clearing unsaved changes when selecting another member
-func (u *Users) unsavedChanges() bool {
-	if !u.ShowForm {
-		return false
-	}
-
-	return u.Name != u.SelectedUser.Name ||
-		u.Username != u.SelectedUser.Username ||
-		u.Password != `` ||
-		u.Role != u.SelectedUser.Role ||
-		u.Club != u.SelectedUser.Club
-}
-
-func (u *Users) Confirm(callback func()) {
-	// TODO
+	go u.selectClub(u.Club)
+	go u.selectRole(u.Role)
 }
 
 func (u *Users) FormTitle() string {
@@ -106,5 +121,183 @@ func (u *Users) SaveButtonText() string {
 }
 
 func (u *Users) Submit() {
-	// TODO
+	u.SubmitError = ``
+
+	if u.SelectedUser == (authdomain.User{}) {
+		u.submitNewUser()
+		return
+	}
+
+	u.submitChanges()
+}
+
+func (u *Users) submitNewUser() {
+	if u.Username == `` ||
+		u.Password == `` ||
+		u.Name == `` ||
+		u.Role == authdomain.RoleNotAuthorized ||
+		u.Club == domain.ClubUnknown {
+
+		u.SubmitError = `All fields must be filled!`
+		return
+	}
+
+	u.SubmitLoading = true
+	go func() {
+		defer func() {
+			defer global.LockAndRender()()
+			u.SubmitLoading = false
+		}()
+
+		err := backend.PostNewUser(api.UserWithPassword{
+			Password: u.Password,
+			User: authdomain.User{
+				Username: u.Username,
+				Club:     u.Club,
+				Name:     u.Name,
+				Role:     u.Role,
+			},
+		})
+		if err != nil {
+			u.SubmitError = `Unable to create new user. Maybe the username or name are already taken.`
+			return
+		}
+
+		cache.Users.Invalidate()
+		defer global.LockAndRender()()
+
+		u.Init()
+	}()
+}
+
+func (u *Users) submitChanges() {
+	if u.Username == `` ||
+		u.Name == `` ||
+		u.Role == authdomain.RoleNotAuthorized ||
+		u.Club == domain.ClubUnknown {
+
+		u.SubmitError = `All fields must be filled!`
+		return
+	}
+
+	u.SubmitLoading = true
+	go func() {
+		defer func() {
+			defer global.LockAndRender()()
+			u.SubmitLoading = false
+		}()
+
+		err := backend.PostEditUser(api.UserWithPassword{
+			Password: u.Password,
+			User: authdomain.User{
+				ID:       u.SelectedUser.ID,
+				Username: u.Username,
+				Club:     u.Club,
+				Name:     u.Name,
+				Role:     u.Role,
+			},
+		})
+		if err != nil {
+			u.SubmitError = `Unable to update user. Maybe the username or name are already taken.`
+			return
+		}
+
+		cache.Users.Invalidate()
+		defer global.LockAndRender()()
+
+		u.Init()
+	}()
+}
+
+func (u *Users) Delete() {
+	if u.DeleteConfirm {
+		u.delete()
+		return
+	}
+
+	u.DeleteConfirm = true
+}
+
+func (u *Users) delete() {
+	u.SubmitLoading = true
+
+	go func() {
+		defer func() {
+			defer global.LockAndRender()()
+			u.SubmitLoading = false
+		}()
+
+		err := backend.PostDeleteUser(u.SelectedUser.ID)
+		if err != nil {
+			u.SubmitError = `Unable to delete user.`
+			return
+		}
+
+		cache.Users.Invalidate()
+		defer global.LockAndRender()()
+
+		u.Init()
+	}()
+}
+
+func (u *Users) DeleteText() string {
+	if u.DeleteConfirm {
+		return `Are you sure?`
+	}
+
+	return `Delete`
+}
+
+func (u *Users) SelectClub(event vugu.DOMEvent) {
+	v, _ := strconv.Atoi(event.JSEventTarget().Get(`value`).String())
+
+	u.Club = domain.Club(v)
+
+	if !u.Club.IsAClub() {
+		u.Club = domain.ClubUnknown
+		return
+	}
+}
+
+func (u *Users) selectClub(club domain.Club) {
+	defer global.LockOnly()()
+
+	elem, ok := document.GetElementById(`select-club`)
+	if !ok {
+		fmt.Fprintln(os.Stderr, `couldn't find select-club element`)
+		return
+	}
+
+	elem.Set(`value`, int(club))
+}
+
+func (u *Users) SelectRole(event vugu.DOMEvent) {
+	v, _ := strconv.Atoi(event.JSEventTarget().Get(`value`).String())
+
+	u.Role = authdomain.Role(v)
+
+	if !u.Role.IsARole() {
+		u.Role = authdomain.RoleNotAuthorized
+		return
+	}
+}
+
+func (u *Users) selectRole(role authdomain.Role) {
+	defer global.LockOnly()()
+
+	elem, ok := document.GetElementById(`select-role`)
+	if !ok {
+		fmt.Fprintln(os.Stderr, `couldn't find select-role element`)
+		return
+	}
+
+	elem.Set(`value`, int(role))
+}
+
+func (u *Users) PasswordLabel() string {
+	if u.SelectedUser == (authdomain.User{}) {
+		return `Password`
+	}
+
+	return `New Password (optional)`
 }

@@ -27,7 +27,13 @@ type Service interface {
 
 	// Register registers a new user. It sets the passwordHash and ID
 	// if the username is taken, it return repo.ErrUsernameTaken
+	// if mandatory fields are missing, it returns repo.ErrUserMissingFields
 	Register(user authdomain.User, password string) error
+
+	// Update updates a user
+	// it can return repo.ErrUserMissingFields and repo.ErrUsernameTaken
+	// if password == ``, it doesn't edit password
+	Update(user authdomain.User, password string) error
 
 	// ChangePassword verifies the original password and changes it to the new password
 	// if anything goes wrong, it returns false
@@ -39,14 +45,19 @@ type Service interface {
 
 	// GetUsers gets all users
 	GetUsers() []authdomain.User
+
+	// Delete deletes a user. If the user doesn't exist or has orders,
+	// it does not delete the user and return false.
+	Delete(id int) bool
 }
 
-func New(userRepo repo.User) Service {
-	return &service{userRepo}
+func New(userRepo repo.User, orderRepo repo.Order) Service {
+	return &service{userRepo, orderRepo}
 }
 
 type service struct {
-	users repo.User
+	users  repo.User
+	orders repo.Order
 }
 
 func (s *service) Login(username, pass string) (authdomain.User, bool) {
@@ -123,6 +134,25 @@ func (s *service) Register(user authdomain.User, password string) error {
 	return err
 }
 
+func (s *service) Update(userChanges authdomain.User, password string) error {
+	user, ok := s.users.Get(userChanges.ID)
+	if !ok {
+		return repo.ErrUserNotFound
+	}
+
+	if password != `` {
+		user.PasswordHash = HashPassword(password)
+	}
+
+	// only update the following fields
+	user.Name = userChanges.Name
+	user.Username = userChanges.Username
+	user.Club = userChanges.Club
+	user.Role = userChanges.Role
+
+	return s.users.Update(user)
+}
+
 func (s *service) ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool {
 	if changePassword.New == `` {
 		return false
@@ -149,4 +179,16 @@ func (s *service) ChangeName(user authdomain.User, name string) bool {
 
 func (s *service) GetUsers() []authdomain.User {
 	return s.users.GetAll()
+}
+
+func (s *service) Delete(id int) bool {
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		BartenderID: id,
+	})
+
+	if len(orders) > 0 {
+		return false
+	}
+
+	return s.users.Delete(id) == nil
 }

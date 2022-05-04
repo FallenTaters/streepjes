@@ -76,6 +76,10 @@ func (s *Summary) Init() {
 	})
 }
 
+func (s *Summary) Destroy() {
+	events.Listen(events.OrderPlaced, `memberlist-sorting`, nil)
+}
+
 func (s *Summary) ChooseMember() {
 	s.ShowMemberModal = true
 
