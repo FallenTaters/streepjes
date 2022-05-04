@@ -1,0 +1,90 @@
+<div class="users-container">
+    <div style="grid-area: userlist;overflow:auto;">
+        <ui:Loading vg-if="c.Loading"></ui:Loading>
+        <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load users.</article>
+        <h2>Users</h2>
+        <button class="no-club responsive extra" @click="c.NewUser()" style="margin:5px;">+</button>
+        <button
+                vg-for="_, user := range c.Users"
+                :class="user.Club.String() + ` responsive extra`"
+                vg-content="user.Name"
+                @click="c.SelectUser(user)"
+                style="margin:5px;"
+        ></button>
+    </div>
+    <div style="grid-area: userform" vg-if="c.ShowForm">
+        <h3 vg-content="c.FormTitle()"></h3>
+        <form @submit="event.PreventDefault(); c.Submit()">
+            <beercss:Input
+                    name="username"
+                    type="text"
+                    :Label="`Username`"
+                    :Value="c.Username"
+                    @Input="c.Username = string(event)"
+            ></beercss:Input>
+            <beercss:Input
+                    name="password"
+                    type="password"
+                    :Label="c.PasswordLabel()"
+                    :Value="c.Password"
+                    @Input="c.Password = string(event)"
+            ></beercss:Input>
+            <beercss:Input
+                    name="name"
+                    type="text"
+                    :Label="`Name`"
+                    :Value="c.Name"
+                    @Input="c.Name = string(event)"
+            ></beercss:Input>
+            <div class="field suffix border">
+                <select id="select-club" @change="c.SelectClub(event)">
+                    <option selected disabled :value="int(domain.ClubUnknown)">Select Club</option>
+                    <option :value="int(domain.ClubParabool)">De Parabool</option>
+                    <option :value="int(domain.ClubGladiators)">Gladiators</option>
+                </select>
+                <i>arrow_drop_down</i>
+            </div>
+            <div class="field suffix border">
+                <select id="select-role" @change="c.SelectRole(event)">
+                    <option selected disabled :value="int(authdomain.RoleNotAuthorized)">Select Role</option>
+                    <option :value="int(authdomain.RoleBartender)">Bartender</option>
+                    <option :value="int(authdomain.RoleAdmin)">Admin</option>
+                </select>
+                <i>arrow_drop_down</i>
+            </div>
+            <p>
+                <button
+                    :class="`large responsive ` + c.Club.String()"
+                    type="submit"
+                    vg-content="c.SaveButtonText()">
+                </button>
+            </p>
+        </form>
+        <p>
+            <button
+                @click="c.Delete()"
+                vg-if="c.SelectedUser != (authdomain.User{})"
+                class="large responsive error"
+                vg-content="c.DeleteText()">
+            </button>
+        </p>
+        <ui:Loading vg-if="c.SubmitLoading"></ui:Loading>
+        <article style="margin-top:10px;" class="error" vg-if="c.SubmitError != ``" vg-content="c.SubmitError"></article>
+    </div>
+</div>
+
+<style>
+.users-container {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 1fr;
+    grid-template-areas: 'userlist userform';
+}
+</style>
+
+<script type="application/x-go">
+import "github.com/FallenTaters/streepjes/domain"
+import "github.com/FallenTaters/streepjes/domain/authdomain"
+</script>

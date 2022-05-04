@@ -17,7 +17,7 @@ func TestLogin(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:           1,
 		Username:     `username`,
@@ -89,7 +89,7 @@ func TestCheck(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:           1,
 		Username:     `username`,
@@ -173,7 +173,7 @@ func TestActive(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID: 1,
 	}
@@ -220,7 +220,7 @@ func TestLogout(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:        1,
 		AuthToken: `abcdefg`,
@@ -273,7 +273,7 @@ func TestRegister(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		Username: `username`,
 	}
@@ -319,7 +319,7 @@ func TestChangePassword(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:           1,
 		PasswordHash: auth.HashPassword(`abc`),
@@ -399,7 +399,7 @@ func TestChangeName(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
-	s := auth.New(mock)
+	s := auth.New(mock, nil)
 	testUser := authdomain.User{ //nolint:exhaustivestruct
 		ID:           1,
 		Name:         `Hank`,

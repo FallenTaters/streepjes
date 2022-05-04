@@ -89,3 +89,20 @@ func PostOrder(order orderdomain.Order) error {
 func PostDeleteOrder(id int) error {
 	return post(fmt.Sprintf(`/order/%d/delete`, id), nil, nil)
 }
+
+func GetUsers() ([]authdomain.User, error) {
+	var users []authdomain.User
+	return users, get(`/admin/users`, &users)
+}
+
+func PostNewUser(user api.UserWithPassword) error {
+	return post(`/admin/users/new`, user, nil)
+}
+
+func PostEditUser(user api.UserWithPassword) error {
+	return post(`/admin/users/edit`, user, nil)
+}
+
+func PostDeleteUser(id int) error {
+	return post(fmt.Sprintf(`/admin/users/%d/delete`, id), nil, nil)
+}

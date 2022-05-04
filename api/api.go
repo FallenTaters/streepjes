@@ -2,6 +2,7 @@
 package api
 
 import (
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
@@ -26,4 +27,10 @@ type MemberDetails struct {
 	orderdomain.Member
 
 	Debt orderdomain.Price `json:"debt"`
+}
+
+type UserWithPassword struct {
+	authdomain.User
+
+	Password string `json:"password"`
 }

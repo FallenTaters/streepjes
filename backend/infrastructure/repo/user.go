@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	ErrNameTaken         = errors.New(`name taken`)
 	ErrUserNotFound      = errors.New(`user not found`)
 	ErrUsernameTaken     = errors.New(`username taken`)
 	ErrUserMissingFields = errors.New(`user object is missing fields`)
@@ -30,8 +31,9 @@ type User interface {
 	Update(user authdomain.User) error
 
 	// Create a new user. Returns ErrUsernameTaken if the username already exists.
-	// it returns the id of the new user
+	// if name is taken, it returns ErrNameTaken.
 	// if mandatory fields are missing, it returns ErrUserMissingFields
+	// it returns the id of the new user
 	Create(user authdomain.User) (int, error)
 
 	// Delete a user by id. Returns ErrUserHasOrders if there is a foreign key conflict, or ErrUserNotFound if id is unknown.

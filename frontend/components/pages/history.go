@@ -28,14 +28,13 @@ func (h *History) Init() {
 	h.Loading = true
 
 	go func() {
+		orders, err1 := cache.Orders.Get()
+		members, err2 := cache.Members.Get()
+		defer global.LockAndRender()()
 		defer func() {
-			defer global.LockAndRender()()
 			h.Loading = false
 		}()
-
-		orders, err := cache.Orders.Get()
-		if err != nil {
-			defer global.LockAndRender()()
+		if err1 != nil || err2 != nil {
 			h.Error = true
 			return
 		}
@@ -44,14 +43,6 @@ func (h *History) Init() {
 			return orders[i].OrderTime.After(orders[j].OrderTime)
 		})
 		h.Orders = orders
-
-		members, err := cache.Members.Get()
-		if err != nil {
-			h.Error = true
-			return
-		}
-
-		defer global.LockAndRender()()
 
 		membersByID := make(map[int]orderdomain.Member)
 		for _, member := range members {

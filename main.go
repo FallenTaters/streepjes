@@ -34,7 +34,7 @@ func main() {
 	orderRepo := sqlite.NewOrderRepo(db)
 	catalogRepo := sqlite.NewCatalogRepo(db)
 
-	authService := auth.New(userRepo)
+	authService := auth.New(userRepo, orderRepo)
 	checkNoUsers(userRepo, authService)
 
 	orderService := order.New(memberRepo, orderRepo, catalogRepo)

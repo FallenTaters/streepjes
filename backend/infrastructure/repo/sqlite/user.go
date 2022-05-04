@@ -95,6 +95,13 @@ func (ur *userRepo) GetByToken(token string) (authdomain.User, bool) {
 }
 
 func (ur *userRepo) Update(user authdomain.User) error {
+	if user.Username == `` ||
+		user.Name == `` ||
+		user.Club == domain.ClubUnknown ||
+		user.Role == authdomain.RoleNotAuthorized {
+		return repo.ErrUserMissingFields
+	}
+
 	res, err := ur.db.Exec(
 		`UPDATE users SET username = ?, password = ?, club = ?, name = ?, role = ?, auth_token = ?, auth_time = ? WHERE id = ?;`,
 		user.Username, user.PasswordHash, user.Club, user.Name, user.Role, user.AuthToken, user.AuthTime, user.ID,
@@ -124,6 +131,14 @@ func (ur *userRepo) Create(user authdomain.User) (int, error) {
 		return 0, fmt.Errorf(`%w: %#v`, repo.ErrUserMissingFields, user)
 	}
 
+	if _, ok := ur.getByName(user.Name); ok {
+		return 0, fmt.Errorf(`%w, %#v`, repo.ErrNameTaken, user)
+	}
+
+	if _, ok := ur.GetByUsername(user.Username); ok {
+		return 0, fmt.Errorf(`%w, %#v`, repo.ErrUsernameTaken, user)
+	}
+
 	res, err := ur.db.Exec(
 		`INSERT INTO users (username, password, club, name, role) VALUES (?, ?, ?, ?, ?);`,
 		user.Username, user.PasswordHash, user.Club, user.Name, user.Role, user.AuthToken, user.AuthTime, user.ID,
@@ -138,6 +153,22 @@ func (ur *userRepo) Create(user authdomain.User) (int, error) {
 	}
 
 	return int(id), nil
+}
+
+func (ur *userRepo) getByName(name string) (authdomain.User, bool) {
+	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.name = ?;`, name)
+
+	var user authdomain.User
+
+	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+	if errors.Is(err, sql.ErrNoRows) {
+		return authdomain.User{}, false
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	return user, true
 }
 
 func (ur *userRepo) Delete(id int) error {
