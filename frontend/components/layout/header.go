@@ -31,6 +31,10 @@ func (*Header) showAdminPages() bool {
 	return store.Auth.User.Role == authdomain.RoleAdmin
 }
 
+func (*Header) showBartenderPages() bool {
+	return store.Auth.User.Role == authdomain.RoleBartender
+}
+
 func (*Header) username() string {
 	username := store.Auth.User.Username
 	if len(username) > 10 {

@@ -1,12 +1,25 @@
 <div>
     <div :class="c.menuClasses()">
-        <a @click="c.Navigate(PageOrder)">
+        <a vg-if="c.showBartenderPages()" @click="c.Navigate(PageOrder)">
             <i>shopping_cart</i>
             <div>Order</div>
         </a>
-        <a @click="c.Navigate(PageHistory)">
+        <a vg-if="c.showBartenderPages()" @click="c.Navigate(PageHistory)">
             <i>history</i>
             <div>History</div>
+        </a>
+        <a vg-if="c.showBartenderPages()" @click="c.Navigate(PageLeaderboard)">
+            <i>leaderboard</i>
+            <div>Leaderboard</div>
+        </a>
+        <a vg-if="c.showBartenderPages()" @click="c.Navigate(PageKegs)">
+            <i>sports_bar</i>
+            <div>New Keg</div>
+        </a>
+
+        <a vg-if="c.showAdminPages()" @click="c.Navigate(PageBilling)">
+            <i>receipt</i>
+            <div>Billing</div>
         </a>
         <a vg-if="c.showAdminPages()" @click="c.Navigate(PageCatalog)">
             <i>fastfood</i>
@@ -20,6 +33,7 @@
             <i>manage_accounts</i>
             <div>Users</div>
         </a>
+
         <a @click="c.Navigate(PageProfile)">
             <i>person</i>
             <div vg-content="c.username()"></div>
