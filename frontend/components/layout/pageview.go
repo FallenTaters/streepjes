@@ -17,10 +17,13 @@ const (
 
 	PageOrder
 	PageHistory
+	PageLeaderboard
+	PageKegs
 
 	PageCatalog
 	PageMembers
 	PageUsers
+	PageBilling
 )
 
 type Pageview struct {
@@ -40,7 +43,7 @@ func (pv *Pageview) Init(vugu.InitCtx) {
 
 		switch store.Auth.User.Role {
 		case authdomain.RoleAdmin:
-			pv.Page = PageMembers
+			pv.Page = PageBilling
 		case authdomain.RoleBartender:
 			pv.Page = PageOrder
 		}
