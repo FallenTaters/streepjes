@@ -7,14 +7,14 @@
 
         <pages:Order vg-if="c.Page == PageOrder" ></pages:Order>
         <pages:History vg-if="c.Page == PageHistory" ></pages:History>
-        <!-- <pages:Leaderboard vg-if="c.Page == PageLeaderboard" ></pages:Leaderboard> -->
-        <!-- <pages:Kegs vg-if="c.Page == PageKegs" ></pages:Kegs> -->
+        <pages:Leaderboard vg-if="c.Page == PageLeaderboard" ></pages:Leaderboard>
+        <pages:Kegs vg-if="c.Page == PageKegs" ></pages:Kegs>
 
 
         <pages:Users vg-if="c.Page == PageUsers" ></pages:Users>
-        <!-- <pages:Members vg-if="c.Page == PageMembers" ></pages:Members>
+        <pages:Members vg-if="c.Page == PageMembers" ></pages:Members>
         <pages:Catalog vg-if="c.Page == PageCatalog" ></pages:Catalog>
-        <pages:Billing vg-if="c.Page == PageBilling" ></pages:Billing> -->
+        <pages:Billing vg-if="c.Page == PageBilling" ></pages:Billing>
     </div>
 </div>
 

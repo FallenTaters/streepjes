@@ -1,0 +1,56 @@
+<div class="catalog-grid">
+    <h3>Catalog</h3>
+    <div style="grid-area: categories">
+        <h4>Categories</h4>
+        <catalog:Categories
+            :Categories="c.Categories"
+            :SelectedCategoryID="c.SelectedCategory.ID"
+            :OnClick="c.OnCategoryClick"
+            :OnClickNew="c.OnCategoryClickNew"
+        ></catalog:Categories>
+    </div>
+    <div style="grid-area: items">
+        <h4>Items</h4>
+        <catalog:Items
+            vg-if="c.SelectedCategory != (orderdomain.Category{})"
+            :Items="c.DisplayItems"
+            :SelectedItemID="c.SelectedItem.ID"
+            :OnClick="c.OnItemClick"
+            :OnClickNew="c.OnItemClickNew"
+        ></catalog:Items>
+    </div>
+    <div style="grid-area: form">
+        <h4>Form Title here TODO</h4>
+        <div vg-if="c.ShowCategoryForm()">
+            CategoryForm
+            <span vg-content="`newCategory: ` + fmt.Sprint(c.NewCategory)"></span>
+            <br>
+            <span vg-content="`selectedCategory: ` + fmt.Sprint(c.SelectedCategory)"></span>
+        </div>
+        <div vg-if="c.ShowItemForm()">
+            ItemForm
+            <span vg-content="`newItem: ` + fmt.Sprint(c.NewItem)"></span>
+            <br>
+            <span vg-content="`selectedItem: ` + fmt.Sprint(c.SelectedItem)"></span>
+        </div>
+    </div>
+</div>
+
+<style>
+.catalog-grid {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows:  100px 1fr;
+    grid-template-areas: 'title title title' 'categories items form';
+}
+</style>
+
+<script type="application/x-go">
+import (
+    "fmt"
+
+    "github.com/FallenTaters/streepjes/frontend/components/catalog"
+    "github.com/FallenTaters/streepjes/domain/orderdomain"
+)
+</script>
