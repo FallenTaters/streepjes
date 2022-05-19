@@ -165,9 +165,23 @@ func persist() {
 	_, _ = userIDs, memberIDs
 }
 
+var unknownBartenderID int
+
 func persistUsers() map[int]int {
 	mapping := make(map[int]int)
 	names := make(map[string]int)
+
+	unknownID, err := authRepo.Create(authdomain.User{
+		Username:     `unknown_bartender`,
+		PasswordHash: `asdfhjkl;`,
+		Club:         domain.ClubParabool,
+		Name:         `Unknown bartender`,
+		Role:         authdomain.RoleBartender,
+	})
+	if err != nil {
+		panic(err)
+	}
+	unknownBartenderID = unknownID
 
 	for _, user := range newData.Users {
 		// attempt to fix duplicate name, may still fail in rare cases
@@ -245,6 +259,9 @@ func persistMembers() map[int]int {
 
 func persistOrders(userIDs, memberIDs map[int]int) {
 	for _, order := range newData.Orders {
+		if order.BartenderID == 0 {
+			order.BartenderID = unknownBartenderID
+		}
 		order.BartenderID = userIDs[order.BartenderID]
 		order.MemberID = memberIDs[order.MemberID]
 
