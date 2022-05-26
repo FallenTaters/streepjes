@@ -3,7 +3,7 @@
         <ui:Loading vg-if="c.Loading"></ui:Loading>
         <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load users.</article>
         <h2>Users</h2>
-        <button class="no-club responsive extra" @click="c.NewUser()" style="margin:5px;">+</button>
+        <button class="no-club responsive extra border" @click="c.NewUser()" style="margin:5px;">+</button>
         <button
                 vg-for="_, user := range c.Users"
                 :class="user.Club.String() + ` responsive extra`"

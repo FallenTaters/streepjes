@@ -104,3 +104,22 @@ func (c *Catalog) ShowCategoryForm() bool {
 func (c *Catalog) ShowItemForm() bool {
 	return c.NewItem || c.SelectedItem != (orderdomain.Item{})
 }
+
+func (c *Catalog) FormTitle() string {
+	switch {
+	case c.NewCategory:
+		return `New Category`
+
+	case c.NewItem:
+		return `New Item`
+
+	case c.SelectedItem != orderdomain.Item{}:
+		return `Edit Item - ` + c.SelectedItem.Name
+
+	case c.SelectedCategory != orderdomain.Category{}:
+		return `Edit Category - ` + c.SelectedCategory.Name
+
+	}
+
+	return ``
+}

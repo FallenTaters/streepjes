@@ -1,7 +1,7 @@
 <div>
     <button
         vg-if="c.OnClickNew != nil"
-        class="responsive extra small-margin"
+        class="responsive extra small-margin border"
         @click="c.OnClickNew()"
         >+</button>
     <button

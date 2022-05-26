@@ -20,7 +20,7 @@
         ></catalog:Items>
     </div>
     <div style="grid-area: form">
-        <h4>Form Title here TODO</h4>
+        <h4 vg-content="c.FormTitle()"></h4>
         <div vg-if="c.ShowCategoryForm()">
             CategoryForm
             <span vg-content="`newCategory: ` + fmt.Sprint(c.NewCategory)"></span>
