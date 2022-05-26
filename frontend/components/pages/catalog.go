@@ -7,6 +7,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
 	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/window"
 )
 
 type Catalog struct {
@@ -22,9 +23,15 @@ type Catalog struct {
 	SelectedCategory orderdomain.Category
 	SelectedItem     orderdomain.Item
 
-	// form values
+	LoadingForm bool
+	FormError   bool
+
+	// category form values
+	CategoryName string
+
+	// item form values
 	CategoryID      int
-	Name            string
+	ItemName        string
 	PriceGladiators orderdomain.Price
 	PriceParabool   orderdomain.Price
 }
@@ -69,16 +76,24 @@ func (c *Catalog) reset() {
 	c.NewItem = false
 	c.SelectedItem = orderdomain.Item{}
 	c.SelectedCategory = orderdomain.Category{}
+
+	c.CategoryName = ``
+	c.CategoryID = 0
+	c.ItemName = ``
+	c.PriceGladiators = 0
+	c.PriceParabool = 0
 }
 
 func (c *Catalog) OnCategoryClick(category orderdomain.Category) {
-	if c.SelectedCategory == category {
+	if c.SelectedCategory == category && c.SelectedItem == (orderdomain.Item{}) {
+		// already editing this category
 		return
 	}
 
 	c.reset()
 
 	c.SelectedCategory = category
+	c.CategoryName = category.Name
 }
 
 func (c *Catalog) OnCategoryClickNew() {
@@ -122,4 +137,14 @@ func (c *Catalog) FormTitle() string {
 	}
 
 	return ``
+}
+
+func (c *Catalog) SubmitCategoryForm() {
+	// TODO
+	window.Alert(`submit category form`)
+}
+
+func (c *Catalog) SubmitItemForm() {
+	// TODO
+	window.Alert(`submit item form`)
 }

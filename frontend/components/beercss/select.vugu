@@ -1,0 +1,14 @@
+<div class="field suffix border">
+    <select
+        vg-attr="c.Attrs()"
+        @change="c.SelectRole(event)"
+    >
+        <option selected disabled value="-1">Select Role</option>
+        <option
+            vg-for="i, option := range c.Options"
+            :value="fmt.Sprint(i)"
+            vg-content="option.Label">
+        </option>
+    </select>
+    <i>arrow_drop_down</i>
+</div>

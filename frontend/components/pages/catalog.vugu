@@ -9,6 +9,7 @@
             :OnClickNew="c.OnCategoryClickNew"
         ></catalog:Categories>
     </div>
+
     <div style="grid-area: items">
         <h4>Items</h4>
         <catalog:Items
@@ -19,20 +20,37 @@
             :OnClickNew="c.OnItemClickNew"
         ></catalog:Items>
     </div>
+
     <div style="grid-area: form">
         <h4 vg-content="c.FormTitle()"></h4>
-        <div vg-if="c.ShowCategoryForm()">
-            CategoryForm
-            <span vg-content="`newCategory: ` + fmt.Sprint(c.NewCategory)"></span>
-            <br>
-            <span vg-content="`selectedCategory: ` + fmt.Sprint(c.SelectedCategory)"></span>
-        </div>
-        <div vg-if="c.ShowItemForm()">
-            ItemForm
-            <span vg-content="`newItem: ` + fmt.Sprint(c.NewItem)"></span>
-            <br>
-            <span vg-content="`selectedItem: ` + fmt.Sprint(c.SelectedItem)"></span>
-        </div>
+
+        <form vg-if="c.ShowCategoryForm()" @submit="event.PreventDefault(); c.SubmitCategoryForm()">
+            <beercss:Input
+                id="category-form-name" name="category-name" type="text"
+                :Label="`Category Name`" :Value="c.CategoryName"
+                @Input="c.CategoryName = string(event)">
+            </beercss:Input>
+            <button :disabled="c.LoadingForm" type="submit" class="responsive">
+                <i>save</i>
+                <span>Save</span>
+            </button>
+        </form>
+
+        <form vg-if="c.ShowItemForm()" @submit="event.PreventDefault(); c.SubmitItemForm()">
+            <!-- TODO -->
+            <beercss:Select>Category Select Here </beercss:Select>
+            <beercss:Input
+                id="item-form-name" name="item-name" type="text"
+                :Label="`Item Name`" :Value="c.ItemName"
+                @Input="c.CategoryName = string(event)">
+            </beercss:Input>
+            <button :disabled="c.LoadingForm" type="submit" class="responsive">
+                <i>save</i>
+                <span>Save</span>
+            </button>
+        </form>
+        <ui:Loading vg-if="c.LoadingForm"></ui:Loading>
+        <article class="error" vg-if="c.FormError">That didn't work.</article>
     </div>
 </div>
 
