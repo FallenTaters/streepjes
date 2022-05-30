@@ -2,7 +2,9 @@ package repo
 
 import (
 	"errors"
+	"time"
 
+	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
@@ -25,11 +27,11 @@ type Order interface {
 }
 
 type OrderFilter struct {
-	// Club        domain.Club
+	Club        domain.Club
 	BartenderID int
 	MemberID    int
 	// Status      []orderdomain.Status
-	StatusNot []orderdomain.Status
-	Month     orderdomain.Month
-	Limit     int
+	StatusNot  []orderdomain.Status
+	Start, End time.Time
+	Limit      int
 }

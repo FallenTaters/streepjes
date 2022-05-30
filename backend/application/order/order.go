@@ -3,6 +3,7 @@ package order
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/FallenTaters/streepjes/api"
@@ -57,6 +58,9 @@ type Service interface {
 	// DeleteItem deletes an item.
 	// It can return repo.ErrItemNotFound
 	DeleteItem(id int) error
+
+	// GetLeaderboard makes a leaderboard, the members will be pre-sorted
+	GetLeaderboard(api.LeaderboardFilter) api.Leaderboard
 }
 
 func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
@@ -82,13 +86,16 @@ func (s *service) GetMemberDetails(id int) (api.MemberDetails, bool) {
 
 	member, ok := s.members.Get(id)
 	if !ok {
-		return api.MemberDetails{}, false
+		return api.MemberDetails{}, false //nolint:exhaustruct
 	}
 	memberDetails.Member = member
 
-	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+	month := orderdomain.CurrentMonth()
+
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct,exhaustruct
 		MemberID:  id,
-		Month:     orderdomain.CurrentMonth(),
+		Start:     month.Start(),
+		End:       month.End(),
 		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
 
@@ -107,9 +114,12 @@ func (s *service) GetCatalog() api.Catalog {
 }
 
 func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
-	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+	month := orderdomain.CurrentMonth()
+
+	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct,exhaustruct
 		BartenderID: id,
-		Month:       orderdomain.MonthOf(time.Now()),
+		Start:       month.Start(),
+		End:         month.End(),
 	})
 }
 
@@ -194,4 +204,50 @@ func (s *service) UpdateItem(update orderdomain.Item) error {
 
 func (s *service) DeleteItem(id int) error {
 	return s.catalog.DeleteItem(id)
+}
+
+func (s *service) GetLeaderboard(filter api.LeaderboardFilter) api.Leaderboard {
+	orderFilter := repo.OrderFilter{ //nolint:exhaustruct,exhaustivestruct
+		Start: filter.Start,
+		End:   filter.End,
+	}
+	if filter.Gladiators && !filter.Parabool {
+		orderFilter.Club = domain.ClubGladiators
+	}
+	if filter.Parabool && !filter.Gladiators {
+		orderFilter.Club = domain.ClubParabool
+	}
+
+	members := s.members.GetAll()
+	orders := s.orders.Filter(orderFilter)
+
+	var total orderdomain.Price
+	totals := make(map[int]orderdomain.Price)
+
+	for _, o := range orders {
+		if o.Status == orderdomain.StatusCancelled {
+			continue
+		}
+
+		total += o.Price
+		totals[o.MemberID] += o.Price
+	}
+
+	leaderboard := api.Leaderboard{
+		Total:   total,
+		Members: make([]api.LeaderboardMember, 0, len(members)),
+	}
+
+	for _, member := range members {
+		leaderboard.Members = append(leaderboard.Members, api.LeaderboardMember{
+			Member: member,
+			Amount: totals[member.ID],
+		})
+	}
+
+	sort.Slice(leaderboard.Members, func(i, j int) bool {
+		return leaderboard.Members[i].Amount >= leaderboard.Members[j].Amount
+	})
+
+	return leaderboard
 }

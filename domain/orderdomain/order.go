@@ -48,3 +48,11 @@ func (m Month) Time() time.Time {
 func CurrentMonth() Month {
 	return MonthOf(time.Now())
 }
+
+func (m Month) Start() time.Time {
+	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.UTC)
+}
+
+func (m Month) End() time.Time {
+	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 1, 0)
+}

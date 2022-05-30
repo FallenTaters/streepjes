@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/labstack/echo/v4"
@@ -15,8 +16,8 @@ func bartenderRoutes(r *echo.Group, orderService order.Service) {
 	r.GET(`/member/:id`, getMember(orderService))
 	r.GET(`/orders`, getOrders(orderService))
 	r.POST(`/order`, postOrder(orderService))
-
 	r.POST(`/order/:id/delete`, postDeleteOrder(orderService))
+	r.POST(`/leaderboard`, postGetLeaderboard(orderService))
 }
 
 func getCatalog(orderService order.Service) echo.HandlerFunc {
@@ -85,5 +86,18 @@ func postDeleteOrder(orderService order.Service) echo.HandlerFunc {
 		}
 
 		return c.NoContent(http.StatusOK)
+	}
+}
+
+func postGetLeaderboard(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		filter, ok := readJSON[api.LeaderboardFilter](c)
+		if !ok {
+			return nil
+		}
+
+		leaderboard := orderService.GetLeaderboard(filter)
+
+		return c.JSON(http.StatusOK, leaderboard)
 	}
 }

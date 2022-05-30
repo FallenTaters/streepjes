@@ -1,3 +1,36 @@
-<div>
-    <h4>Leaderboard</h4>
+<div class="leaderboard-container">
+    <div style="grid-area: header;">
+        <h3 style="grid-area: header;">Leaderboard</h3>
+    </div>
+
+    <div style="grid-area: form;">
+        [form placeholder]
+    </div>
+
+    <div style="grid-area: total;" class="large-text">
+        Total: <span vg-content="c.Leaderboard.Total.String()"></span>
+    </div>
+
+    <div style="grid-area: list;" style="overflow:auto">
+        <div vg-for="i, member := range c.Leaderboard.Members" :class="`padding margin primary large-text round ` + member.Club.String()" style="display: flex; justify-content: space-between">
+            <span vg-content="strconv.Itoa(i+1) + `.`"></span>
+            <span vg-content="member.Name"></span>
+            <span vg-content="member.Amount.String()"></span>
+        </div>
+    </div>
 </div>
+
+<style>
+.leaderboard-container {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr;
+    grid-template-rows: 70px 80px 50px 1fr;
+    grid-template-areas: 'header' 'form' 'total' 'list';
+}
+</style>
+
+<script type="application/x-go">
+import "strconv"
+</script>

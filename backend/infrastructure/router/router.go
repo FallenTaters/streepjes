@@ -80,6 +80,7 @@ func readJSON[T any](c echo.Context) (T, bool) {
 	var t T
 	err := json.NewDecoder(c.Request().Body).Decode(&t)
 	if err != nil {
+		fmt.Println(err)
 		_ = c.NoContent(http.StatusBadRequest)
 		return t, false
 	}
