@@ -13,7 +13,7 @@ type Order struct {
 	Club        domain.Club `json:"club"`
 	BartenderID int         `json:"bartender"`
 	MemberID    int         `json:"memberId"`
-	Contents    string      `json:"contents"`
+	Contents    string      `json:"contents"` // Usually []Orderline as JSON
 	Price       Price       `json:"price"`
 	OrderTime   time.Time   `json:"orderDate"`
 	Status      Status      `json:"status"`

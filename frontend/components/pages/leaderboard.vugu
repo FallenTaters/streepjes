@@ -8,16 +8,18 @@
     </div>
 
     <div style="grid-area: total;" class="large-text">
-        Total: <span vg-content="c.Leaderboard.Total.String()"></span>
+        Total: <span vg-content="c.Leaderboard.TotalPrice.String()"></span>
     </div>
 
     <div style="grid-area: list;" style="overflow:auto">
         <div vg-for="i, member := range c.Leaderboard.Members" :class="`padding margin primary large-text round ` + member.Club.String()" style="display: flex; justify-content: space-between">
             <span vg-content="strconv.Itoa(i+1) + `.`"></span>
             <span vg-content="member.Name"></span>
-            <span vg-content="member.Amount.String()"></span>
+            <span vg-content="member.Total.String()"></span>
         </div>
     </div>
+
+    <!-- <div vg-for="item, count := range c.Leaderboard.Items" vg-content="strconv.Itoa(count) + ` ` + item"></div> -->
 </div>
 
 <style>

@@ -80,7 +80,7 @@ func readJSON[T any](c echo.Context) (T, bool) {
 	var t T
 	err := json.NewDecoder(c.Request().Body).Decode(&t)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err) // TODO: introduce optional logging to a file ? perhaps make a global/log package
 		_ = c.NoContent(http.StatusBadRequest)
 		return t, false
 	}

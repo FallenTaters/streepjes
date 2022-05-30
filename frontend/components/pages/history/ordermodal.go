@@ -8,13 +8,12 @@ import (
 	"github.com/FallenTaters/streepjes/frontend/backend/cache"
 	"github.com/FallenTaters/streepjes/frontend/events"
 	"github.com/FallenTaters/streepjes/frontend/global"
-	"github.com/FallenTaters/streepjes/frontend/store"
 )
 
 type Ordermodal struct {
-	Order      MemberOrder       `vugu:"data"`
-	Contents   []store.Orderline `vugu:"data"`
-	ParseError bool              `vugu:"data"`
+	Order      MemberOrder        `vugu:"data"`
+	Contents   []orderdomain.Line `vugu:"data"`
+	ParseError bool               `vugu:"data"`
 
 	Loading     bool `vugu:"data"`
 	DeleteError bool `vugu:"data"`

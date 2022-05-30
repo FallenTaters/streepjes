@@ -1,6 +1,7 @@
 package order
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -59,7 +60,7 @@ type Service interface {
 	// It can return repo.ErrItemNotFound
 	DeleteItem(id int) error
 
-	// GetLeaderboard makes a leaderboard, the members will be pre-sorted
+	// GetLeaderboard makes a leaderboard, the members will be pre-sorted by amount
 	GetLeaderboard(api.LeaderboardFilter) api.Leaderboard
 }
 
@@ -221,8 +222,14 @@ func (s *service) GetLeaderboard(filter api.LeaderboardFilter) api.Leaderboard {
 	members := s.members.GetAll()
 	orders := s.orders.Filter(orderFilter)
 
+	return makeLeaderboard(members, orders)
+}
+
+func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) api.Leaderboard {
 	var total orderdomain.Price
 	totals := make(map[int]orderdomain.Price)
+	counts := make(map[int]map[string]int)
+	totalCounts := make(map[string]int)
 
 	for _, o := range orders {
 		if o.Status == orderdomain.StatusCancelled {
@@ -231,22 +238,37 @@ func (s *service) GetLeaderboard(filter api.LeaderboardFilter) api.Leaderboard {
 
 		total += o.Price
 		totals[o.MemberID] += o.Price
+
+		// attempt to unmarshal contents and count by item name
+		var lines []orderdomain.Line
+		if err := json.Unmarshal([]byte(o.Contents), &lines); err == nil {
+			if m, ok := counts[o.MemberID]; !ok || m == nil {
+				counts[o.MemberID] = make(map[string]int)
+			}
+
+			for _, line := range lines {
+				counts[o.MemberID][line.Item.Name] += line.Amount
+				totalCounts[line.Item.Name] += line.Amount
+			}
+		}
 	}
 
 	leaderboard := api.Leaderboard{
-		Total:   total,
-		Members: make([]api.LeaderboardMember, 0, len(members)),
+		TotalPrice: total,
+		Members:    make([]api.LeaderboardMember, 0, len(members)),
+		Items:      totalCounts,
 	}
 
 	for _, member := range members {
 		leaderboard.Members = append(leaderboard.Members, api.LeaderboardMember{
-			Member: member,
-			Amount: totals[member.ID],
+			Member:  member,
+			Total:   totals[member.ID],
+			Amounts: counts[member.ID],
 		})
 	}
 
 	sort.Slice(leaderboard.Members, func(i, j int) bool {
-		return leaderboard.Members[i].Amount >= leaderboard.Members[j].Amount
+		return leaderboard.Members[i].Total >= leaderboard.Members[j].Total
 	})
 
 	return leaderboard

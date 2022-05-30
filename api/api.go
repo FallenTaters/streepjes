@@ -2,8 +2,6 @@
 package api
 
 import (
-	"time"
-
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
@@ -35,21 +33,4 @@ type UserWithPassword struct {
 	authdomain.User
 
 	Password string `json:"password"`
-}
-
-type LeaderboardFilter struct {
-	Start                time.Time `json:"start"`
-	End                  time.Time `json:"end"`
-	Gladiators, Parabool bool
-}
-
-type Leaderboard struct {
-	Total   orderdomain.Price   `json:"price"`
-	Members []LeaderboardMember `json:"members"`
-}
-
-type LeaderboardMember struct {
-	orderdomain.Member
-
-	Amount orderdomain.Price `json:"amount"`
 }

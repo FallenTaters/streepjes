@@ -8,7 +8,15 @@ import (
 )
 
 type Leaderboard struct {
+	Loading bool
+	Error   bool
+
+	Items []string
+
 	Leaderboard api.Leaderboard
+
+	Total string
+	Ranking []orderdomain.LeaderboardRank
 }
 
 func (l *Leaderboard) Init() {
@@ -19,4 +27,16 @@ func (l *Leaderboard) Init() {
 	})
 
 	l.Leaderboard = leaderboard
+}
+
+func (l *Leaderboard) Refresh() {
+
+}
+
+func (l *Leaderboard) Total() string {
+	if len(l.Items) == 0 {
+		return l.Leaderboard.TotalPrice.String()
+	}
+
+	return l.
 }

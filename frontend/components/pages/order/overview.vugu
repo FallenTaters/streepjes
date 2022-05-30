@@ -22,7 +22,7 @@
                 <span vg-content="line.Item.Name"></span>
             </div>
 
-             <div class="col min middle-align" vg-content="line.Price().String()"></div>
+             <div class="col min middle-align" vg-content="line.Price(c.Club).String()"></div>
 
              <div class="col min middle-align">
                 <button class="circle flat error" @click="c.delete(line.Item)">

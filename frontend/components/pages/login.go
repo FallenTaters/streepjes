@@ -2,6 +2,7 @@ package pages
 
 import (
 	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
 	"github.com/FallenTaters/streepjes/frontend/events"
 	"github.com/FallenTaters/streepjes/frontend/global"
@@ -41,7 +42,7 @@ func (l *Login) Submit() {
 
 		store.Auth.LogIn(user)
 		store.Order.Club = user.Club
-		store.Order.Lines = []store.Orderline{}
+		store.Order.Lines = []orderdomain.Line{}
 
 		events.Trigger(events.Login)
 	}()

@@ -12,6 +12,7 @@ require (
 	github.com/vugu/vugu v0.3.4
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2
+	golang.org/x/text v0.3.7
 )
 
 require (
@@ -23,6 +24,5 @@ require (
 	github.com/vugu/xxhash v0.0.0-20191111030615-ed24d0179019 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20211103235746-7861aae1554b // indirect
-	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 )
