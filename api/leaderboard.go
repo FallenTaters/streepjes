@@ -53,6 +53,7 @@ func (l Leaderboard) ItemRanking(items map[string]int) (int, []LeaderboardRank) 
 			Member:       member.Member,
 			sortingValue: memberTotal,
 			Total:        strconv.Itoa(memberTotal),
+			ItemInfo:     member.Amounts,
 		}
 	}
 
@@ -74,5 +75,6 @@ type LeaderboardRank struct {
 	orderdomain.Member
 
 	Total        string
+	ItemInfo     map[string]int
 	sortingValue int
 }

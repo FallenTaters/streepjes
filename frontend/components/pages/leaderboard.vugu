@@ -7,15 +7,26 @@
         [form placeholder]
     </div>
 
-    <div style="grid-area: total;" class="large-text">
+    <h5 style="grid-area: total; padding-right: 75px;" class="right-align">
         Total: <span vg-content="c.Total"></span>
-    </div>
+    </h5>
 
     <div style="grid-area: list;" style="overflow:auto">
-        <div vg-for="i, rank := range c.Ranking" :class="`padding margin primary large-text round ` + rank.Member.Club.String()" style="display: flex; justify-content: space-between">
-            <span vg-content="strconv.Itoa(i+1) + `.`"></span>
-            <span vg-content="rank.Name"></span>
-            <span vg-content="rank.Total"></span>
+        <div
+            vg-for="i, rank := range c.Ranking"
+            :class="rank.Member.Club.String()"
+            @click="c.ShowExpansion[rank.Name] = !c.ShowExpansion[rank.Name]"
+        >
+            <button style="display: flex; justify-content: space-between" class="primary round responsive extra large-text margin">
+                <span vg-content="strconv.Itoa(i+1) + `.`"></span>
+                <span vg-content="rank.Name"></span>
+                <span>
+                    <span vg-content="rank.Total"></span>
+                    <i>arrow_drop_down</i>
+                </span>
+            </button>
+
+            <div vg-if="c.ShowExpansion[rank.Name]" class="small-text center-align" vg-for="_, itemInfo := range c.SortItemInfo(rank.ItemInfo)" vg-content="itemInfo.Msg"></div>
         </div>
     </div>
 </div>

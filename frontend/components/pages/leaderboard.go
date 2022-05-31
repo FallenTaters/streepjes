@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"sort"
 	"strconv"
 	"time"
 
@@ -15,6 +16,8 @@ type Leaderboard struct {
 	ItemWeights map[string]int
 
 	Leaderboard api.Leaderboard
+
+	ShowExpansion map[string]bool
 
 	// Display state
 	Total   string                `vugu:"data"`
@@ -45,6 +48,8 @@ func (l *Leaderboard) Init() {
 		`Wijn`:           1,
 		`Radler`:         0,
 	}
+
+	l.ShowExpansion = make(map[string]bool)
 
 	l.Refresh()
 }
@@ -93,4 +98,27 @@ func (l *Leaderboard) calcRanking() []api.LeaderboardRank {
 	}
 
 	return ranking
+}
+
+type MsgCount struct {
+	Msg   string
+	count int
+}
+
+func (l *Leaderboard) SortItemInfo(itemInfo map[string]int) []MsgCount {
+	out := make([]MsgCount, 0, len(itemInfo))
+	for name, count := range itemInfo {
+		if len(l.ItemWeights) == 0 || l.ItemWeights[name] > 0 {
+			out = append(out, MsgCount{
+				Msg:   strconv.Itoa(count) + ` ` + name,
+				count: count,
+			})
+		}
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].count > out[j].count
+	})
+
+	return out
 }
