@@ -2,16 +2,15 @@ package api
 
 import (
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
 type LeaderboardFilter struct {
-	Start      time.Time `json:"start"`
-	End        time.Time `json:"end"`
-	Gladiators bool      `json:"gladiators"`
-	Parabool   bool      `json:"parabool"`
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 type Leaderboard struct {
@@ -23,28 +22,45 @@ type Leaderboard struct {
 	Items map[string]int `json:"items"`
 }
 
-// ForItems makes a leaderboard ranking for multiple item names
-func (l Leaderboard) ForItems(items map[string]int) (int, []LeaderboardRank) {
-	total := 0
-	members := make([]LeaderboardRank, len(l.Members))
-
+func (l Leaderboard) MoneyRanking() (orderdomain.Price, []LeaderboardRank) {
+	ranking := make([]LeaderboardRank, len(l.Members))
 	for i, member := range l.Members {
-		members[i] = LeaderboardRank{
-			Member: member.Member,
-			Amount: 0,
-		}
-
-		for name, weight := range items {
-			total += member.Amounts[name] * weight
-			members[i].Amount += member.Amounts[name] * weight
+		ranking[i] = LeaderboardRank{
+			Member:       member.Member,
+			sortingValue: int(member.Total),
+			Total:        member.Total.String(),
 		}
 	}
 
-	sort.Slice(members, func(i, j int) bool {
-		return members[i].Amount < members[j].Amount
+	// sorting not needed?
+
+	return l.TotalPrice, ranking
+}
+
+// ItemRanking makes a leaderboard ranking for multiple item names
+func (l Leaderboard) ItemRanking(items map[string]int) (int, []LeaderboardRank) {
+	total := 0
+	ranking := make([]LeaderboardRank, len(l.Members))
+
+	for i, member := range l.Members {
+		var memberTotal int
+		for name, weight := range items {
+			total += member.Amounts[name] * weight
+			memberTotal += member.Amounts[name] * weight
+		}
+
+		ranking[i] = LeaderboardRank{
+			Member:       member.Member,
+			sortingValue: memberTotal,
+			Total:        strconv.Itoa(memberTotal),
+		}
+	}
+
+	sort.Slice(ranking, func(i, j int) bool {
+		return ranking[i].sortingValue > ranking[j].sortingValue
 	})
 
-	return total, members
+	return total, ranking
 }
 
 type LeaderboardMember struct {
@@ -57,5 +73,6 @@ type LeaderboardMember struct {
 type LeaderboardRank struct {
 	orderdomain.Member
 
-	Amount int `json:"amount"`
+	Total        string
+	sortingValue int
 }

@@ -212,12 +212,6 @@ func (s *service) GetLeaderboard(filter api.LeaderboardFilter) api.Leaderboard {
 		Start: filter.Start,
 		End:   filter.End,
 	}
-	if filter.Gladiators && !filter.Parabool {
-		orderFilter.Club = domain.ClubGladiators
-	}
-	if filter.Parabool && !filter.Gladiators {
-		orderFilter.Club = domain.ClubParabool
-	}
 
 	members := s.members.GetAll()
 	orders := s.orders.Filter(orderFilter)
@@ -241,16 +235,19 @@ func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) a
 
 		// attempt to unmarshal contents and count by item name
 		var lines []orderdomain.Line
-		if err := json.Unmarshal([]byte(o.Contents), &lines); err == nil {
-			if m, ok := counts[o.MemberID]; !ok || m == nil {
-				counts[o.MemberID] = make(map[string]int)
-			}
-
-			for _, line := range lines {
-				counts[o.MemberID][line.Item.Name] += line.Amount
-				totalCounts[line.Item.Name] += line.Amount
-			}
+		if err := json.Unmarshal([]byte(o.Contents), &lines); err != nil {
+			continue
 		}
+
+		if m, ok := counts[o.MemberID]; !ok || m == nil {
+			counts[o.MemberID] = make(map[string]int)
+		}
+
+		for _, line := range lines {
+			counts[o.MemberID][line.Item.Name] += line.Amount
+			totalCounts[line.Item.Name] += line.Amount
+		}
+
 	}
 
 	leaderboard := api.Leaderboard{

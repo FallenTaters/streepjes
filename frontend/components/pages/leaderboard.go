@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/FallenTaters/streepjes/api"
@@ -11,12 +12,13 @@ type Leaderboard struct {
 	Loading bool
 	Error   bool
 
-	Items []string
+	ItemWeights map[string]int
 
 	Leaderboard api.Leaderboard
 
-	Total string
-	Ranking []orderdomain.LeaderboardRank
+	// Display state
+	Total   string                `vugu:"data"`
+	Ranking []api.LeaderboardRank `vugu:"data"`
 }
 
 func (l *Leaderboard) Init() {
@@ -27,16 +29,68 @@ func (l *Leaderboard) Init() {
 	})
 
 	l.Leaderboard = leaderboard
+
+	// TODO make this adjustable ?
+	l.ItemWeights = map[string]int{
+		`Bier`:           1,
+		`Weizen glas`:    1,
+		`Pitcher`:        5,
+		`Weizen Pitcher`: 5,
+		`Flugel`:         1,
+		`Bier Barcie`:    1,
+		`Bier BarCie`:    1,
+		`Seltzer BarCie`: 1,
+		`Seltzer`:        1,
+		`Wine Bottle`:    5,
+		`Wijn`:           1,
+		`Radler`:         0,
+	}
+
+	l.Refresh()
 }
 
 func (l *Leaderboard) Refresh() {
+	if len(l.ItemWeights) == 0 {
+		total, ranking := l.Leaderboard.MoneyRanking()
+		l.Total = total.String()
+		l.Ranking = ranking
+		return
+	}
 
+	total, ranking := l.Leaderboard.ItemRanking(l.ItemWeights)
+	l.Total = strconv.Itoa(total)
+	l.Ranking = ranking
+	return
 }
 
-func (l *Leaderboard) Total() string {
-	if len(l.Items) == 0 {
+func (l *Leaderboard) calcTotal() string {
+	if len(l.ItemWeights) == 0 {
 		return l.Leaderboard.TotalPrice.String()
 	}
 
-	return l.
+	total := 0
+	for item, weight := range l.ItemWeights {
+		total += l.Leaderboard.Items[item] * weight
+	}
+
+	return strconv.Itoa(total)
+}
+
+func (l *Leaderboard) calcRanking() []api.LeaderboardRank {
+	ranking := make([]api.LeaderboardRank, 0, len(l.Leaderboard.Members))
+
+	for _, member := range l.Leaderboard.Members {
+		// money only
+		if len(l.ItemWeights) == 0 {
+			ranking = append(ranking, api.LeaderboardRank{
+				Total: member.Total.String(),
+			})
+			continue
+		}
+
+		// items/weights
+		l.Leaderboard.ItemRanking(l.ItemWeights)
+	}
+
+	return ranking
 }
