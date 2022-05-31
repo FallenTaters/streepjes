@@ -3,9 +3,11 @@ package pages
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/FallenTaters/streepjes/api"
+	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
 )
 
@@ -18,6 +20,8 @@ type Leaderboard struct {
 	Leaderboard api.Leaderboard
 
 	ShowExpansion map[string]bool
+
+	Gladiators, Parabool bool
 
 	// Display state
 	Total   string                `vugu:"data"`
@@ -49,6 +53,8 @@ func (l *Leaderboard) Init() {
 		`Radler`:         0,
 	}
 
+	l.Gladiators = true
+
 	l.ShowExpansion = make(map[string]bool)
 
 	l.Refresh()
@@ -58,46 +64,27 @@ func (l *Leaderboard) Refresh() {
 	if len(l.ItemWeights) == 0 {
 		total, ranking := l.Leaderboard.MoneyRanking()
 		l.Total = total.String()
-		l.Ranking = ranking
+		l.Ranking = l.FilterRanking(ranking)
 		return
 	}
 
 	total, ranking := l.Leaderboard.ItemRanking(l.ItemWeights)
 	l.Total = strconv.Itoa(total)
-	l.Ranking = ranking
+	l.Ranking = l.FilterRanking(ranking)
 	return
 }
 
-func (l *Leaderboard) calcTotal() string {
-	if len(l.ItemWeights) == 0 {
-		return l.Leaderboard.TotalPrice.String()
-	}
+func (l *Leaderboard) FilterRanking(ranking []api.LeaderboardRank) []api.LeaderboardRank {
+	newRanking := make([]api.LeaderboardRank, 0, len(ranking))
 
-	total := 0
-	for item, weight := range l.ItemWeights {
-		total += l.Leaderboard.Items[item] * weight
-	}
-
-	return strconv.Itoa(total)
-}
-
-func (l *Leaderboard) calcRanking() []api.LeaderboardRank {
-	ranking := make([]api.LeaderboardRank, 0, len(l.Leaderboard.Members))
-
-	for _, member := range l.Leaderboard.Members {
-		// money only
-		if len(l.ItemWeights) == 0 {
-			ranking = append(ranking, api.LeaderboardRank{
-				Total: member.Total.String(),
-			})
-			continue
+	for _, rank := range ranking {
+		if (rank.Club == domain.ClubGladiators && l.Gladiators) ||
+			(rank.Club == domain.ClubParabool && l.Parabool) {
+			newRanking = append(newRanking, rank)
 		}
-
-		// items/weights
-		l.Leaderboard.ItemRanking(l.ItemWeights)
 	}
 
-	return ranking
+	return newRanking
 }
 
 type MsgCount struct {
@@ -117,6 +104,10 @@ func (l *Leaderboard) SortItemInfo(itemInfo map[string]int) []MsgCount {
 	}
 
 	sort.Slice(out, func(i, j int) bool {
+		if out[i].count == out[j].count {
+			return strings.Compare(out[i].Msg, out[j].Msg) < 0
+		}
+
 		return out[i].count > out[j].count
 	})
 

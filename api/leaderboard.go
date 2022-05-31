@@ -3,6 +3,7 @@ package api
 import (
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
@@ -29,6 +30,7 @@ func (l Leaderboard) MoneyRanking() (orderdomain.Price, []LeaderboardRank) {
 			Member:       member.Member,
 			sortingValue: int(member.Total),
 			Total:        member.Total.String(),
+			ItemInfo:     member.Amounts,
 		}
 	}
 
@@ -40,24 +42,32 @@ func (l Leaderboard) MoneyRanking() (orderdomain.Price, []LeaderboardRank) {
 // ItemRanking makes a leaderboard ranking for multiple item names
 func (l Leaderboard) ItemRanking(items map[string]int) (int, []LeaderboardRank) {
 	total := 0
-	ranking := make([]LeaderboardRank, len(l.Members))
+	ranking := make([]LeaderboardRank, 0, len(l.Members))
 
-	for i, member := range l.Members {
+	for _, member := range l.Members {
 		var memberTotal int
 		for name, weight := range items {
 			total += member.Amounts[name] * weight
 			memberTotal += member.Amounts[name] * weight
 		}
 
-		ranking[i] = LeaderboardRank{
+		if memberTotal == 0 {
+			continue
+		}
+
+		ranking = append(ranking, LeaderboardRank{
 			Member:       member.Member,
 			sortingValue: memberTotal,
 			Total:        strconv.Itoa(memberTotal),
 			ItemInfo:     member.Amounts,
-		}
+		})
 	}
 
 	sort.Slice(ranking, func(i, j int) bool {
+		if ranking[i].sortingValue == ranking[j].sortingValue {
+			return strings.Compare(ranking[i].Name, ranking[j].Name) < 0
+		}
+
 		return ranking[i].sortingValue > ranking[j].sortingValue
 	})
 
