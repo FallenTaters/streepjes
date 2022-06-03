@@ -52,7 +52,7 @@
                 <beercss:Input
                     id="item-form-name" name="item-name" type="text"
                     :Label="`Item Name`" :Value="c.ItemName"
-                    @Input="c.CategoryName = string(event)">
+                    @Input="c.ItemName = string(event)">
                 </beercss:Input>
                 <beercss:Input
                     id="item-form-price-gladiators" name="item-price-gladiators" type="number"
