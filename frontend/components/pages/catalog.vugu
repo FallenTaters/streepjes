@@ -24,31 +24,57 @@
     <div style="grid-area: form">
         <h4 vg-content="c.FormTitle()"></h4>
 
-        <form vg-if="c.ShowCategoryForm()" @submit="event.PreventDefault(); c.SubmitCategoryForm()">
-            <beercss:Input
-                id="category-form-name" name="category-name" type="text"
-                :Label="`Category Name`" :Value="c.CategoryName"
-                @Input="c.CategoryName = string(event)">
-            </beercss:Input>
-            <button :disabled="c.LoadingForm" type="submit" class="responsive">
-                <i>save</i>
-                <span>Save</span>
+        <div vg-if="c.ShowCategoryForm()">
+            <form @submit="event.PreventDefault(); c.SubmitCategoryForm()" class="no-margin">
+                <beercss:Input
+                    id="category-form-name" name="category-name" type="text"
+                    :Label="`Category Name`" :Value="c.CategoryName"
+                    @Input="c.CategoryName = string(event)">
+                </beercss:Input>
+                <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
+                    <i>save</i>
+                    <span>Save</span>
+                </button>
+            </form>
+            <button vg-if="!c.NewCategory" @click="c.DeleteCategory()" class="responsive error small-margin">
+                <i>delete</i>
+                <span>Delete</span>
             </button>
-        </form>
+        </div>
 
-        <form vg-if="c.ShowItemForm()" @submit="event.PreventDefault(); c.SubmitItemForm()">
-            <!-- TODO -->
-            <beercss:Select>Category Select Here </beercss:Select>
-            <beercss:Input
-                id="item-form-name" name="item-name" type="text"
-                :Label="`Item Name`" :Value="c.ItemName"
-                @Input="c.CategoryName = string(event)">
-            </beercss:Input>
-            <button :disabled="c.LoadingForm" type="submit" class="responsive">
-                <i>save</i>
-                <span>Save</span>
+        <div vg-if="c.ShowItemForm()">
+            <form @submit="event.PreventDefault(); c.SubmitItemForm()" class="no-margin">
+                <beercss:Select
+                    :Options="c.CategoryOptions()"
+                    :Label="`Choose Category`"
+                    @Select="c.ChooseCategory(event.(int))"
+                ></beercss:Select>
+                <beercss:Input
+                    id="item-form-name" name="item-name" type="text"
+                    :Label="`Item Name`" :Value="c.ItemName"
+                    @Input="c.CategoryName = string(event)">
+                </beercss:Input>
+                <beercss:Input
+                    id="item-form-price-gladiators" name="item-price-gladiators" type="number"
+                    :Label="`Price Gladiators (¢)`" :Value="strconv.Itoa(int(c.PriceGladiators))"
+                    @Input="v, _ := strconv.Atoi(string(event)); c.PriceGladiators = orderdomain.Price(v)">
+                </beercss:Input>
+                <beercss:Input
+                    id="item-form-price-parabool" name="item-price-parabool" type="number"
+                    :Label="`Price Parabool (¢)`" :Value="strconv.Itoa(int(c.PriceParabool))"
+                    @Input="v, _ := strconv.Atoi(string(event)); c.PriceParabool = orderdomain.Price(v)">
+                </beercss:Input>
+                <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
+                    <i>save</i>
+                    <span>Save</span>
+                </button>
+            </form>
+            <button vg-if="!c.NewItem" @click="c.DeleteItem()" class="responsive error small-margin">
+                <i>delete</i>
+                <span>Delete</span>
             </button>
-        </form>
+        </div>
+
         <ui:Loading vg-if="c.LoadingForm"></ui:Loading>
         <article class="error" vg-if="c.FormError">That didn't work.</article>
     </div>
@@ -67,6 +93,7 @@
 <script type="application/x-go">
 import (
     "fmt"
+    "strconv"
 
     "github.com/FallenTaters/streepjes/frontend/components/catalog"
     "github.com/FallenTaters/streepjes/domain/orderdomain"

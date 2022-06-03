@@ -6,9 +6,11 @@ import (
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/components/beercss"
 	"github.com/FallenTaters/streepjes/frontend/global"
-	"github.com/FallenTaters/streepjes/frontend/jscall/window"
 )
+
+// TODO: unwanted behavior from input. Currently, editing the text in an input field and then selecting a different category doesn't reset the content of the field
 
 type Catalog struct {
 	Loading bool
@@ -72,6 +74,8 @@ func (c *Catalog) Compute() {
 }
 
 func (c *Catalog) reset() {
+	c.FormError = false
+
 	c.NewCategory = false
 	c.NewItem = false
 	c.SelectedItem = orderdomain.Item{}
@@ -85,14 +89,10 @@ func (c *Catalog) reset() {
 }
 
 func (c *Catalog) OnCategoryClick(category orderdomain.Category) {
-	if c.SelectedCategory == category && c.SelectedItem == (orderdomain.Item{}) {
-		// already editing this category
-		return
-	}
-
 	c.reset()
 
 	c.SelectedCategory = category
+
 	c.CategoryName = category.Name
 }
 
@@ -103,12 +103,25 @@ func (c *Catalog) OnCategoryClickNew() {
 }
 
 func (c *Catalog) OnItemClick(item orderdomain.Item) {
-	c.NewItem = false
+	selCat := c.SelectedCategory
+
+	c.reset()
+
 	c.SelectedItem = item
+	c.SelectedCategory = selCat
+
+	c.ItemName = item.Name
+	c.CategoryID = item.CategoryID
+	c.PriceGladiators = item.PriceGladiators
+	c.PriceParabool = item.PriceParabool
 }
 
 func (c *Catalog) OnItemClickNew() {
-	c.SelectedItem = orderdomain.Item{}
+	selCat := c.SelectedCategory
+
+	c.reset()
+
+	c.SelectedCategory = selCat
 	c.NewItem = true
 }
 
@@ -140,11 +153,114 @@ func (c *Catalog) FormTitle() string {
 }
 
 func (c *Catalog) SubmitCategoryForm() {
-	// TODO
-	window.Alert(`submit category form`)
+	c.FormError = false
+	c.LoadingForm = true
+
+	go func() {
+		var err error
+
+		if c.NewCategory {
+			err = backend.PostNewCategory(orderdomain.Category{
+				Name: c.CategoryName,
+			})
+		} else {
+			err = backend.PostUpdateCategory(orderdomain.Category{
+				ID:   c.SelectedCategory.ID,
+				Name: c.CategoryName,
+			})
+		}
+		c.LoadingForm = false
+		defer global.LockAndRender()()
+		if err != nil {
+			c.FormError = true
+			return
+		}
+
+		c.Init()
+	}()
 }
 
 func (c *Catalog) SubmitItemForm() {
-	// TODO
-	window.Alert(`submit item form`)
+	c.FormError = false
+	c.LoadingForm = true
+
+	go func() {
+		var err error
+
+		if c.NewItem {
+			err = backend.PostNewItem(orderdomain.Item{
+				CategoryID:      c.CategoryID,
+				Name:            c.ItemName,
+				PriceGladiators: c.PriceGladiators,
+				PriceParabool:   c.PriceParabool,
+			})
+		} else {
+			err = backend.PostUpdateItem(orderdomain.Item{
+				ID:              c.SelectedItem.ID,
+				CategoryID:      c.CategoryID,
+				Name:            c.ItemName,
+				PriceGladiators: c.PriceGladiators,
+				PriceParabool:   c.PriceParabool,
+			})
+		}
+		c.LoadingForm = false
+		defer global.LockAndRender()()
+		if err != nil {
+			c.FormError = true
+			return
+		}
+
+		c.Init()
+	}()
+}
+
+func (c *Catalog) CategoryOptions() []beercss.Option {
+	options := make([]beercss.Option, len(c.Categories))
+
+	for i, cat := range c.Categories {
+		options[i] = beercss.Option{
+			Label: cat.Name,
+			Value: cat.ID,
+		}
+	}
+
+	return options
+}
+
+func (c *Catalog) ChooseCategory(id int) {
+	c.CategoryID = id
+}
+
+func (c *Catalog) DeleteCategory() {
+	c.FormError = false
+	c.LoadingForm = true
+
+	go func() {
+		err := backend.PostDeleteCategory(c.SelectedCategory.ID)
+		c.LoadingForm = false
+		defer global.LockAndRender()()
+		if err != nil {
+			c.FormError = true
+			return
+		}
+
+		c.Init()
+	}()
+}
+
+func (c *Catalog) DeleteItem() {
+	c.FormError = false
+	c.LoadingForm = true
+
+	go func() {
+		err := backend.PostDeleteItem(c.SelectedItem.ID)
+		c.LoadingForm = false
+		defer global.LockAndRender()()
+		if err != nil {
+			c.FormError = true
+			return
+		}
+
+		c.Init()
+	}()
 }
