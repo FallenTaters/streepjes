@@ -104,3 +104,106 @@ func (cr catalogRepo) CreateCategory(category orderdomain.Category) (int, error)
 
 	return int(id), nil
 }
+
+func (cr catalogRepo) getCategory(id int) (orderdomain.Category, bool) {
+	row := cr.db.QueryRow(`SELECT id, name FROM categories WHERE id = ?;`, id)
+
+	var cat orderdomain.Category
+	if err := row.Scan(&cat.ID, &cat.Name); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return cat, false
+		}
+
+		panic(err)
+	}
+
+	return cat, true
+}
+
+func (cr catalogRepo) UpdateCategory(cat orderdomain.Category) error {
+	res, err := cr.db.Exec(`UPDATE categories SET name = ? WHERE id = ?;`, cat.Name, cat.ID)
+	if err != nil {
+		return repo.ErrCategoryNameTaken
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if affected == 0 {
+		return repo.ErrCategoryNotFound
+	}
+
+	return nil
+}
+
+func (cr catalogRepo) DeleteCategory(id int) error {
+	// check for existing items
+	rows, err := cr.db.Query(`SELECT * from items WHERE category_id = ?;`, id)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	if rows.Next() {
+		return repo.ErrCategoryHasItems
+	}
+
+	// exec delete
+	res, err := cr.db.Exec(`DELETE FROM categories WHERE id = ?`, id)
+	if err != nil {
+		panic(err)
+	}
+
+	// check if actually found
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if affected == 0 {
+		return repo.ErrCategoryNotFound
+	}
+
+	return nil
+}
+
+func (cr catalogRepo) UpdateItem(item orderdomain.Item) error {
+	if _, exists := cr.getCategory(item.CategoryID); !exists {
+		return repo.ErrCategoryNotFound
+	}
+
+	res, err := cr.db.Exec(`UPDATE items SET category_id = ?, name = ?, price_parabool = ?, price_gladiators WHERE id = ?;`,
+		item.CategoryID, item.Name, item.PriceParabool, item.PriceGladiators, item.ID)
+	if err != nil {
+		return repo.ErrItemNameTaken
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if affected == 0 {
+		return repo.ErrItemNotFound
+	}
+
+	return nil
+}
+
+func (cr catalogRepo) DeleteItem(id int) error {
+	res, err := cr.db.Exec(`DELETE FROM items WHERE id = ?`, id)
+	if err != nil {
+		panic(err)
+	}
+
+	// check if actually found
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if affected == 0 {
+		return repo.ErrItemNotFound
+	}
+
+	return nil
+}

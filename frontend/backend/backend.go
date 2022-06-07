@@ -42,7 +42,7 @@ func PostNewCategory(category orderdomain.Category) error {
 }
 
 func PostUpdateCategory(category orderdomain.Category) error {
-	return post(`/category/`+strconv.Itoa(category.ID), category, nil)
+	return post(`/category/update`, category, nil)
 }
 
 func PostDeleteCategory(id int) error {
@@ -54,7 +54,7 @@ func PostNewItem(item orderdomain.Item) error {
 }
 
 func PostUpdateItem(item orderdomain.Item) error {
-	return post(`/item/`+strconv.Itoa(item.ID), item, nil)
+	return post(`/item/update`, item, nil)
 }
 
 func PostDeleteItem(id int) error {

@@ -33,6 +33,30 @@ type Service interface {
 	// BartenderDeleteOrder marks an order as deleted for a bartender
 	// if the bartender does not have access or if the order is not found, it returns false
 	BartenderDeleteOrder(bartenderID, orderID int) bool
+
+	// NewCategory creates a new category
+	// It can return repo.ErrCategoryNameEmty or repo.ErrCategoryNameTaken
+	NewCategory(orderdomain.Category) error
+
+	// UpdateCategory updates an existing category.
+	// It can return repo.ErrCategoryNotFound, repo.ErrCategoryNameEmpty or repo.ErrCategoryNameTaken
+	UpdateCategory(orderdomain.Category) error
+
+	// DeleteCategory deletes an existing category.
+	// It can return repo.ErrCategoryNotFound or repo.ErrCategoryHasItems
+	DeleteCategory(id int) error
+
+	// NewItem creates a new item.
+	// It can return repo.ErrCategoryNotFound, repo.ErrItemNameEmpty or repo.ErrItemNameTaken
+	NewItem(orderdomain.Item) error
+
+	// UpdateItem updates an existing item.
+	// It can return repo.ErrItemNameTaken, repo.ErrItemNameEmpty, repo.ErrCategoryNotFound, or repo.ErrItemNotFound
+	UpdateItem(orderdomain.Item) error
+
+	// DeleteItem deletes an item.
+	// It can return repo.ErrItemNotFound
+	DeleteItem(id int) error
 }
 
 func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
@@ -128,4 +152,46 @@ func (s *service) BartenderDeleteOrder(bartenderID, orderID int) bool {
 	}
 
 	return s.orders.Delete(order.ID)
+}
+
+func (s *service) NewCategory(cat orderdomain.Category) error {
+	if cat.Name == `` {
+		return repo.ErrCategoryNameEmpty
+	}
+
+	_, err := s.catalog.CreateCategory(cat)
+	return err
+}
+
+func (s *service) UpdateCategory(update orderdomain.Category) error {
+	if update.Name == `` {
+		return repo.ErrCategoryNameEmpty
+	}
+
+	return s.catalog.UpdateCategory(update)
+}
+
+func (s *service) DeleteCategory(id int) error {
+	return s.catalog.DeleteCategory(id)
+}
+
+func (s *service) NewItem(item orderdomain.Item) error {
+	if item.Name == `` {
+		return repo.ErrItemNameEmpty
+	}
+
+	_, err := s.catalog.CreateItem(item)
+	return err
+}
+
+func (s *service) UpdateItem(update orderdomain.Item) error {
+	if update.Name == `` {
+		return repo.ErrItemNameEmpty
+	}
+
+	return s.catalog.UpdateItem(update)
+}
+
+func (s *service) DeleteItem(id int) error {
+	return s.catalog.DeleteItem(id)
 }
