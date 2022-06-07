@@ -8,9 +8,11 @@ import (
 	"github.com/FallenTaters/streepjes/frontend/backend"
 	"github.com/FallenTaters/streepjes/frontend/components/beercss"
 	"github.com/FallenTaters/streepjes/frontend/global"
+	"github.com/FallenTaters/streepjes/frontend/jscall/window"
 )
 
 // TODO: unwanted behavior from input. Currently, editing the text in an input field and then selecting a different category doesn't reset the content of the field
+// TODO: category select is not (always?) filled when selecting an item. currently still works but might cause issues in combination with the above issue.
 
 type Catalog struct {
 	Loading bool
@@ -41,6 +43,8 @@ type Catalog struct {
 func (c *Catalog) Init() {
 	c.Loading = true
 	c.Error = false
+
+	c.reset()
 
 	go func() {
 		catalog, err := backend.GetCatalog()
@@ -232,6 +236,10 @@ func (c *Catalog) ChooseCategory(id int) {
 }
 
 func (c *Catalog) DeleteCategory() {
+	if !window.Confirm(`Are you sure you want to delete this category?`) {
+		return
+	}
+
 	c.FormError = false
 	c.LoadingForm = true
 
@@ -249,6 +257,10 @@ func (c *Catalog) DeleteCategory() {
 }
 
 func (c *Catalog) DeleteItem() {
+	if !window.Confirm(`Are you sure you want to delete this item?`) {
+		return
+	}
+
 	c.FormError = false
 	c.LoadingForm = true
 

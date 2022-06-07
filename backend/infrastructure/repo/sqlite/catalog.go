@@ -172,7 +172,7 @@ func (cr catalogRepo) UpdateItem(item orderdomain.Item) error {
 		return repo.ErrCategoryNotFound
 	}
 
-	res, err := cr.db.Exec(`UPDATE items SET category_id = ?, name = ?, price_parabool = ?, price_gladiators WHERE id = ?;`,
+	res, err := cr.db.Exec(`UPDATE items SET category_id = ?, name = ?, price_parabool = ?, price_gladiators = ? WHERE id = ?;`,
 		item.CategoryID, item.Name, item.PriceParabool, item.PriceGladiators, item.ID)
 	if err != nil {
 		return repo.ErrItemNameTaken
