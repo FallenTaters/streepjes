@@ -32,7 +32,7 @@ func New(static Static, authService auth.Service, orderService order.Service) ht
 	bartenderRoutes(bar, orderService)
 
 	admin := auth.Group(`/admin`, permissionMiddleware(authdomain.PermissionAdminStuff))
-	adminRoutes(admin, authService)
+	adminRoutes(admin, authService, orderService)
 
 	// must go last because of https://github.com/labstack/echo/issues/2141
 	publicRoutes(r, static, authService)

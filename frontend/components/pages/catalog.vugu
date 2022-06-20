@@ -1,0 +1,101 @@
+<div class="catalog-grid">
+    <h3>Catalog</h3>
+    <div style="grid-area: categories">
+        <h4>Categories</h4>
+        <catalog:Categories
+            :Categories="c.Categories"
+            :SelectedCategoryID="c.SelectedCategory.ID"
+            :OnClick="c.OnCategoryClick"
+            :OnClickNew="c.OnCategoryClickNew"
+        ></catalog:Categories>
+    </div>
+
+    <div style="grid-area: items">
+        <h4>Items</h4>
+        <catalog:Items
+            vg-if="c.SelectedCategory != (orderdomain.Category{})"
+            :Items="c.DisplayItems"
+            :SelectedItemID="c.SelectedItem.ID"
+            :OnClick="c.OnItemClick"
+            :OnClickNew="c.OnItemClickNew"
+        ></catalog:Items>
+    </div>
+
+    <div style="grid-area: form">
+        <h4 vg-content="c.FormTitle()"></h4>
+
+        <div vg-if="c.ShowCategoryForm()">
+            <form @submit="event.PreventDefault(); c.SubmitCategoryForm()" class="no-margin">
+                <beercss:Input
+                    id="category-form-name" name="category-name" type="text"
+                    :Label="`Category Name`" :Value="c.CategoryName"
+                    @Input="c.CategoryName = string(event)">
+                </beercss:Input>
+                <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
+                    <i>save</i>
+                    <span>Save</span>
+                </button>
+            </form>
+            <button vg-if="!c.NewCategory" @click="c.DeleteCategory()" class="responsive error small-margin">
+                <i>delete</i>
+                <span>Delete</span>
+            </button>
+        </div>
+
+        <div vg-if="c.ShowItemForm()">
+            <form @submit="event.PreventDefault(); c.SubmitItemForm()" class="no-margin">
+                <beercss:Select
+                    :Options="c.CategoryOptions()"
+                    :Label="`Choose Category`"
+                    @Select="c.ChooseCategory(event.(int))"
+                ></beercss:Select>
+                <beercss:Input
+                    id="item-form-name" name="item-name" type="text"
+                    :Label="`Item Name`" :Value="c.ItemName"
+                    @Input="c.ItemName = string(event)">
+                </beercss:Input>
+                <beercss:Input
+                    id="item-form-price-gladiators" name="item-price-gladiators" type="number"
+                    :Label="`Price Gladiators (¢)`" :Value="strconv.Itoa(int(c.PriceGladiators))"
+                    @Input="v, _ := strconv.Atoi(string(event)); c.PriceGladiators = orderdomain.Price(v)">
+                </beercss:Input>
+                <beercss:Input
+                    id="item-form-price-parabool" name="item-price-parabool" type="number"
+                    :Label="`Price Parabool (¢)`" :Value="strconv.Itoa(int(c.PriceParabool))"
+                    @Input="v, _ := strconv.Atoi(string(event)); c.PriceParabool = orderdomain.Price(v)">
+                </beercss:Input>
+                <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
+                    <i>save</i>
+                    <span>Save</span>
+                </button>
+            </form>
+            <button vg-if="!c.NewItem" @click="c.DeleteItem()" class="responsive error small-margin">
+                <i>delete</i>
+                <span>Delete</span>
+            </button>
+        </div>
+
+        <ui:Loading vg-if="c.LoadingForm"></ui:Loading>
+        <article class="error" vg-if="c.FormError">That didn't work.</article>
+    </div>
+</div>
+
+<style>
+.catalog-grid {
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows:  100px 1fr;
+    grid-template-areas: 'title title title' 'categories items form';
+}
+</style>
+
+<script type="application/x-go">
+import (
+    "fmt"
+    "strconv"
+
+    "github.com/FallenTaters/streepjes/frontend/components/catalog"
+    "github.com/FallenTaters/streepjes/domain/orderdomain"
+)
+</script>

@@ -1,12 +1,17 @@
 <div>
     <button
+        vg-if="c.OnClickNew != nil"
+        class="responsive extra small-margin border"
+        @click="c.OnClickNew()"
+    >+</button>
+    <button
         vg-for="_, item := range c.Items"
         :class="`responsive extra small-margin ` + c.classes(item)"
         @click="c.OnClick(item)"
     >
         <div class="row no-wrap">
             <div class="col" vg-content="item.Name"></div>
-            <div class="col min" vg-content="item.Price(store.Order.Club).String()"></div>
+            <div vg-if="!c.HidePrice" class="col min" vg-content="item.Price(store.Order.Club).String()"></div>
         </div>
     </button>
 </div>

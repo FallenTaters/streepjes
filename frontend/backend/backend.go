@@ -37,6 +37,30 @@ func GetCatalog() (api.Catalog, error) {
 	return catalog, get(`/catalog`, &catalog)
 }
 
+func PostNewCategory(category orderdomain.Category) error {
+	return post(`/admin/category/new`, category, nil)
+}
+
+func PostUpdateCategory(category orderdomain.Category) error {
+	return post(`/admin/category/update`, category, nil)
+}
+
+func PostDeleteCategory(id int) error {
+	return post(`/admin/category/`+strconv.Itoa(id)+`/delete`, nil, nil)
+}
+
+func PostNewItem(item orderdomain.Item) error {
+	return post(`/admin/item/new`, item, nil)
+}
+
+func PostUpdateItem(item orderdomain.Item) error {
+	return post(`/admin/item/update`, item, nil)
+}
+
+func PostDeleteItem(id int) error {
+	return post(`/admin/item/`+strconv.Itoa(id)+`/delete`, nil, nil)
+}
+
 func GetMembers() ([]orderdomain.Member, error) {
 	var members []orderdomain.Member
 	return members, get(`/members`, &members)

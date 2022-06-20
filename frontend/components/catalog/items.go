@@ -12,6 +12,8 @@ type Items struct {
 	Items          []orderdomain.Item
 	SelectedItemID int
 	OnClick        func(orderdomain.Item)
+	OnClickNew     func()
+	HidePrice      bool
 }
 
 func (i *Items) Compute(ctx vugu.ComputeCtx) {

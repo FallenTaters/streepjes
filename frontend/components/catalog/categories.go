@@ -12,6 +12,8 @@ type Categories struct {
 	Categories         []orderdomain.Category     `vugu:"data"`
 	SelectedCategoryID int                        `vugu:"data"`
 	OnClick            func(orderdomain.Category) `vugu:"data"`
+
+	OnClickNew func() `vugu:"data"`
 }
 
 func (c *Categories) Compute(ctx vugu.ComputeCtx) {
