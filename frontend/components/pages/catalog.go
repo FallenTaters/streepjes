@@ -11,9 +11,6 @@ import (
 	"github.com/FallenTaters/streepjes/frontend/jscall/window"
 )
 
-// TODO: unwanted behavior from input. Currently, editing the text in an input field and then selecting a different category doesn't reset the content of the field
-// TODO: category select is not (always?) filled when selecting an item. currently still works but might cause issues in combination with the above issue.
-
 type Catalog struct {
 	Loading bool
 	Error   bool

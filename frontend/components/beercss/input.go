@@ -50,6 +50,10 @@ func (i *Input) HandleChange(event vugu.DOMEvent) {
 
 // Replace with Rendered() once https://github.com/vugu/vugu/issues/224 is resolved, no lock needed
 func (i *Input) Compute(vugu.ComputeCtx) {
+	if id, ok := i.AttrMap[`id`].(string); ok && id != `` {
+		i.ID = id
+	}
+
 	go func() {
 		defer global.LockOnly()()
 
