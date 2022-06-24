@@ -17,29 +17,24 @@ const (
 
 type OrderStore struct {
 	Club   domain.Club
-	Lines  []Orderline
+	Lines  []orderdomain.Line
 	Member orderdomain.Member
 }
 
 var Order = OrderStore{
 	Club:   domain.ClubGladiators,
 	Lines:  nil,
-	Member: orderdomain.Member{},
+	Member: orderdomain.Member{}, //nolint:exhaustruct
 }
 
-type Orderline struct {
-	Item   orderdomain.Item
-	Amount int
-}
-
-func (ol Orderline) Price() orderdomain.Price {
-	return ol.Item.Price(Order.Club).Times(ol.Amount)
+func OrderlinePrice(ol orderdomain.Line) orderdomain.Price {
+	return ol.Price(Order.Club)
 }
 
 func (os *OrderStore) CalculateTotal() orderdomain.Price {
 	var total orderdomain.Price = 0
 	for _, itemAmount := range os.Lines {
-		total += itemAmount.Item.Price(os.Club) * orderdomain.Price(itemAmount.Amount)
+		total += itemAmount.Item.Price(os.Club).Times(itemAmount.Amount)
 	}
 
 	return total
@@ -53,7 +48,7 @@ func (os *OrderStore) AddItem(item orderdomain.Item) {
 		}
 	}
 
-	os.Lines = append(os.Lines, Orderline{
+	os.Lines = append(os.Lines, orderdomain.Line{
 		Item:   item,
 		Amount: 1,
 	})
@@ -107,7 +102,7 @@ func (os *OrderStore) Contents() string {
 }
 
 func (os *OrderStore) Make() orderdomain.Order {
-	return orderdomain.Order{ //nolint:exhaustivestruct
+	return orderdomain.Order{ //nolint:exhaustivestruct,exhaustruct
 		Club:     os.Club,
 		MemberID: os.Member.ID,
 		Contents: os.Contents(),
@@ -118,5 +113,5 @@ func (os *OrderStore) Make() orderdomain.Order {
 
 func (os *OrderStore) Clear() {
 	os.Lines = nil
-	os.Member = orderdomain.Member{}
+	os.Member = orderdomain.Member{} //nolint:exhaustruct
 }

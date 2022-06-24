@@ -130,3 +130,8 @@ func PostEditUser(user api.UserWithPassword) error {
 func PostDeleteUser(id int) error {
 	return post(fmt.Sprintf(`/admin/users/%d/delete`, id), nil, nil)
 }
+
+func GetLeaderboard(payload api.LeaderboardFilter) (api.Leaderboard, error) {
+	var leaderboard api.Leaderboard
+	return leaderboard, post(`/leaderboard`, payload, &leaderboard)
+}

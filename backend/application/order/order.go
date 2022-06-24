@@ -1,8 +1,10 @@
 package order
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/FallenTaters/streepjes/api"
@@ -57,6 +59,9 @@ type Service interface {
 	// DeleteItem deletes an item.
 	// It can return repo.ErrItemNotFound
 	DeleteItem(id int) error
+
+	// GetLeaderboard makes a leaderboard, the members will be pre-sorted by amount
+	GetLeaderboard(api.LeaderboardFilter) api.Leaderboard
 }
 
 func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
@@ -82,13 +87,16 @@ func (s *service) GetMemberDetails(id int) (api.MemberDetails, bool) {
 
 	member, ok := s.members.Get(id)
 	if !ok {
-		return api.MemberDetails{}, false
+		return api.MemberDetails{}, false //nolint:exhaustruct
 	}
 	memberDetails.Member = member
 
-	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+	month := orderdomain.CurrentMonth()
+
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct,exhaustruct
 		MemberID:  id,
-		Month:     orderdomain.CurrentMonth(),
+		Start:     month.Start(),
+		End:       month.End(),
 		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
 
@@ -107,9 +115,12 @@ func (s *service) GetCatalog() api.Catalog {
 }
 
 func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
-	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+	month := orderdomain.CurrentMonth()
+
+	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct,exhaustruct
 		BartenderID: id,
-		Month:       orderdomain.MonthOf(time.Now()),
+		Start:       month.Start(),
+		End:         month.End(),
 	})
 }
 
@@ -194,4 +205,67 @@ func (s *service) UpdateItem(update orderdomain.Item) error {
 
 func (s *service) DeleteItem(id int) error {
 	return s.catalog.DeleteItem(id)
+}
+
+func (s *service) GetLeaderboard(filter api.LeaderboardFilter) api.Leaderboard {
+	orderFilter := repo.OrderFilter{ //nolint:exhaustruct,exhaustivestruct
+		Start: filter.Start,
+		End:   filter.End,
+	}
+
+	members := s.members.GetAll()
+	orders := s.orders.Filter(orderFilter)
+
+	return makeLeaderboard(members, orders)
+}
+
+func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) api.Leaderboard {
+	var total orderdomain.Price
+	totals := make(map[int]orderdomain.Price)
+	counts := make(map[int]map[string]int)
+	totalCounts := make(map[string]int)
+
+	for _, o := range orders {
+		if o.Status == orderdomain.StatusCancelled {
+			continue
+		}
+
+		total += o.Price
+		totals[o.MemberID] += o.Price
+
+		// attempt to unmarshal contents and count by item name
+		var lines []orderdomain.Line
+		if err := json.Unmarshal([]byte(o.Contents), &lines); err != nil {
+			continue
+		}
+
+		if m, ok := counts[o.MemberID]; !ok || m == nil {
+			counts[o.MemberID] = make(map[string]int)
+		}
+
+		for _, line := range lines {
+			counts[o.MemberID][line.Item.Name] += line.Amount
+			totalCounts[line.Item.Name] += line.Amount
+		}
+	}
+
+	leaderboard := api.Leaderboard{
+		TotalPrice: total,
+		Members:    make([]api.LeaderboardMember, 0, len(members)),
+		Items:      totalCounts,
+	}
+
+	for _, member := range members {
+		leaderboard.Members = append(leaderboard.Members, api.LeaderboardMember{
+			Member:  member,
+			Total:   totals[member.ID],
+			Amounts: counts[member.ID],
+		})
+	}
+
+	sort.Slice(leaderboard.Members, func(i, j int) bool {
+		return leaderboard.Members[i].Total >= leaderboard.Members[j].Total
+	})
+
+	return leaderboard
 }

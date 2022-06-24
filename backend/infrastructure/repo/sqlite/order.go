@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain"
@@ -79,7 +80,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 	return int(id), nil
 }
 
-func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,cyclop
+func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,gocyclo,cyclop
 	q := `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
 		`O.price, O.order_time, O.status, O.status_time FROM orders O `
 	var conditions []string
@@ -90,10 +91,10 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 		args = append(args, filter.BartenderID)
 	}
 
-	// if filter.Club != nil {
-	// 	conditions = append(conditions, `O.club = ?`)
-	// 	args = append(args, *filter.Club)
-	// }
+	if filter.Club != domain.ClubUnknown {
+		conditions = append(conditions, `O.club = ?`)
+		args = append(args, filter.Club)
+	}
 
 	if len(filter.StatusNot) > 0 {
 		conditions = append(conditions, `O.status NOT IN (?`+strings.Repeat(`,?`, len(filter.StatusNot)-1)+`)`)
@@ -107,12 +108,14 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 		args = append(args, filter.MemberID)
 	}
 
-	if filter.Month != (orderdomain.Month{}) {
+	if filter.Start != (time.Time{}) {
 		conditions = append(conditions, `O.order_time >= ?`)
-		args = append(args, filter.Month.Time())
+		args = append(args, filter.Start)
+	}
 
+	if filter.End != (time.Time{}) {
 		conditions = append(conditions, `O.order_time < ?`)
-		args = append(args, filter.Month.Time().AddDate(0, 1, 0))
+		args = append(args, filter.End)
 	}
 
 	if len(conditions) > 0 {

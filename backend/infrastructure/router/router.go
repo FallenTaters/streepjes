@@ -49,7 +49,7 @@ func recoverMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 
 			fmt.Fprintf(os.Stderr, "(%s %s) panic: %s\n", c.Request().Method, c.Request().URL.Path, fmt.Sprint(v))
-			fmt.Fprintf(os.Stderr, getStack())
+			fmt.Fprint(os.Stderr, getStack())
 			fmt.Println()
 
 			c.Error(nil)
@@ -80,6 +80,7 @@ func readJSON[T any](c echo.Context) (T, bool) {
 	var t T
 	err := json.NewDecoder(c.Request().Body).Decode(&t)
 	if err != nil {
+		fmt.Println(err) // TODO: introduce optional logging to a file ? perhaps make a global/log package
 		_ = c.NoContent(http.StatusBadRequest)
 		return t, false
 	}
