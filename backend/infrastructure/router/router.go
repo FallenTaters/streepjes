@@ -49,7 +49,7 @@ func recoverMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 
 			fmt.Fprintf(os.Stderr, "(%s %s) panic: %s\n", c.Request().Method, c.Request().URL.Path, fmt.Sprint(v))
-			fmt.Fprintf(os.Stderr, getStack())
+			fmt.Fprint(os.Stderr, getStack())
 			fmt.Println()
 
 			c.Error(nil)

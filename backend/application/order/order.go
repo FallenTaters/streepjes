@@ -247,7 +247,6 @@ func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) a
 			counts[o.MemberID][line.Item.Name] += line.Amount
 			totalCounts[line.Item.Name] += line.Amount
 		}
-
 	}
 
 	leaderboard := api.Leaderboard{

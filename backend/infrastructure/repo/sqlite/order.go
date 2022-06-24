@@ -80,7 +80,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 	return int(id), nil
 }
 
-func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,cyclop
+func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,gocyclo,cyclop
 	q := `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
 		`O.price, O.order_time, O.status, O.status_time FROM orders O `
 	var conditions []string
