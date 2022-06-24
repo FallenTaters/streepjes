@@ -3,8 +3,31 @@
         <h3 style="grid-area: header;">Leaderboard</h3>
     </div>
 
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
+    <article style="margin-top:10px;" class="error" vg-if="c.Error">Unable to load leaderboard.</article>
+
     <div style="grid-area: form;">
-        [form placeholder]
+        <form @submit="event.PreventDefault(); c.Refresh()">
+            <div class="field middle-align">
+                <nav>
+                    <label class="checkbox">
+                        <input type="checkbox" :checked="c.Gladiators" @click="c.Gladiators = !c.Gladiators; c.Refresh()">
+                        <span>Gladiators</span>
+                    </label>
+                    <label class="checkbox">
+                        <input type="checkbox" :checked="c.Parabool" @click="c.Parabool = !c.Parabool; c.Refresh()">
+                        <span>Parabool</span>
+                    </label>
+                    <label class="checkbox">
+                        <beercss:Select
+                            :Options="c.Options()"
+                            :Label="`Sort By`"
+                            @Select="defer global.LockAndRender()(); c.Sorting = event.(Sorting); c.Refresh()"
+                        ></beercss:Select>
+                    </label>
+                </nav>
+            </div>
+        </form>
     </div>
 
     <h5 style="grid-area: total; padding-right: 75px;" class="right-align">
@@ -44,4 +67,5 @@
 
 <script type="application/x-go">
 import "strconv"
+import "github.com/FallenTaters/streepjes/frontend/global"
 </script>

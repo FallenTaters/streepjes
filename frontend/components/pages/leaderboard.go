@@ -9,12 +9,15 @@ import (
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/components/beercss"
+	"github.com/FallenTaters/streepjes/frontend/global"
 )
 
 type Leaderboard struct {
 	Loading bool
 	Error   bool
 
+	Sorting     Sorting
 	ItemWeights map[string]int
 
 	Leaderboard api.Leaderboard
@@ -29,14 +32,6 @@ type Leaderboard struct {
 }
 
 func (l *Leaderboard) Init() {
-	// TODO: Loading, error handling, etc
-	leaderboard, _ := backend.GetLeaderboard(api.LeaderboardFilter{
-		Start: time.Now().AddDate(-10, 0, 0),
-		End:   time.Now().AddDate(10, 0, 0),
-	})
-
-	l.Leaderboard = leaderboard
-
 	// TODO make this adjustable ?
 	l.ItemWeights = map[string]int{
 		`Bier`:           1,
@@ -54,14 +49,34 @@ func (l *Leaderboard) Init() {
 	}
 
 	l.Gladiators = true
-
+	l.Parabool = true
 	l.ShowExpansion = make(map[string]bool)
+	l.Sorting = SortWithWeights
 
-	l.Refresh()
+	l.Loading = true
+	go func() {
+		defer func() {
+			defer global.LockAndRender()()
+			l.Loading = false
+		}()
+
+		leaderboard, err := backend.GetLeaderboard(api.LeaderboardFilter{
+			Start: time.Now().AddDate(-10, 0, 0),
+			End:   time.Now().AddDate(10, 0, 0),
+		})
+		if err != nil {
+			l.Error = true
+			return
+		}
+
+		defer global.LockOnly()()
+		l.Leaderboard = leaderboard
+		l.Refresh()
+	}()
 }
 
 func (l *Leaderboard) Refresh() {
-	if len(l.ItemWeights) == 0 {
+	if l.Sorting == SortByMoneySpent {
 		total, ranking := l.Leaderboard.MoneyRanking()
 		l.Total = total.String()
 		l.Ranking = l.FilterRanking(ranking)
@@ -71,7 +86,6 @@ func (l *Leaderboard) Refresh() {
 	total, ranking := l.Leaderboard.ItemRanking(l.ItemWeights)
 	l.Total = strconv.Itoa(total)
 	l.Ranking = l.FilterRanking(ranking)
-	return
 }
 
 func (l *Leaderboard) FilterRanking(ranking []api.LeaderboardRank) []api.LeaderboardRank {
@@ -112,4 +126,24 @@ func (l *Leaderboard) SortItemInfo(itemInfo map[string]int) []MsgCount {
 	})
 
 	return out
+}
+
+type Sorting uint
+
+const (
+	SortByMoneySpent Sorting = iota + 1
+	SortWithWeights
+)
+
+func (l *Leaderboard) Options() []beercss.Option {
+	return []beercss.Option{
+		{
+			Label: `Money Spent`,
+			Value: SortByMoneySpent,
+		},
+		{
+			Label: `Items Bought`,
+			Value: SortWithWeights,
+		},
+	}
 }
