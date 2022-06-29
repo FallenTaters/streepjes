@@ -6,6 +6,7 @@ import (
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/frontend/backend"
+	"github.com/FallenTaters/streepjes/frontend/backend/cache"
 	"github.com/FallenTaters/streepjes/frontend/components/beercss"
 	"github.com/FallenTaters/streepjes/frontend/global"
 	"github.com/FallenTaters/streepjes/frontend/jscall/window"
@@ -44,7 +45,7 @@ func (c *Catalog) Init() {
 	c.reset()
 
 	go func() {
-		catalog, err := backend.GetCatalog()
+		catalog, err := cache.Catalog.Get()
 		defer global.LockAndRender()()
 		c.Loading = false
 		if err != nil {
@@ -170,12 +171,13 @@ func (c *Catalog) SubmitCategoryForm() {
 				Name: c.CategoryName,
 			})
 		}
-		c.LoadingForm = false
 		defer global.LockAndRender()()
+		c.LoadingForm = false
 		if err != nil {
 			c.FormError = true
 			return
 		}
+		cache.Catalog.Invalidate()
 
 		c.Init()
 	}()
@@ -204,12 +206,13 @@ func (c *Catalog) SubmitItemForm() {
 				PriceParabool:   c.PriceParabool,
 			})
 		}
-		c.LoadingForm = false
 		defer global.LockAndRender()()
+		c.LoadingForm = false
 		if err != nil {
 			c.FormError = true
 			return
 		}
+		cache.Catalog.Invalidate()
 
 		c.Init()
 	}()
@@ -248,6 +251,7 @@ func (c *Catalog) DeleteCategory() {
 			c.FormError = true
 			return
 		}
+		cache.Catalog.Invalidate()
 
 		c.Init()
 	}()
@@ -269,6 +273,7 @@ func (c *Catalog) DeleteItem() {
 			c.FormError = true
 			return
 		}
+		cache.Catalog.Invalidate()
 
 		c.Init()
 	}()

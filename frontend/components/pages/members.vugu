@@ -1,3 +1,30 @@
-<div>
-    <h4>Members</h4>
+<div class="members-grid">
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
+    <article class="error" vg-if="c.Error">Could not load members.</article>
+
+        <h4>Members</h4> <!-- TODO: fix grid to be like catalog.vugu with titles and stuff ? -->
+
+    <div style="grid-area: members; overflow: auto">
+
+        <members:Members :Members="c.Members" :OnClick="c.ClickMember" :OnClickNew="c.ClickNew"></members:Members>
+    </div>
+
+
 </div>
+
+<style>
+.members-grid {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: 'members form';
+}
+</style>
+
+<script type="application/x-go">
+import (
+    "github.com/FallenTaters/streepjes/frontend/components/members"
+)
+</script>

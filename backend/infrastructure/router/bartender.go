@@ -6,6 +6,7 @@ import (
 
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/order"
+	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/labstack/echo/v4"
 )
@@ -29,7 +30,20 @@ func getCatalog(orderService order.Service) echo.HandlerFunc {
 
 func getMembers(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, orderService.GetAllMembers())
+		members := orderService.GetAllMembers()
+		user := userFromContext(c)
+
+		if user.Role == authdomain.RoleAdmin {
+			out := make([]orderdomain.Member, 0, len(members))
+			for _, m := range members {
+				if m.Club == user.Club {
+					out = append(out, m)
+				}
+			}
+			members = out
+		}
+
+		return c.JSON(http.StatusOK, members)
 	}
 }
 

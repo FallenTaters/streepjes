@@ -48,8 +48,6 @@ func (pv *Pageview) Init(vugu.InitCtx) {
 			pv.Page = PageOrder
 		}
 	})
-
-	pv.Page = PageOrder
 }
 
 func (pv *Pageview) GetStyles() string {

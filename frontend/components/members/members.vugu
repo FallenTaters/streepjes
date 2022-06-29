@@ -1,5 +1,10 @@
 <div>
-    <button vg-for="_, member := range c.Members" class="responsive extra small-margin" @click="c.OnClick(member)">
+    <button
+        vg-if="c.OnClickNew != nil"
+        class="responsive extra small-margin border"
+        @click="c.OnClickNew()"
+    >+</button>
+    <button vg-for="_, member := range c.Members" :class="`responsive extra small-margin ` + member.Club.String()" @click="c.OnClick(member)">
         <div style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;" vg-content="member.Name">
         </div>
     </button>
