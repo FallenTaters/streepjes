@@ -46,3 +46,15 @@ func (m *Members) ClickNew() {
 	m.SelectedMember = orderdomain.Member{}
 	m.NewMember = true
 }
+
+func (m *Members) FormTitle() string {
+	if m.SelectedMember != (orderdomain.Member{}) {
+		return `Edit ` + m.SelectedMember.Name
+	}
+
+	if m.NewMember {
+		return `New Member`
+	}
+
+	return ``
+}
