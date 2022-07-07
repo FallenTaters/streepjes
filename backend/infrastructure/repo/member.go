@@ -9,6 +9,8 @@ import (
 var (
 	ErrMemberNameTaken       = errors.New(`member name taken for club`)
 	ErrMemberFieldsNotFilled = errors.New(`member fields not filled`)
+	ErrMemberHasOrders       = errors.New(`member has orders`)
+	ErrClubChange            = errors.New(`existing member may not change club`)
 )
 
 type Member interface {
@@ -25,8 +27,8 @@ type Member interface {
 	// if name is taken for the club, it returns ErrMemberNameTaken
 	Create(member orderdomain.Member) (int, error)
 
-	// // Delete a member by id. Returns false if member is not found
-	// DeleteMember(id int) bool
+	// Delete a member by id. Returns false if member is not found
+	Delete(id int) bool
 }
 
 var ErrMemberNotFound = errors.New("member not found")

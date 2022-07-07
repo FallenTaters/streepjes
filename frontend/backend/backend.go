@@ -135,3 +135,15 @@ func GetLeaderboard(payload api.LeaderboardFilter) (api.Leaderboard, error) {
 	var leaderboard api.Leaderboard
 	return leaderboard, post(`/leaderboard`, payload, &leaderboard)
 }
+
+func PostNewMember(member orderdomain.Member) error {
+	return post(`/admin/members/new`, member, nil)
+}
+
+func PostEditMember(member orderdomain.Member) error {
+	return post(`/admin/members/edit`, member, nil)
+}
+
+func PostDeleteMember(id int) error {
+	return post(fmt.Sprintf(`/admin/members/%d/delete`, id), nil, nil)
+}

@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -86,4 +87,14 @@ func readJSON[T any](c echo.Context) (T, bool) {
 	}
 
 	return t, true
+}
+
+func allowErrors(c echo.Context, err error, allowed ...error) error {
+	for _, er := range allowed {
+		if errors.Is(err, er) {
+			return c.String(http.StatusBadRequest, er.Error())
+		}
+	}
+
+	return c.NoContent(http.StatusInternalServerError)
 }

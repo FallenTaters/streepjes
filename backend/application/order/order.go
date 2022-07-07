@@ -62,6 +62,15 @@ type Service interface {
 
 	// GetLeaderboard makes a leaderboard, the members will be pre-sorted by amount
 	GetLeaderboard(api.LeaderboardFilter) api.Leaderboard
+
+	// NewMember creates a new member
+	NewMember(orderdomain.Member) error
+
+	// EditMember edits a member
+	EditMember(orderdomain.Member) error
+
+	// DeleteMember deletes a member by id
+	DeleteMember(id int) error
 }
 
 func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
@@ -268,4 +277,39 @@ func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) a
 	})
 
 	return leaderboard
+}
+
+func (s *service) NewMember(m orderdomain.Member) error {
+	_, err := s.members.Create(m)
+	return err
+}
+
+func (s *service) EditMember(m orderdomain.Member) error {
+	original, ok := s.members.Get(m.ID)
+	if !ok {
+		return repo.ErrMemberNotFound
+	}
+
+	if original.Club != m.Club {
+		return repo.ErrClubChange
+	}
+
+	return s.members.Update(m)
+}
+
+func (s *service) DeleteMember(id int) error {
+	_, ok := s.members.Get(id)
+	if !ok {
+		return repo.ErrMemberNotFound
+	}
+
+	if len(s.orders.Filter(repo.OrderFilter{MemberID: id})) > 0 { //nolint:exhaustivestruct
+		return repo.ErrMemberHasOrders
+	}
+
+	if !s.members.Delete(id) {
+		return repo.ErrMemberNotFound
+	}
+
+	return nil
 }

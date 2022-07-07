@@ -132,7 +132,7 @@ func (ur *userRepo) Create(user authdomain.User) (int, error) {
 	}
 
 	if _, ok := ur.getByName(user.Name); ok {
-		return 0, fmt.Errorf(`%w, %#v`, repo.ErrNameTaken, user)
+		return 0, fmt.Errorf(`%w, %#v`, repo.ErrUsernameTaken, user)
 	}
 
 	if _, ok := ur.GetByUsername(user.Username); ok {

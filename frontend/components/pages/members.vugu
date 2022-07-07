@@ -1,3 +1,49 @@
-<div>
-    <h4>Members</h4>
+<div class="members-grid">
+    <ui:Loading vg-if="c.Loading"></ui:Loading>
+    <article class="error" vg-if="c.Error">Could not load members.</article>
+
+    <h4 style="grid-area:title1">Members</h4>
+    <h4 style="grid-area:title2" vg-content="c.FormTitle()"></h4>
+
+    <div style="grid-area: members; overflow: auto">
+        <members:Members :Members="c.Members" :OnClick="c.ClickMember" :OnClickNew="c.ClickNew"></members:Members>
+    </div>
+
+    <div style="grid-area: form; overflow: auto;">
+        <form vg-if="c.ShowForm()" @submit="event.PreventDefault(); c.SubmitForm()" class="no-margin">
+            <beercss:Input
+                id="member-form-name" name="member-name" type="text"
+                :Label="`Name`" :Value="c.Name"
+                @Input="c.Name = string(event)"
+            ></beercss:Input>
+            <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
+                <i>save</i>
+                <span>Save</span>
+            </button>
+        </form>
+        <button vg-if="c.Editing()" @click="c.Delete()" class="responsive error small-margin">
+            <i>delete</i>
+            <span>Delete</span>
+        </button>
+        <ui:Loading vg-if="c.LoadingForm"></ui:Loading>
+        <article class="error" vg-if="c.ErrorForm">That didn't work.</article>
+    </div>
 </div>
+
+<style>
+.members-grid {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 80px 1fr;
+    grid-template-areas: 'title1 title2' 'members form';
+}
+</style>
+
+<script type="application/x-go">
+import (
+    "github.com/FallenTaters/streepjes/frontend/components/members"
+    "github.com/FallenTaters/streepjes/domain"
+)
+</script>

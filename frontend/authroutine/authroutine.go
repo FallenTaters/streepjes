@@ -93,5 +93,6 @@ func postActive() {
 
 	if originalStore != store.Auth {
 		go global.LockAndRender()()
+		events.Trigger(events.Login)
 	}
 }

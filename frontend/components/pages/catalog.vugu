@@ -1,7 +1,9 @@
 <div class="catalog-grid">
-    <h3>Catalog</h3>
-    <div style="grid-area: categories">
-        <h4>Categories</h4>
+    <h4 style="grid-area:title1">Categories</h4>
+    <h4 style="grid-area:title2">Items</h4>
+    <h4 style="grid-area:title3" vg-content="c.FormTitle()"></h4>
+
+    <div style="grid-area: categories; overflow: auto">
         <catalog:Categories
             :Categories="c.Categories"
             :SelectedCategoryID="c.SelectedCategory.ID"
@@ -10,8 +12,7 @@
         ></catalog:Categories>
     </div>
 
-    <div style="grid-area: items">
-        <h4>Items</h4>
+    <div style="grid-area: items; overflow:auto">
         <catalog:Items
             vg-if="c.SelectedCategory != (orderdomain.Category{})"
             :Items="c.DisplayItems"
@@ -21,9 +22,7 @@
         ></catalog:Items>
     </div>
 
-    <div style="grid-area: form">
-        <h4 vg-content="c.FormTitle()"></h4>
-
+    <div style="grid-area: form; overflow: auto">
         <div vg-if="c.ShowCategoryForm()">
             <form @submit="event.PreventDefault(); c.SubmitCategoryForm()" class="no-margin">
                 <beercss:Input
@@ -82,11 +81,12 @@
 
 <style>
 .catalog-grid {
+    height: 100%;
     display: grid;
     grid-gap: 5px;
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows:  100px 1fr;
-    grid-template-areas: 'title title title' 'categories items form';
+    grid-template-rows:  80px 1fr;
+    grid-template-areas: 'title1 title2 title3' 'categories items form';
 }
 </style>
 
