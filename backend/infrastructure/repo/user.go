@@ -7,7 +7,6 @@ import (
 )
 
 var (
-	ErrNameTaken         = errors.New(`name taken`)
 	ErrUserNotFound      = errors.New(`user not found`)
 	ErrUsernameTaken     = errors.New(`username taken`)
 	ErrUserMissingFields = errors.New(`user object is missing fields`)

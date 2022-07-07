@@ -10,7 +10,23 @@
     </div>
 
     <div style="grid-area: form; overflow: auto;">
-        here form!
+        <form vg-if="c.ShowForm()" @submit="event.PreventDefault(); c.SubmitForm()" class="no-margin">
+            <beercss:Input
+                id="member-form-name" name="member-name" type="text"
+                :Label="`Name`" :Value="c.Name"
+                @Input="c.Name = string(event)"
+            ></beercss:Input>
+            <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
+                <i>save</i>
+                <span>Save</span>
+            </button>
+        </form>
+        <button vg-if="c.Editing()" @click="c.Delete()" class="responsive error small-margin">
+            <i>delete</i>
+            <span>Delete</span>
+        </button>
+        <ui:Loading vg-if="c.LoadingForm"></ui:Loading>
+        <article class="error" vg-if="c.ErrorForm">That didn't work.</article>
     </div>
 </div>
 
@@ -28,5 +44,6 @@
 <script type="application/x-go">
 import (
     "github.com/FallenTaters/streepjes/frontend/components/members"
+    "github.com/FallenTaters/streepjes/domain"
 )
 </script>

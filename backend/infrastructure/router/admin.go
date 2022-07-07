@@ -23,9 +23,14 @@ func adminRoutes(r *echo.Group, authService auth.Service, orderService order.Ser
 	r.POST(`/category/new`, postNewCategory(orderService))
 	r.POST(`/category/update`, postUpdateCategory(orderService))
 	r.POST(`/category/:id/delete`, postDeleteCategory(orderService))
+
 	r.POST(`/item/new`, postNewItem(orderService))
 	r.POST(`/item/update`, postUpdateItem(orderService))
 	r.POST(`/item/:id/delete`, postDeleteItem(orderService))
+
+	r.POST(`/members/new`, postNewMember(orderService))
+	r.POST(`/members/edit`, postEditMember(orderService))
+	r.POST(`/members/:id/delete`, postDeleteMember(orderService))
 }
 
 func getUsers(authService auth.Service) echo.HandlerFunc {
@@ -63,7 +68,7 @@ func postEditUser(authService auth.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		user, ok := readJSON[api.UserWithPassword](c)
 		if !ok {
-			return c.NoContent(http.StatusBadRequest)
+			return nil
 		}
 
 		fmt.Printf("%#v\n", user)
@@ -108,7 +113,7 @@ func postNewCategory(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cat, ok := readJSON[orderdomain.Category](c)
 		if !ok {
-			return c.NoContent(http.StatusBadRequest)
+			return nil
 		}
 
 		if err := orderService.NewCategory(cat); err != nil {
@@ -131,7 +136,7 @@ func postUpdateCategory(orderService order.Service) echo.HandlerFunc { //nolint:
 	return func(c echo.Context) error {
 		cat, ok := readJSON[orderdomain.Category](c)
 		if !ok {
-			return c.NoContent(http.StatusBadRequest)
+			return nil
 		}
 
 		if err := orderService.UpdateCategory(cat); err != nil {
@@ -181,7 +186,7 @@ func postNewItem(orderService order.Service) echo.HandlerFunc { //nolint:dupl
 	return func(c echo.Context) error {
 		item, ok := readJSON[orderdomain.Item](c)
 		if !ok {
-			return c.NoContent(http.StatusBadRequest)
+			return nil
 		}
 
 		if err := orderService.NewItem(item); err != nil {
@@ -208,7 +213,7 @@ func postUpdateItem(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		item, ok := readJSON[orderdomain.Item](c)
 		if !ok {
-			return c.NoContent(http.StatusBadRequest)
+			return nil
 		}
 
 		if err := orderService.UpdateItem(item); err != nil {
@@ -248,6 +253,64 @@ func postDeleteItem(orderService order.Service) echo.HandlerFunc {
 			}
 
 			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
+}
+
+func postNewMember(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		member, ok := readJSON[orderdomain.Member](c)
+		if !ok {
+			return nil
+		}
+
+		if member.Club != userFromContext(c).Club {
+			return c.String(http.StatusBadRequest, `you cannot only create members for your own club`)
+		}
+
+		if err := orderService.NewMember(member); err != nil {
+			return allowErrors(c, err,
+				repo.ErrMemberNameTaken,
+				repo.ErrMemberFieldsNotFilled,
+			)
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
+}
+
+func postEditMember(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		member, ok := readJSON[orderdomain.Member](c)
+		if !ok {
+			return nil
+		}
+
+		if err := orderService.EditMember(member); err != nil {
+			return allowErrors(c, err,
+				repo.ErrMemberNameTaken,
+				repo.ErrMemberFieldsNotFilled,
+				repo.ErrClubChange,
+				repo.ErrMemberNotFound)
+		}
+
+		return c.NoContent(http.StatusOK)
+	}
+}
+
+func postDeleteMember(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := strconv.Atoi(c.Param(`id`))
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
+		if err := orderService.DeleteMember(id); err != nil {
+			return allowErrors(c, err,
+				repo.ErrMemberNotFound,
+				repo.ErrMemberHasOrders)
 		}
 
 		return c.NoContent(http.StatusOK)

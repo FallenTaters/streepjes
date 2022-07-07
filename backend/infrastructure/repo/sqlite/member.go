@@ -99,3 +99,17 @@ func (mr *memberRepo) Update(member orderdomain.Member) error {
 
 	return nil
 }
+
+func (mr *memberRepo) Delete(id int) bool {
+	res, err := mr.db.Exec(`DELETE FROM members WHERE id = ?;`, id)
+	if err != nil {
+		panic(err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	return affected != 0
+}
