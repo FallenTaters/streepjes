@@ -1,8 +1,15 @@
 package window
 
-import "syscall/js"
+import (
+	"fmt"
+	"syscall/js"
+)
 
 func Alert(args ...any) {
+	for i := range args {
+		args[i] = fmt.Sprint(args[i])
+	}
+
 	js.Global().Get(`window`).Call(`alert`, args...)
 }
 

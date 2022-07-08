@@ -97,5 +97,7 @@ import (
 
     "github.com/FallenTaters/streepjes/frontend/components/catalog"
     "github.com/FallenTaters/streepjes/domain/orderdomain"
+    "github.com/FallenTaters/streepjes/frontend/components/beercss"
+    "github.com/FallenTaters/streepjes/frontend/components/ui"
 )
 </script>

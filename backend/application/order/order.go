@@ -29,6 +29,12 @@ type Service interface {
 	// GetOrdersForBartender gets all order for that bartender for the current month
 	GetOrdersForBartender(id int) []orderdomain.Order
 
+	// GetOrdersByClub gets all orders from the month for the specified month
+	GetOrdersByClub(club domain.Club, month orderdomain.Month) []orderdomain.Order
+
+	// BillingCSV makes a downloadable csv file with orders and such
+	BillingCSV(club domain.Club, month orderdomain.Month) []byte
+
 	// PlaceOrder places the order for the bartender
 	PlaceOrder(order orderdomain.Order, bartender authdomain.User) error
 
@@ -131,6 +137,25 @@ func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
 		Start:       month.Start(),
 		End:         month.End(),
 	})
+}
+
+func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) []orderdomain.Order {
+	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		Club:  club,
+		Start: month.Start(),
+		End:   month.End(),
+	})
+}
+
+func (s *service) BillingCSV(club domain.Club, month orderdomain.Month) []byte {
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		Club:  club,
+		Start: month.Start(),
+		End:   month.End(),
+	})
+	members := s.members.GetAll()
+
+	return writeCSV(orders, members)
 }
 
 func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User) error {

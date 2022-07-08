@@ -1,6 +1,7 @@
 package orderdomain
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/FallenTaters/streepjes/domain"
@@ -41,12 +42,17 @@ func MonthOf(t time.Time) Month {
 	}
 }
 
-func (m Month) Time() time.Time {
-	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
+func ParseMonth(s string) (Month, error) {
+	t, err := time.Parse(`2006-01`, s)
+	return MonthOf(t), err
 }
 
 func CurrentMonth() Month {
 	return MonthOf(time.Now())
+}
+
+func (m Month) Time() time.Time {
+	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
 }
 
 func (m Month) Start() time.Time {
@@ -55,4 +61,8 @@ func (m Month) Start() time.Time {
 
 func (m Month) End() time.Time {
 	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 1, 0)
+}
+
+func (m Month) String() string {
+	return fmt.Sprintf(`%04d-%02d`, m.Year, m.Month)
 }

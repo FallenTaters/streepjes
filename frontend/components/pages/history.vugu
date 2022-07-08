@@ -22,5 +22,8 @@
 </div>
 
 <script type="application/x-go">
-import "github.com/FallenTaters/streepjes/frontend/components/pages/history"
+import (
+    "github.com/FallenTaters/streepjes/frontend/components/pages/history"
+    "github.com/FallenTaters/streepjes/frontend/components/ui"
+)
 </script>
