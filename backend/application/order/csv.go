@@ -36,22 +36,37 @@ func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte {
 
 	var buf bytes.Buffer
 	w := csv.NewWriter(&buf)
-	w.Write([]string{`Member`, `Price`, `Date`, `Order`})
+	err := w.Write([]string{`Member`, `Price`, `Date`, `Order`})
+	if err != nil {
+		panic(err)
+	}
 
 	memberTotals := make(map[int]orderdomain.Price, len(members))
 	for _, o := range orders {
 		memberTotals[o.MemberID] += o.Price
-		w.Write([]string{
+		err := w.Write([]string{
 			membersByID[o.MemberID].Name,
 			o.Price.String(),
 			o.OrderTime.Format(`2006-01-02 15:04`),
 			parseOrderLines(o.Contents),
 		})
+		if err != nil {
+			panic(err)
+		}
 	}
-	w.Write(nil)
-	w.Write([]string{`Member`, `Total`})
+	err = w.Write(nil)
+	if err != nil {
+		panic(err)
+	}
+	err = w.Write([]string{`Member`, `Total`})
+	if err != nil {
+		panic(err)
+	}
 	for id, total := range memberTotals {
-		w.Write([]string{membersByID[id].Name, total.String()})
+		err := w.Write([]string{membersByID[id].Name, total.String()})
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	w.Flush()

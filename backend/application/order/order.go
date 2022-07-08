@@ -140,7 +140,7 @@ func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
 }
 
 func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) []orderdomain.Order {
-	return s.orders.Filter(repo.OrderFilter{
+	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
 		Club:  club,
 		Start: month.Start(),
 		End:   month.End(),
@@ -148,7 +148,7 @@ func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) []o
 }
 
 func (s *service) BillingCSV(club domain.Club, month orderdomain.Month) []byte {
-	orders := s.orders.Filter(repo.OrderFilter{
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
 		Club:  club,
 		Start: month.Start(),
 		End:   month.End(),

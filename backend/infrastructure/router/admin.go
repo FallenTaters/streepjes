@@ -135,7 +135,7 @@ func postNewCategory(orderService order.Service) echo.HandlerFunc {
 	}
 }
 
-func postUpdateCategory(orderService order.Service) echo.HandlerFunc { //nolint:dupl
+func postUpdateCategory(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		cat, ok := readJSON[orderdomain.Category](c)
 		if !ok {
@@ -185,7 +185,7 @@ func postDeleteCategory(orderService order.Service) echo.HandlerFunc {
 	}
 }
 
-func postNewItem(orderService order.Service) echo.HandlerFunc { //nolint:dupl
+func postNewItem(orderService order.Service) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		item, ok := readJSON[orderdomain.Item](c)
 		if !ok {
