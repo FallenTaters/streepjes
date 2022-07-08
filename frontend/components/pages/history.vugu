@@ -9,7 +9,7 @@
             @click="c.Click(order)"
         >
             <div class="row no-wrap large-text">
-                <div class="col min middle-align" style="min-width:200px" vg-content="c.formatDate(order.OrderTime)"></div>
+                <div class="col min middle-align" style="min-width:120px" vg-content="c.formatDate(order.OrderTime)"></div>
                 <div class="col middle-align" vg-content="c.MembersByID[order.MemberID].Name"></div>
                 <div class="col min middle-align" vg-content="order.Price"></div>
             </div>
