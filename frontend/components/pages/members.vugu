@@ -44,6 +44,8 @@
 <script type="application/x-go">
 import (
     "github.com/FallenTaters/streepjes/frontend/components/members"
-    "github.com/FallenTaters/streepjes/domain"
 )
+
+import "github.com/FallenTaters/streepjes/frontend/components/beercss"
+import "github.com/FallenTaters/streepjes/frontend/components/ui"
 </script>

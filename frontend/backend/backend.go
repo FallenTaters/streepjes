@@ -147,3 +147,8 @@ func PostEditMember(member orderdomain.Member) error {
 func PostDeleteMember(id int) error {
 	return post(fmt.Sprintf(`/admin/members/%d/delete`, id), nil, nil)
 }
+
+func GetBillingOrders(month orderdomain.Month) ([]orderdomain.Order, error) {
+	var orders []orderdomain.Order
+	return orders, get(fmt.Sprintf(`/admin/billing/orders?month=%s`, month), &orders)
+}

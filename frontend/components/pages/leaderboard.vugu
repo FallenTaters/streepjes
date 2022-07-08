@@ -68,4 +68,6 @@
 <script type="application/x-go">
 import "strconv"
 import "github.com/FallenTaters/streepjes/frontend/global"
+import "github.com/FallenTaters/streepjes/frontend/components/beercss"
+import "github.com/FallenTaters/streepjes/frontend/components/ui"
 </script>

@@ -48,3 +48,8 @@
         <button @click="c.Logout()" type="submit" class="error"><i>logout</i> <span>Log Out</span></button>
     </p>
 </div>
+
+<script type="application/x-go">
+import "github.com/FallenTaters/streepjes/frontend/components/beercss"
+import "github.com/FallenTaters/streepjes/frontend/components/ui"
+</script>

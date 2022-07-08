@@ -5,6 +5,7 @@ go 1.18
 require (
 	git.fuyu.moe/Fuyu/assert v0.2.1
 	github.com/FallenTaters/bbucket v1.0.0
+	github.com/FallenTaters/timefmt v1.0.0
 	github.com/google/go-cmp v0.4.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/mattn/go-sqlite3 v1.14.11

@@ -16,6 +16,8 @@ import (
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 )
 
+// TODO: use https://github.com/go-chi/chi ?
+
 type Static func(filename string) ([]byte, error)
 
 func New(static Static, authService auth.Service, orderService order.Service) http.Handler {

@@ -31,6 +31,9 @@ func adminRoutes(r *echo.Group, authService auth.Service, orderService order.Ser
 	r.POST(`/members/new`, postNewMember(orderService))
 	r.POST(`/members/edit`, postEditMember(orderService))
 	r.POST(`/members/:id/delete`, postDeleteMember(orderService))
+
+	r.GET(`/billing/orders`, getBillingOrders(orderService))
+	r.GET(`/download`, getDownload(orderService))
 }
 
 func getUsers(authService auth.Service) echo.HandlerFunc {
@@ -314,5 +317,34 @@ func postDeleteMember(orderService order.Service) echo.HandlerFunc {
 		}
 
 		return c.NoContent(http.StatusOK)
+	}
+}
+
+func getBillingOrders(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		m, err := orderdomain.ParseMonth(c.QueryParam(`month`))
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
+		orders := orderService.GetOrdersByClub(userFromContext(c).Club, m)
+
+		return c.JSON(http.StatusOK, orders)
+	}
+}
+
+func getDownload(orderService order.Service) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		m, err := orderdomain.ParseMonth(c.QueryParam(`month`))
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+
+		user := userFromContext(c)
+		csv := orderService.BillingCSV(user.Club, m)
+
+		filename := m.String() + `-` + user.Club.String() + `.csv`
+		c.Response().Header().Set(`content-disposition`, `attachment; filename="`+filename+`"`)
+		return c.Blob(http.StatusOK, `text/csv`, csv)
 	}
 }
