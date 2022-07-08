@@ -11,7 +11,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte {
+func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte { //nolint:funlen,cyclop
 	membersByID := make(map[int]orderdomain.Member)
 	for _, m := range members {
 		membersByID[m.ID] = m
@@ -44,7 +44,7 @@ func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte {
 	memberTotals := make(map[int]orderdomain.Price, len(members))
 	for _, o := range orders {
 		memberTotals[o.MemberID] += o.Price
-		err := w.Write([]string{
+		err = w.Write([]string{
 			membersByID[o.MemberID].Name,
 			o.Price.String(),
 			o.OrderTime.Format(`2006-01-02 15:04`),
