@@ -1,12 +1,14 @@
 # Streepjes
 
-Streepjes is a custom POS app for two specific sports clubs and a hobby project.
+Streepjes is a custom POS app for two specific sports clubs and a hobby project written in pure Go.
+
+The frontend is WASM powered by Vugu, and the backend relies on a sqlite database.
 
 ## Development
 
 ### Requirements
 
-* go >= 1.17
+* go >= 1.18
 * go tooling:
     * [enumer](https://github.com/alvaroloes/enumer)
     * [vugugen](https://www.vugu.org/doc/start)
