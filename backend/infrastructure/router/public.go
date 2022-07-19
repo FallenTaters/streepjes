@@ -7,12 +7,13 @@ import (
 
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func publicRoutes(r *echo.Echo, static Static, authService auth.Service) {
 	r.GET(``, getIndex(static))
 	r.GET(`/version`, getVersion)
-	r.GET(`/static/*`, getStatic(static))
+	r.GET(`/static/*`, getStatic(static), middleware.Gzip())
 	r.POST(`/login`, postLogin(authService))
 }
 
@@ -38,6 +39,7 @@ func getIndex(assets Static) echo.HandlerFunc {
 			panic(err)
 		}
 
+		setCacheHeader(c)
 		return c.Blob(http.StatusOK, `text/html`, index)
 	}
 }
@@ -51,6 +53,11 @@ func getStatic(assets Static) echo.HandlerFunc {
 			return c.NoContent(http.StatusNotFound)
 		}
 
+		setCacheHeader(c)
 		return c.Blob(http.StatusOK, http.DetectContentType(asset), asset)
 	}
+}
+
+func setCacheHeader(c echo.Context) {
+	c.Response().Header().Set(`Cache-Control`, `max-age=86400, must-revalidate, private`)
 }
