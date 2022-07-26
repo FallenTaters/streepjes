@@ -5,7 +5,7 @@ go 1.18
 require (
 	git.fuyu.moe/Fuyu/assert v0.2.1
 	github.com/FallenTaters/bbucket v1.0.0
-	github.com/FallenTaters/chio v0.2.1
+	github.com/FallenTaters/chio v0.2.3
 	github.com/FallenTaters/timefmt v1.0.0
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-cmp v0.4.0

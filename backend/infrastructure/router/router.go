@@ -20,6 +20,9 @@ func New(static Static, authService auth.Service, orderService order.Service) ht
 	r := chi.NewRouter()
 
 	r.Use(middleware.Recover(middleware.DefaultPanicLogger(os.Stderr)))
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	})
 
 	publicRoutes(r, static, authService)
 

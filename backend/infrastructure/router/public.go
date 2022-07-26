@@ -12,7 +12,7 @@ import (
 )
 
 func publicRoutes(r chi.Router, static Static, authService auth.Service) {
-	r.Get(``, getIndex(static))
+	r.Get(`/`, getIndex(static))
 	r.Get(`/version`, getVersion)
 	r.With(chiMiddleware.Compress(5)).Get(`/static/*`, getStatic(static))
 	r.Post(`/login`, postLogin(authService))
