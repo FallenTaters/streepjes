@@ -4,34 +4,35 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 )
 
-func bartenderRoutes(r *echo.Group, orderService order.Service) {
-	r.GET(`/catalog`, getCatalog(orderService))
-	r.GET(`/members`, getMembers(orderService))
-	r.GET(`/member/:id`, getMember(orderService))
-	r.GET(`/orders`, getOrders(orderService))
-	r.POST(`/order`, postOrder(orderService))
-	r.POST(`/order/:id/delete`, postDeleteOrder(orderService))
-	r.POST(`/leaderboard`, postGetLeaderboard(orderService))
+func bartenderRoutes(r chi.Router, orderService order.Service) {
+	r.Get(`/catalog`, getCatalog(orderService))
+	r.Get(`/members`, getMembers(orderService))
+	r.Get(`/member/:id`, getMember(orderService))
+	r.Get(`/orders`, getOrders(orderService))
+	r.Post(`/order`, chio.JSON(postOrder(orderService)))
+	r.Post(`/order/:id/delete`, postDeleteOrder(orderService))
+	r.Post(`/leaderboard`, chio.JSON(postGetLeaderboard(orderService)))
 }
 
-func getCatalog(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
+func getCatalog(orderService order.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		catalog := orderService.GetCatalog()
-		return c.JSON(http.StatusOK, catalog)
+		chio.WriteJSON(w, http.StatusOK, catalog)
 	}
 }
 
-func getMembers(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
+func getMembers(orderService order.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		members := orderService.GetAllMembers()
-		user := userFromContext(c)
+		user := userFromContext(r)
 
 		if user.Role == authdomain.RoleAdmin {
 			out := make([]orderdomain.Member, 0, len(members))
@@ -43,75 +44,70 @@ func getMembers(orderService order.Service) echo.HandlerFunc {
 			members = out
 		}
 
-		return c.JSON(http.StatusOK, members)
+		chio.WriteJSON(w, http.StatusOK, members)
 	}
 }
 
-func getMember(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		id, err := strconv.Atoi(c.Param(`id`))
+func getMember(orderService order.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := strconv.Atoi(chi.URLParam(r, `id`))
 		if err != nil {
-			return c.NoContent(http.StatusBadRequest)
+			chio.Empty(w, http.StatusBadRequest)
+			return
 		}
 
 		member, ok := orderService.GetMemberDetails(id)
 		if !ok {
-			return c.NoContent(http.StatusNotFound)
+			chio.Empty(w, http.StatusNotFound)
+			return
 		}
 
-		return c.JSON(http.StatusOK, member)
+		chio.WriteJSON(w, http.StatusOK, member)
 	}
 }
 
-func getOrders(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		user := userFromContext(c)
+func getOrders(orderService order.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := userFromContext(r)
 		orders := orderService.GetOrdersForBartender(user.ID)
-		return c.JSON(http.StatusOK, orders)
+		chio.WriteJSON(w, http.StatusOK, orders)
 	}
 }
 
-func postOrder(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		order, ok := readJSON[orderdomain.Order](c)
-		if !ok {
-			return nil
+func postOrder(orderService order.Service) func(http.ResponseWriter, *http.Request, orderdomain.Order) {
+	return func(w http.ResponseWriter, r *http.Request, order orderdomain.Order) {
+		if err := orderService.PlaceOrder(order, userFromContext(r)); err != nil {
+			chio.WriteString(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
-		if err := orderService.PlaceOrder(order, userFromContext(c)); err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
-		}
-
-		return c.NoContent(http.StatusOK)
+		chio.Empty(w, http.StatusOK)
 	}
 }
 
-func postDeleteOrder(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		bartenderID := userFromContext(c).ID
-		orderID, err := strconv.Atoi(c.Param(`id`))
+func postDeleteOrder(orderService order.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		bartenderID := userFromContext(r).ID
+		orderID, err := strconv.Atoi(chi.URLParam(r, `id`))
 		if err != nil {
-			return c.String(http.StatusUnprocessableEntity, `order id must be integer`)
+			chio.WriteString(w, http.StatusUnprocessableEntity, `order id must be integer`)
+			return
 		}
 
 		ok := orderService.BartenderDeleteOrder(bartenderID, orderID)
 		if !ok {
-			return c.NoContent(http.StatusNotFound)
+			chio.Empty(w, http.StatusNotFound)
+			return
 		}
 
-		return c.NoContent(http.StatusOK)
+		chio.Empty(w, http.StatusOK)
 	}
 }
 
-func postGetLeaderboard(orderService order.Service) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		filter, ok := readJSON[api.LeaderboardFilter](c)
-		if !ok {
-			return nil
-		}
-
+func postGetLeaderboard(orderService order.Service) func(http.ResponseWriter, *http.Request, api.LeaderboardFilter) {
+	return func(w http.ResponseWriter, r *http.Request, filter api.LeaderboardFilter) {
 		leaderboard := orderService.GetLeaderboard(filter)
 
-		return c.JSON(http.StatusOK, leaderboard)
+		chio.WriteJSON(w, http.StatusOK, leaderboard)
 	}
 }

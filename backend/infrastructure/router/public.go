@@ -5,16 +5,17 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-func publicRoutes(r *echo.Echo, static Static, authService auth.Service) {
-	r.GET(``, getIndex(static))
-	r.GET(`/version`, getVersion)
-	r.GET(`/static/*`, getStatic(static), middleware.Gzip())
-	r.POST(`/login`, postLogin(authService))
+func publicRoutes(r chi.Router, static Static, authService auth.Service) {
+	r.Get(`/`, getIndex(static))
+	r.Get(`/version`, getVersion)
+	r.With(chiMiddleware.Compress(5)).Get(`/static/*`, getStatic(static))
+	r.Post(`/login`, postLogin(authService))
 }
 
 var (
@@ -28,36 +29,37 @@ func version() string {
 		buildVersion, buildTime, buildCommit)
 }
 
-func getVersion(c echo.Context) error {
-	return c.String(http.StatusOK, version())
+func getVersion(w http.ResponseWriter, r *http.Request) {
+	chio.WriteString(w, http.StatusOK, version())
 }
 
-func getIndex(assets Static) echo.HandlerFunc {
-	return func(c echo.Context) error {
+func getIndex(assets Static) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		index, err := assets(`index.html`)
 		if err != nil {
 			panic(err)
 		}
 
-		setCacheHeader(c)
-		return c.Blob(http.StatusOK, `text/html`, index)
+		setCacheHeader(w)
+		chio.WriteBlob(w, http.StatusOK, `text/html`, index)
 	}
 }
 
-func getStatic(assets Static) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		name := strings.TrimPrefix(strings.TrimPrefix(c.Request().URL.Path, `/`), `static/`)
+func getStatic(assets Static) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		name := strings.TrimPrefix(strings.TrimPrefix(r.URL.Path, `/`), `static/`)
 
 		asset, err := assets(name)
 		if err != nil {
-			return c.NoContent(http.StatusNotFound)
+			chio.Empty(w, http.StatusNotFound)
+			return
 		}
 
-		setCacheHeader(c)
-		return c.Blob(http.StatusOK, http.DetectContentType(asset), asset)
+		setCacheHeader(w)
+		chio.WriteBlob(w, http.StatusOK, http.DetectContentType(asset), asset)
 	}
 }
 
-func setCacheHeader(c echo.Context) {
-	c.Response().Header().Set(`Cache-Control`, `max-age=86400, must-revalidate, private`)
+func setCacheHeader(w http.ResponseWriter) {
+	w.Header().Set(`Cache-Control`, `max-age=86400, must-revalidate, private`)
 }
