@@ -5,7 +5,6 @@ package router
 // maybe make a type of error that can be returned, that way the router package can simply check if the error is of that type, and if so, write it.
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -51,17 +50,10 @@ func postNewUser(authService auth.Service) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, user api.UserWithPassword) {
 		err := authService.Register(user.User, user.Password)
 		if err != nil {
-			if errors.Is(err, repo.ErrUsernameTaken) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrUsernameTaken.Error())
-				return
-			}
-
-			if errors.Is(err, repo.ErrUserMissingFields) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrUserMissingFields.Error())
-				return
-			}
-
-			chio.Empty(w, http.StatusBadRequest)
+			allowErrors(w, err,
+				repo.ErrUsernameTaken,
+				repo.ErrUserMissingFields,
+			)
 			return
 		}
 
@@ -73,22 +65,11 @@ func postEditUser(authService auth.Service) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, user api.UserWithPassword) {
 		err := authService.Update(user.User, user.Password)
 		if err != nil {
-			if errors.Is(err, repo.ErrUserNotFound) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrUserNotFound.Error())
-				return
-			}
-
-			if errors.Is(err, repo.ErrUsernameTaken) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrUsernameTaken.Error())
-				return
-			}
-
-			if errors.Is(err, repo.ErrUserMissingFields) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrUserMissingFields.Error())
-				return
-			}
-
-			chio.Empty(w, http.StatusInternalServerError)
+			allowErrors(w, err,
+				repo.ErrUserNotFound,
+				repo.ErrUsernameTaken,
+				repo.ErrUserMissingFields,
+			)
 			return
 		}
 
@@ -117,17 +98,10 @@ func postDeleteUser(authService auth.Service) http.HandlerFunc {
 func postNewCategory(orderService order.Service) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, cat orderdomain.Category) {
 		if err := orderService.NewCategory(cat); err != nil {
-			if errors.Is(err, repo.ErrCategoryNameTaken) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrCategoryNameTaken.Error())
-				return
-			}
-
-			if errors.Is(err, repo.ErrCategoryNameEmpty) {
-				chio.WriteString(w, http.StatusBadRequest, repo.ErrCategoryNameEmpty.Error())
-				return
-			}
-
-			chio.Empty(w, http.StatusInternalServerError)
+			allowErrors(w, err,
+				repo.ErrCategoryNameTaken,
+				repo.ErrCategoryNameEmpty,
+			)
 			return
 		}
 
@@ -221,7 +195,7 @@ func postDeleteItem(orderService order.Service) http.HandlerFunc {
 func postNewMember(orderService order.Service) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, member orderdomain.Member) {
 		if member.Club != userFromContext(r).Club {
-			chio.WriteString(w, http.StatusBadRequest, `you cannot only create members for your own club`)
+			chio.WriteString(w, http.StatusBadRequest, `you can only create members for your own club`)
 			return
 		}
 
