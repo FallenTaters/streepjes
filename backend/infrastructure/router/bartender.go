@@ -15,10 +15,10 @@ import (
 func bartenderRoutes(r chi.Router, orderService order.Service) {
 	r.Get(`/catalog`, getCatalog(orderService))
 	r.Get(`/members`, getMembers(orderService))
-	r.Get(`/member/:id`, getMember(orderService))
+	r.Get(`/member/{id}`, getMember(orderService))
 	r.Get(`/orders`, getOrders(orderService))
 	r.Post(`/order`, chio.JSON(postOrder(orderService)))
-	r.Post(`/order/:id/delete`, postDeleteOrder(orderService))
+	r.Post(`/order/{id}/delete`, postDeleteOrder(orderService))
 	r.Post(`/leaderboard`, chio.JSON(postGetLeaderboard(orderService)))
 }
 

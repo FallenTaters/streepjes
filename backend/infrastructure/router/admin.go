@@ -21,19 +21,19 @@ func adminRoutes(r chi.Router, authService auth.Service, orderService order.Serv
 	r.Get(`/users`, getUsers(authService))
 	r.Post(`/users/new`, postNewUser(authService))
 	r.Post(`/users/edit`, postEditUser(authService))
-	r.Post(`/users/:id/delete`, postDeleteUser(authService))
+	r.Post(`/users/{id}/delete`, postDeleteUser(authService))
 
 	r.Post(`/category/new`, postNewCategory(orderService))
 	r.Post(`/category/update`, postUpdateCategory(orderService))
-	r.Post(`/category/:id/delete`, postDeleteCategory(orderService))
+	r.Post(`/category/{id}/delete`, postDeleteCategory(orderService))
 
 	r.Post(`/item/new`, postNewItem(orderService))
 	r.Post(`/item/update`, postUpdateItem(orderService))
-	r.Post(`/item/:id/delete`, postDeleteItem(orderService))
+	r.Post(`/item/{id}/delete`, postDeleteItem(orderService))
 
 	r.Post(`/members/new`, postNewMember(orderService))
 	r.Post(`/members/edit`, postEditMember(orderService))
-	r.Post(`/members/:id/delete`, postDeleteMember(orderService))
+	r.Post(`/members/{id}/delete`, postDeleteMember(orderService))
 
 	r.Get(`/billing/orders`, getBillingOrders(orderService))
 	r.Get(`/download`, getDownload(orderService))
