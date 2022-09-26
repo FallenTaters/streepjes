@@ -1,6 +1,0 @@
-<details class="card">
-    <summary>
-        <vg-comp expr="c.Summary"></vg-comp>
-    </summary>
-    <vg-comp expr="c.Content"></vg-comp>
-</details>
