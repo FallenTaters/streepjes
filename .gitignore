@@ -14,3 +14,11 @@ gitignore/
 *_vgen.go
 
 .env
+
+frontend_old/
+
+frontend/node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local/

@@ -1,7 +1,0 @@
-<div class="col min" @click="c.toggle()">
-    <club:Logo :Club="c.Club" :Size="120"></club:Logo>
-</div>
-
-<script type="application/x-go">
-    import "github.com/FallenTaters/streepjes/frontend/components/club"
-</script>
