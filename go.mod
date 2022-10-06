@@ -11,7 +11,7 @@ require (
 	github.com/google/go-cmp v0.4.0
 	github.com/mattn/go-sqlite3 v1.14.14
 	github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9
-	github.com/vugu/vugu v0.3.4
+	github.com/vugu/vugu v0.3.5-0.20221005220046-fff6df3754fe
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2
 	golang.org/x/text v0.3.7
