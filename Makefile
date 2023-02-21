@@ -44,7 +44,7 @@ lint:
 
 build: generate vugugen wasm
 	@echo -n "Compiling backend..."
-	@go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
+	@CGO_ENABLED=1 go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
 	@echo "Done"
 
 # TODO: use just?
