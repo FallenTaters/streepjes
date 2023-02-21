@@ -25,5 +25,13 @@ The frontend is WASM powered by Vugu, and the backend relies on a sqlite databas
 
 ## Running
 
+the environment variable `STREEPJES_PORT` is required in the environment.
+
+for example:
+
+```
+STREEPJES_PORT=80
+```
+
 ### Requirements
 * Browser must support webassembly
