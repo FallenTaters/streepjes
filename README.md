@@ -13,6 +13,23 @@ The frontend is WASM powered by Vugu, and the backend relies on a sqlite databas
     * [enumer](https://github.com/alvaroloes/enumer)
     * [vugugen](https://www.vugu.org/doc/start)
 
+#### Tooling Installation steps
+
+- [install go](https://go.dev/doc/install)
+    - add `~/go/bin` to `PATH`
+- `go install github.com/alvaroloes/enumer@latest`
+- `go install -u github.com/vugu/vgrun`
+- `vgrun -install-tools`
+
+### Build
+
+run `make build` or `make run` to build/run. this will rebuild the frontend first using WASM.
+
+Example: Build for Raspberry Pi
+
+`GOOS=linux GOARCH=arm make build && cp ./bin/streepjes ./bin/streepjes/streepjes-linux-arm`
+
+
 ### Run locally
 
 1. `make generate`
