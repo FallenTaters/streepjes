@@ -20,7 +20,12 @@ import (
 )
 
 func main() {
-	db, err := sqlite.OpenDB(`streepjes.db`)
+	dbPath := os.Getenv("STREEPJES_DB_PATH")
+	if dbPath == "" {
+		dbPath = "streepjes.db"
+	}
+
+	db, err := sqlite.OpenDB(dbPath)
 	if err != nil {
 		panic(err)
 	}

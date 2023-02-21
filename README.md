@@ -23,14 +23,14 @@ The frontend is WASM powered by Vugu, and the backend relies on a sqlite databas
 
 1. `make`
 
-## Running
+## Settings
 
-the environment variable `STREEPJES_PORT` is required in the environment.
 
-for example:
+The listed values are the default values.
 
 ```
 STREEPJES_PORT=80
+STREEPJES_DB_PATH=streepjes.db
 ```
 
 ### Requirements
