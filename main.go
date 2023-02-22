@@ -26,7 +26,12 @@ func main() {
 }
 
 func run() int {
-	log.Default().SetLevel(log.DebugLevel)
+	logLevel := log.ErrorLevel
+	debug := os.Getenv("STREEPJES_DEBUG")
+	if debug == "true" {
+		logLevel = log.DebugLevel
+	}
+	log.Default().SetLevel(logLevel)
 
 	dbPath := os.Getenv("STREEPJES_DB_PATH")
 	if dbPath == "" {
@@ -63,7 +68,7 @@ func run() int {
 
 	handler := router.New(static.Get, authService, orderService)
 
-	fmt.Printf("Starting server on port %d\n", settings.Port)
+	log.Info("Starting server", "port", settings.Port)
 	go func() {
 		err := http.ListenAndServe(fmt.Sprintf(`:%d`, settings.Port), handler)
 		log.Fatal("server exited", "error", err)

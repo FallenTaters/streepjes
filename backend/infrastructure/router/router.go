@@ -2,6 +2,7 @@ package router
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -55,13 +56,14 @@ func allowErrors(w http.ResponseWriter, err error, allowed ...error) {
 
 func logMiddleware(next http.Handler) http.Handler {
 	logger := log.New()
-	logger.SetLevel(log.DebugLevel)
-	logger.SetFormatter(log.TextFormatter)
+	logger.SetLevel(log.Default().GetLevel())
+	logger.SetReportTimestamp(true)
+	logger.SetPrefix("HTTP")
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := &statusRecorder{w, 0}
 		next.ServeHTTP(rec, r)
-		log.Debug(r.Method, "path", r.URL.Path, "status", rec.status)
+		logger.Debug(r.Method + " " + fmt.Sprint(rec.status) + " " + r.URL.Path)
 	})
 }
 

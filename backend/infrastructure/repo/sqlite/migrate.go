@@ -3,6 +3,7 @@ package sqlite
 import (
 	"embed"
 	"fmt"
+	"log"
 )
 
 //go:embed migrations/*
@@ -44,7 +45,7 @@ func migrate(db Queryable, version int) {
 
 		_, err = db.Exec(string(file))
 		if err != nil {
-			fmt.Printf("Couldn't run migration %04d.sql\n", version+1)
+			log.Fatal("Couldn't run migration", "file", fmt.Sprintf("%04d.sql\n", version+1))
 			panic(err)
 		}
 

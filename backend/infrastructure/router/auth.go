@@ -28,8 +28,6 @@ func authRoutes(r chi.Router, authService auth.Service) {
 
 func postLogin(authService auth.Service) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, credentials api.Credentials) {
-		log.Debug("received login request", "username", credentials.Username)
-
 		user, ok := authService.Login(credentials.Username, credentials.Password)
 		if !ok {
 			chio.Empty(w, http.StatusUnauthorized)
@@ -52,8 +50,6 @@ func postLogin(authService auth.Service) http.HandlerFunc {
 func postLogout(authService auth.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
-
-		log.Debug("received logout request", "user", user.Username)
 
 		authService.Logout(user.ID)
 
