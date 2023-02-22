@@ -23,6 +23,7 @@ func (cr catalogRepo) GetCategories() []orderdomain.Category {
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 
 	var categories []orderdomain.Category
 	for rows.Next() {
@@ -43,6 +44,7 @@ func (cr catalogRepo) GetItems() []orderdomain.Item {
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 
 	var items []orderdomain.Item
 	for rows.Next() {
@@ -145,6 +147,7 @@ func (cr catalogRepo) DeleteCategory(id int) error {
 		panic(err)
 	}
 	defer rows.Close()
+
 	if rows.Next() {
 		return repo.ErrCategoryHasItems
 	}

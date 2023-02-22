@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
 
 	"github.com/FallenTaters/streepjes/backend/application/auth"
@@ -17,9 +18,16 @@ import (
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/static"
+	"github.com/charmbracelet/log"
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
+	log.Default().SetLevel(log.DebugLevel)
+
 	dbPath := os.Getenv("STREEPJES_DB_PATH")
 	if dbPath == "" {
 		dbPath = "streepjes.db"
@@ -29,6 +37,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer db.Close()
+
+	sigChan := make(chan os.Signal)
+	shutdown := make(chan int)
+	signal.Notify(sigChan, os.Interrupt, os.Kill)
+	go func() {
+		<-sigChan
+		shutdown <- 0
+	}()
 
 	readSettings()
 
@@ -47,7 +64,13 @@ func main() {
 	handler := router.New(static.Get, authService, orderService)
 
 	fmt.Printf("Starting server on port %d\n", settings.Port)
-	panic(http.ListenAndServe(fmt.Sprintf(`:%d`, settings.Port), handler))
+	go func() {
+		err := http.ListenAndServe(fmt.Sprintf(`:%d`, settings.Port), handler)
+		log.Fatal("server exited", "error", err)
+		shutdown <- 1
+	}()
+
+	return <-shutdown
 }
 
 // check if there are no users in the database, if so, insert some

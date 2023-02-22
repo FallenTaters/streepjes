@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-	"database/sql"
 	"embed"
 	"fmt"
 )
@@ -9,7 +8,7 @@ import (
 //go:embed migrations/*
 var migrations embed.FS
 
-func Migrate(db *sql.DB) {
+func Migrate(db Queryable) {
 	row := db.QueryRow(`SELECT version FROM version;`)
 
 	var version int
@@ -22,7 +21,7 @@ func Migrate(db *sql.DB) {
 	migrate(db, version)
 }
 
-func createVersionTable(db *sql.DB) {
+func createVersionTable(db Queryable) {
 	_, err := db.Exec(`CREATE TABLE version(version INTEGER);`)
 	if err != nil {
 		panic(err)
@@ -34,7 +33,7 @@ func createVersionTable(db *sql.DB) {
 	}
 }
 
-func migrate(db *sql.DB, version int) {
+func migrate(db Queryable, version int) {
 	for {
 		filename := fmt.Sprintf(`migrations/%04d.sql`, version+1)
 
