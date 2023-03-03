@@ -39,7 +39,7 @@ func run() int {
 	var lis net.Listener
 	var err error
 	if !settings.DisableSecure {
-		cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+		cer, err := tls.LoadX509KeyPair(settings.TLSCertPath, settings.TLSKeyPath)
 		if err != nil {
 			panic(err)
 		}
@@ -127,5 +127,15 @@ func readSettings() {
 	dbPath := os.Getenv("STREEPJES_DB_PATH")
 	if dbPath != "" {
 		settings.DBPath = dbPath
+	}
+
+	tlsCertPath := os.Getenv("STREEPJES_TLS_CERT_PATH")
+	if tlsCertPath != "" {
+		settings.TLSCertPath = tlsCertPath
+	}
+
+	tlsKeyPath := os.Getenv("STREEPJES_TLS_KEY_PATH")
+	if tlsKeyPath != "" {
+		settings.TLSKeyPath = tlsKeyPath
 	}
 }
