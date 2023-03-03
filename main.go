@@ -3,7 +3,9 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -26,19 +28,31 @@ func main() {
 }
 
 func run() int {
+	readSettings()
+
 	logLevel := log.ErrorLevel
-	debug := os.Getenv("STREEPJES_DEBUG")
-	if debug == "true" {
+	if settings.Debug {
 		logLevel = log.DebugLevel
 	}
 	log.Default().SetLevel(logLevel)
 
-	dbPath := os.Getenv("STREEPJES_DB_PATH")
-	if dbPath == "" {
-		dbPath = "streepjes.db"
+	var lis net.Listener
+	var err error
+	if !settings.DisableSecure {
+		cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+		if err != nil {
+			panic(err)
+		}
+
+		lis, err = tls.Listen("tcp", ":443", &tls.Config{Certificates: []tls.Certificate{cer}})
+	} else {
+		lis, err = net.Listen("tcp", fmt.Sprintf(":%d", settings.Port))
+	}
+	if err != nil {
+		panic(err)
 	}
 
-	db, err := sqlite.OpenDB(dbPath)
+	db, err := sqlite.OpenDB(settings.DBPath)
 	if err != nil {
 		panic(err)
 	}
@@ -51,8 +65,6 @@ func run() int {
 		<-sigChan
 		shutdown <- 0
 	}()
-
-	readSettings()
 
 	sqlite.Migrate(db)
 
@@ -70,7 +82,7 @@ func run() int {
 
 	log.Info("Starting server", "port", settings.Port)
 	go func() {
-		err := http.ListenAndServe(fmt.Sprintf(`:%d`, settings.Port), handler)
+		err := http.Serve(lis, handler)
 		log.Fatal("server exited", "error", err)
 		shutdown <- 1
 	}()
@@ -109,5 +121,11 @@ func readSettings() {
 		}
 
 		settings.Port = portN
+	}
+
+	settings.Debug = os.Getenv("STREEPJES_DEBUG") == "true"
+	dbPath := os.Getenv("STREEPJES_DB_PATH")
+	if dbPath != "" {
+		settings.DBPath = dbPath
 	}
 }
