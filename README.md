@@ -23,6 +23,8 @@ The frontend is WASM powered by Vugu, and the backend relies on a sqlite databas
 
 ### Build
 
+NOTE: building without CGO is currently not supported.
+
 run `make build` or `make run` to build/run. this will rebuild the frontend first using WASM.
 
 Example: Build for Raspberry Pi

@@ -44,12 +44,12 @@ lint:
 
 build: generate vugugen wasm
 	@echo -n "Compiling backend..."
-	@CGO_ENABLED=0 go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
+	@CGO_ENABLED=1 go build -o ./bin/streepjes -ldflags $(LDFLAGS) .
 	@echo "Done"
 
 build-arm: generate vugugen wasm
 	@echo -n "Compiling backend..."
-	@GOOS=linux GOARCH=arm CGO_ENABLED=0 go build -o ./bin/streepjes-linux-arm -ldflags $(LDFLAGS) .
+	@GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o ./bin/streepjes-linux-arm -ldflags $(LDFLAGS) .
 	@echo "Done"
 
 # TODO: use just?
