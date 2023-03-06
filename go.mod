@@ -1,6 +1,6 @@
 module github.com/FallenTaters/streepjes
 
-go 1.18
+go 1.20
 
 require (
 	git.fuyu.moe/Fuyu/assert v0.2.1
