@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	TokenDuration         = 5 * time.Minute
-	LockScreenWarningTime = 3 * time.Minute
+	TokenDuration         = 24 * time.Hour
+	LockScreenWarningTime = 24 * time.Hour
 )
 
 type User struct {
