@@ -7,9 +7,23 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
+
+	_ "time/tzdata"
 )
+
+func init() { //nolint:gochecknoinits
+	tz, err := time.LoadLocation("Europe/Amsterdam")
+	if err != nil {
+		panic(err)
+	}
+
+	timezone = tz
+}
+
+var timezone *time.Location
 
 func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte { //nolint:funlen,cyclop
 	membersByID := make(map[int]orderdomain.Member)
@@ -47,7 +61,7 @@ func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte {
 		err = w.Write([]string{
 			membersByID[o.MemberID].Name,
 			o.Price.String(),
-			o.OrderTime.Format(`2006-01-02 15:04`),
+			o.OrderTime.In(timezone).Format(`2006-01-02 15:04`),
 			parseOrderLines(o.Contents),
 		})
 		if err != nil {

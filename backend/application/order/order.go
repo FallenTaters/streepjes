@@ -140,18 +140,26 @@ func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
 }
 
 func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) []orderdomain.Order {
-	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
-		Club:  club,
-		Start: month.Start(),
-		End:   month.End(),
+	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+		Club:      club,
+		Start:     month.Start(),
+		End:       month.End(),
+		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
+
+	for i := range orders {
+		orders[i].OrderTime = orders[i].OrderTime.In(timezone)
+	}
+
+	return orders
 }
 
 func (s *service) BillingCSV(club domain.Club, month orderdomain.Month) []byte {
 	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
-		Club:  club,
-		Start: month.Start(),
-		End:   month.End(),
+		Club:      club,
+		Start:     month.Start(),
+		End:       month.End(),
+		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
 	members := s.members.GetAll()
 
