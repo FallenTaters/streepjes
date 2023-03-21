@@ -45,6 +45,8 @@ func run() int {
 		}
 
 		lis, err = tls.Listen("tcp", ":443", &tls.Config{Certificates: []tls.Certificate{cer}})
+
+		go redirectHTTPS()
 	} else {
 		lis, err = net.Listen("tcp", fmt.Sprintf(":%d", settings.Port))
 	}
@@ -88,6 +90,18 @@ func run() int {
 	}()
 
 	return <-shutdown
+}
+
+func redirectHTTPS() {
+	err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u := *r.URL
+		u.Scheme = "https"
+
+		http.Redirect(w, r, u.String(), http.StatusMovedPermanently)
+	}))
+	if err != nil {
+		panic(err)
+	}
 }
 
 // check if there are no users in the database, if so, insert some
