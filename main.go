@@ -94,10 +94,7 @@ func run() int {
 
 func redirectHTTPS() {
 	err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := *r.URL
-		u.Scheme = "https"
-
-		http.Redirect(w, r, u.String(), http.StatusMovedPermanently)
+		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 	}))
 	if err != nil {
 		panic(err)
