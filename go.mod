@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/log v0.1.0
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-cmp v0.4.0
+	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9
 	github.com/vugu/vugu v0.3.5-0.20221005220046-fff6df3754fe
