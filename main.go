@@ -15,7 +15,7 @@ import (
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/backend/global/settings"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
-	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/sqlite"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/postgres"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/router"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -54,7 +54,7 @@ func run() int {
 		panic(err)
 	}
 
-	db, err := sqlite.OpenDB(settings.DBPath)
+	db, err := postgres.OpenDB(settings.DBConnectionString)
 	if err != nil {
 		panic(err)
 	}
@@ -68,12 +68,12 @@ func run() int {
 		shutdown <- 0
 	}()
 
-	sqlite.Migrate(db)
+	postgres.Migrate(db)
 
-	userRepo := sqlite.NewUserRepo(db)
-	memberRepo := sqlite.NewMemberRepo(db)
-	orderRepo := sqlite.NewOrderRepo(db)
-	catalogRepo := sqlite.NewCatalogRepo(db)
+	userRepo := postgres.NewUserRepo(db)
+	memberRepo := postgres.NewMemberRepo(db)
+	orderRepo := postgres.NewOrderRepo(db)
+	catalogRepo := postgres.NewCatalogRepo(db)
 
 	authService := auth.New(userRepo, orderRepo)
 	checkNoUsers(userRepo, authService)
@@ -135,9 +135,9 @@ func readSettings() {
 	}
 
 	settings.Debug = os.Getenv("STREEPJES_DEBUG") == "true"
-	dbPath := os.Getenv("STREEPJES_DB_PATH")
-	if dbPath != "" {
-		settings.DBPath = dbPath
+	dbConnectionString := os.Getenv("STREEPJES_DB_CONNECTION_STRING")
+	if dbConnectionString != "" {
+		settings.DBConnectionString = dbConnectionString
 	}
 
 	tlsCertPath := os.Getenv("STREEPJES_TLS_CERT_PATH")
