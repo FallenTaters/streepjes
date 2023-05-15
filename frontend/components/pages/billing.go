@@ -36,7 +36,8 @@ func (b *Billing) SetMonth(event vugu.DOMEvent) {
 	var date timefmt.Date[monthFormat]
 	err := date.UnmarshalText([]byte(v))
 	if err != nil {
-		panic(err) // TODO
+		window.Alert("month must be in format YYYY-MM, such as 2023-04")
+		return
 	}
 	b.Month = orderdomain.MonthOf(date.Time())
 
