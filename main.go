@@ -10,12 +10,14 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"time"
 
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/backend/global/settings"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/postgres"
+	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/sqlite"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/router"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -24,7 +26,115 @@ import (
 )
 
 func main() {
-	os.Exit(run())
+	// os.Exit(run())
+
+	readSettings()
+
+	oldDB, err := sqlite.OpenDB("streepjes.db")
+	if err != nil {
+		panic(err)
+	}
+
+	newDB, err := postgres.OpenDB(settings.DBConnectionString)
+	if err != nil {
+		panic(err)
+	}
+
+	postgres.Migrate(newDB)
+
+	tx, err := newDB.Begin()
+	if err != nil {
+		panic(err)
+	}
+	defer tx.Rollback()
+
+	users := sqlite.NewUserRepo(oldDB).GetAll()
+	cat := sqlite.NewCatalogRepo(oldDB)
+	categories := cat.GetCategories()
+	items := cat.GetItems()
+
+	members := sqlite.NewMemberRepo(oldDB).GetAll()
+	orders := sqlite.NewOrderRepo(oldDB).Filter(repo.OrderFilter{
+		Start: time.Date(2022, time.September, 1, 0, 0, 0, 0, time.Local),
+		Limit: 100000000000,
+	})
+
+	q := "INSERT INTO users (id, username, password, club, name, role) VALUES "
+	for i, user := range users {
+		if i != 0 {
+			q += ","
+		}
+		q += fmt.Sprintf("(%d,'%s','%s','%s','%s','%s')", user.ID, user.Username, user.PasswordHash, user.Club, user.Name, user.Role)
+	}
+	_, err = tx.Exec(q + ";")
+	if err != nil {
+		panic(err)
+	}
+
+	q = "INSERT INTO categories (id, name) VALUES "
+	for i, cat := range categories {
+		if i != 0 {
+			q += ","
+		}
+		q += fmt.Sprintf("(%d,'%s')", cat.ID, cat.Name)
+	}
+	_, err = tx.Exec(q + ";")
+	if err != nil {
+		panic(err)
+	}
+
+	q = "INSERT INTO items (id, category_id, name, price_gladiators, price_parabool) VALUES "
+	for i, item := range items {
+		if item.CategoryID == 0 {
+			fmt.Printf("SKIPPING ITEM %d (%s)\n", item.ID, item.Name)
+			continue
+		}
+		if i != 0 {
+			q += ","
+		}
+		q += fmt.Sprintf("(%d,%d,'%s',%d,%d)", item.ID, item.CategoryID, item.Name, item.PriceGladiators, item.PriceParabool)
+	}
+	_, err = tx.Exec(q + ";")
+	if err != nil {
+		panic(err)
+	}
+
+	format := "2006-01-02 15:04:05.000"
+
+	memberIDs := map[int]bool{}
+	q = "INSERT INTO members (id, club, name, last_order) VALUES "
+	for i, member := range members {
+		memberIDs[member.ID] = true
+		if i != 0 {
+			q += ","
+		}
+		q += fmt.Sprintf("(%d,'%s','%s','%s')", member.ID, member.Club, member.Name, member.LastOrder.Format(format))
+	}
+	_, err = tx.Exec(q + ";")
+	if err != nil {
+		panic(err)
+	}
+
+	q = "INSERT INTO orders (id, club, bartender_id, member_id, contents, price, order_time, status, status_time) VALUES "
+	for i, o := range orders {
+		if o.MemberID == 0 { // anonymous orders
+			continue
+		}
+
+		if i != 0 {
+			q += ","
+		}
+		q += fmt.Sprintf("(%d,'%s',%d,%d,'%s',%d,'%s','%s','%s')", o.ID, o.Club, o.BartenderID, o.MemberID, o.Contents, o.Price, o.OrderTime.Format(format), o.Status, o.StatusTime.Format(format))
+	}
+	_, err = tx.Exec(q + ";")
+	if err != nil {
+		panic(err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func run() int {
