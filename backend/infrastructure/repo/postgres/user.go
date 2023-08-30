@@ -8,6 +8,7 @@ import (
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/charmbracelet/log"
 )
 
 func NewUserRepo(db Queryable) repo.User {
@@ -123,6 +124,7 @@ func (ur *userRepo) Update(user authdomain.User) error {
 }
 
 func (ur *userRepo) Create(user authdomain.User) (int, error) {
+	log.Debug("creating new user", "username", user.Username, "name", user.Name, "role")
 	if user.Username == `` ||
 		len(user.PasswordHash) == 0 ||
 		user.Club == domain.ClubUnknown ||
