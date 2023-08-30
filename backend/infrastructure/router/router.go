@@ -51,6 +51,7 @@ func allowErrors(w http.ResponseWriter, err error, allowed ...error) {
 		}
 	}
 
+	log.Error("error not allowed for this call", "error", err.Error())
 	chio.Empty(w, http.StatusInternalServerError)
 }
 
