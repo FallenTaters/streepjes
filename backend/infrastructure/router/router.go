@@ -56,7 +56,7 @@ func allowErrors(w http.ResponseWriter, err error, allowed ...error) {
 
 func logMiddleware(next http.Handler) http.Handler {
 	logger := log.New()
-	logger.SetLevel(log.Default().GetLevel())
+	logger.SetLevel(log.DebugLevel)
 	logger.SetReportTimestamp(true)
 	logger.SetPrefix("HTTP")
 
