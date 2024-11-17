@@ -41,6 +41,7 @@
                     <option selected disabled :value="int(domain.ClubUnknown)">Select Club</option>
                     <option :value="int(domain.ClubParabool)">De Parabool</option>
                     <option :value="int(domain.ClubGladiators)">Gladiators</option>
+                    <option :value="int(domain.ClubCalamari)">Calamari</option>
                 </select>
                 <i>arrow_drop_down</i>
             </div>

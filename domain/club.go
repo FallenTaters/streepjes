@@ -8,4 +8,5 @@ const (
 	ClubUnknown    Club = iota // Unknown
 	ClubParabool               // Parabool
 	ClubGladiators             // Gladiators
+	ClubCalamari               // Calamari
 )

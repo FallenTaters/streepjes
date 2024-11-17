@@ -3,13 +3,13 @@
     <div style="justify-self:center">
         <button @click="c.Anonymous()" class="extra" style="width:100px;" :disabled="c.DisableButtons()">
             <i>payment</i>
-            <label>Anonymous</label>
+            <label class="primary">Anonymous<label>
         </button>
     </div>
     <div style="justify-self:center">
         <button @click="c.ChooseMember()" class="extra" style="width:100px;" :disabled="c.DisableButtons()">
             <i>person</i>
-            <label>Member</label>
+            <label class="primary">Member</label>
         </button>
     </div>
     <ui:Modal :Show="c.ShowMemberModal" @Close="c.ShowMemberModal = false" :Side="`right`">

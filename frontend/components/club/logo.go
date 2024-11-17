@@ -32,6 +32,8 @@ func (l *Logo) path() string {
 		return `url("/static/logos/parabool.jpg")`
 	case domain.ClubGladiators:
 		return `url("/static/logos/gladiators.jpg")`
+	case domain.ClubCalamari:
+		return `url("/static/logos/calamari.jpg")`
 	}
 
 	return ``

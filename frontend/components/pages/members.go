@@ -99,6 +99,10 @@ func (m *Members) ClubOptions() []beercss.Option {
 			Label: domain.ClubParabool.String(),
 			Value: domain.ClubParabool,
 		},
+		{
+			Label: domain.ClubCalamari.String(),
+			Value: domain.ClubCalamari,
+		},
 	}
 }
 

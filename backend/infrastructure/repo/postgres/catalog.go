@@ -40,7 +40,7 @@ func (cr catalogRepo) GetCategories() []orderdomain.Category {
 }
 
 func (cr catalogRepo) GetItems() []orderdomain.Item {
-	rows, err := cr.db.Query(`SELECT id, category_id, name, price_gladiators, price_parabool FROM items;`)
+	rows, err := cr.db.Query(`SELECT id, category_id, name, price_gladiators, price_parabool, price_calamari FROM items;`)
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +49,7 @@ func (cr catalogRepo) GetItems() []orderdomain.Item {
 	var items []orderdomain.Item
 	for rows.Next() {
 		var item orderdomain.Item
-		err := rows.Scan(&item.ID, &item.CategoryID, &item.Name, &item.PriceGladiators, &item.PriceParabool)
+		err := rows.Scan(&item.ID, &item.CategoryID, &item.Name, &item.PriceGladiators, &item.PriceParabool, &item.PriceCalamari)
 		if err != nil {
 			panic(err)
 		}
@@ -70,8 +70,8 @@ func (cr catalogRepo) CreateItem(item orderdomain.Item) (int, error) {
 		return 0, repo.ErrItemNameTaken
 	}
 
-	row = cr.db.QueryRow(`INSERT INTO items (category_id, name, price_gladiators, price_parabool) VALUES ($1, $2, $3, $4) RETURNING id;`,
-		item.CategoryID, item.Name, item.PriceGladiators, item.PriceParabool)
+	row = cr.db.QueryRow(`INSERT INTO items (category_id, name, price_gladiators, price_parabool, price_calamari) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+		item.CategoryID, item.Name, item.PriceGladiators, item.PriceParabool, item.PriceCalamari)
 
 	var id int
 	return id, row.Scan(&id)
@@ -161,8 +161,8 @@ func (cr catalogRepo) UpdateItem(item orderdomain.Item) error {
 		return repo.ErrCategoryNotFound
 	}
 
-	res, err := cr.db.Exec(`UPDATE items SET category_id = $1, name = $2, price_parabool = $3, price_gladiators = $4 WHERE id = $5;`,
-		item.CategoryID, item.Name, item.PriceParabool, item.PriceGladiators, item.ID)
+	res, err := cr.db.Exec(`UPDATE items SET category_id = $1, name = $2, price_parabool = $3, price_gladiators = $4, price_calamari = $5 WHERE id = $6;`,
+		item.CategoryID, item.Name, item.PriceParabool, item.PriceGladiators, item.PriceCalamari, item.ID)
 	if err != nil {
 		return repo.ErrItemNameTaken
 	}

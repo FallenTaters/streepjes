@@ -13,6 +13,7 @@ type Item struct {
 	Name            string `json:"name"`
 	PriceGladiators Price  `json:"price_gladiators"`
 	PriceParabool   Price  `json:"price_parabool"`
+	PriceCalamari   Price  `json:"price_calamari"`
 }
 
 func (i Item) Price(c domain.Club) Price {
@@ -23,6 +24,8 @@ func (i Item) Price(c domain.Club) Price {
 		return i.PriceGladiators
 	case domain.ClubParabool:
 		return i.PriceParabool
+	case domain.ClubCalamari:
+		return i.PriceCalamari
 	}
 
 	panic(c)

@@ -55,3 +55,10 @@ body > div {
   --secondary: #625b71;
   --on-secondary: white;
 }
+
+.Calamari {
+  --primary: #fe0;
+  --on-primary: #000;
+  --secondary: #fc0;
+  --on-secondary: #000;
+}

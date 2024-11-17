@@ -36,6 +36,7 @@ type Catalog struct {
 	ItemName        string
 	PriceGladiators orderdomain.Price
 	PriceParabool   orderdomain.Price
+	PriceCalamari   orderdomain.Price
 }
 
 func (c *Catalog) Init() {
@@ -88,6 +89,7 @@ func (c *Catalog) reset() {
 	c.ItemName = ``
 	c.PriceGladiators = 0
 	c.PriceParabool = 0
+	c.PriceCalamari = 0
 }
 
 func (c *Catalog) OnCategoryClick(category orderdomain.Category) {
@@ -116,6 +118,7 @@ func (c *Catalog) OnItemClick(item orderdomain.Item) {
 	c.CategoryID = item.CategoryID
 	c.PriceGladiators = item.PriceGladiators
 	c.PriceParabool = item.PriceParabool
+	c.PriceCalamari = item.PriceCalamari
 }
 
 func (c *Catalog) OnItemClickNew() {
@@ -196,6 +199,7 @@ func (c *Catalog) SubmitItemForm() {
 				Name:            c.ItemName,
 				PriceGladiators: c.PriceGladiators,
 				PriceParabool:   c.PriceParabool,
+				PriceCalamari:   c.PriceCalamari,
 			})
 		} else {
 			err = backend.PostUpdateItem(orderdomain.Item{
@@ -204,6 +208,7 @@ func (c *Catalog) SubmitItemForm() {
 				Name:            c.ItemName,
 				PriceGladiators: c.PriceGladiators,
 				PriceParabool:   c.PriceParabool,
+				PriceCalamari:   c.PriceCalamari,
 			})
 		}
 		defer global.LockAndRender()()

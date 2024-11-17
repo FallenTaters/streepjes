@@ -19,6 +19,10 @@
                         <span>Parabool</span>
                     </label>
                     <label class="checkbox">
+                        <input type="checkbox" :checked="c.Calamari" @click="c.Calamari = !c.Calamari; c.Refresh()">
+                        <span>Calamari</span>
+                    </label>
+                    <label class="checkbox">
                         <beercss:Select
                             :Options="c.Options()"
                             :Label="`Sort By`"
