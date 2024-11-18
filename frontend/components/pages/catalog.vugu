@@ -64,6 +64,11 @@
                     :Label="`Price Parabool (¢)`" :Value="strconv.Itoa(int(c.PriceParabool))"
                     @Input="v, _ := strconv.Atoi(string(event)); c.PriceParabool = orderdomain.Price(v)">
                 </beercss:Input>
+                <beercss:Input
+                    id="item-form-price-gladiators" name="item-price-gladiators" type="number"
+                    :Label="`Price Calamari (¢)`" :Value="strconv.Itoa(int(c.PriceCalamari))"
+                    @Input="v, _ := strconv.Atoi(string(event)); c.PriceCalamari = orderdomain.Price(v)">
+                </beercss:Input>
                 <button :disabled="c.LoadingForm" type="submit" class="responsive small-margin">
                     <i>save</i>
                     <span>Save</span>

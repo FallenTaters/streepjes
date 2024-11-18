@@ -116,6 +116,12 @@ func checkNoUsers(userRepo repo.User, authService auth.Service) {
 			Name:     `Parabool Admin`,
 			Role:     authdomain.RoleAdmin,
 		}, `groningerstudentenkorfbalcommissie`)
+		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
+			Username: `adminCalamari`,
+			Club:     domain.ClubCalamari,
+			Name:     `Calamari Admin`,
+			Role:     authdomain.RoleAdmin,
+		}, `blub`)
 	}
 }
 

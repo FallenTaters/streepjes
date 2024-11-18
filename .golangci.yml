@@ -1,26 +1,18 @@
 run:
-  build-tags: []
-  skip-dirs: [migratelegacydb]
-  skip-files: ['_vgen.go$']
+  build-tags: ["js", "wasm"]
  
 output:
-  format: colored-line-number
   print-issued-lines: true
   print-linter-name: true
  
 linters:
   enable-all: true
   disable:
-    - interfacer
-    - maligned
-    - scopelint
-    - golint
     - wrapcheck
     - varnamelen
     - tagliatelle
     - stylecheck
     - nlreturn
-    - gomnd
     - gochecknoglobals
     - forcetypeassert
     - revive
@@ -33,13 +25,11 @@ linters:
     - godot
     - paralleltest
     - tparallel
-    - ifshort
     - exhaustruct
+    - exportloopref
+    - typecheck
  
-linters-settings:
-  govet:
-    check-shadowing: true
- 
+linters-settings: 
   gocyclo:
     min-complexity: 15
  
@@ -55,6 +45,8 @@ linters-settings:
     statements: 40
  
 issues:
+  exclude-dirs: [migratelegacydb]
+  exclude-files: ['_vgen.go$']
   exclude: []
   exclude-rules:
     - path: _test.go

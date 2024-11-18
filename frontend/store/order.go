@@ -85,9 +85,12 @@ func (os *OrderStore) deleteAt(i int) {
 }
 
 func (os *OrderStore) ToggleClub() {
-	if os.Club == domain.ClubGladiators {
+	switch os.Club {
+	case domain.ClubGladiators:
 		os.Club = domain.ClubParabool
-	} else {
+	case domain.ClubParabool:
+		os.Club = domain.ClubCalamari
+	default:
 		os.Club = domain.ClubGladiators
 	}
 }

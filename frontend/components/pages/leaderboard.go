@@ -24,7 +24,7 @@ type Leaderboard struct {
 
 	ShowExpansion map[string]bool
 
-	Gladiators, Parabool bool
+	Gladiators, Parabool, Calamari bool
 
 	// Display state
 	Total   string                `vugu:"data"`
@@ -50,6 +50,7 @@ func (l *Leaderboard) Init() {
 
 	l.Gladiators = true
 	l.Parabool = true
+	l.Calamari = true
 	l.ShowExpansion = make(map[string]bool)
 	l.Sorting = SortWithWeights
 
@@ -93,7 +94,8 @@ func (l *Leaderboard) FilterRanking(ranking []api.LeaderboardRank) []api.Leaderb
 
 	for _, rank := range ranking {
 		if (rank.Club == domain.ClubGladiators && l.Gladiators) ||
-			(rank.Club == domain.ClubParabool && l.Parabool) {
+			(rank.Club == domain.ClubParabool && l.Parabool) ||
+			(rank.Club == domain.ClubCalamari && l.Calamari) {
 			newRanking = append(newRanking, rank)
 		}
 	}
