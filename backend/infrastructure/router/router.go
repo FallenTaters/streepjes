@@ -2,9 +2,9 @@ package router
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/chio/middleware"
@@ -64,7 +64,7 @@ func logMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rec := &statusRecorder{w, 0}
 		next.ServeHTTP(rec, r)
-		logger.Debug(r.Method + " " + fmt.Sprint(rec.status) + " " + r.URL.Path)
+		logger.Debug(r.Method + " " + strconv.Itoa(rec.status) + " " + r.URL.Path)
 	})
 }
 

@@ -22,7 +22,7 @@ jobs:
       run: go install github.com/vugu/vgrun@latest && vgrun -install-tools && go install github.com/dmarkham/enumer@latest && make build
 
     - name: install golangci-lint
-      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.0
+      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
 
     - name: lint
       run: make lint
