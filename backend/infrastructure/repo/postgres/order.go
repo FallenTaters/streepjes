@@ -49,13 +49,13 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 
 	row := or.db.QueryRow(`SELECT * FROM users WHERE id = $1;`, order.BartenderID)
 	if errors.Is(row.Scan(), sql.ErrNoRows) {
-		return 0, fmt.Errorf("%w with id %d\n", repo.ErrUserNotFound, order.BartenderID)
+		return 0, fmt.Errorf("%w with id %d", repo.ErrUserNotFound, order.BartenderID)
 	}
 
 	if order.MemberID != 0 {
 		row = or.db.QueryRow(`SELECT * FROM members WHERE id = $1;`, order.MemberID)
 		if errors.Is(row.Scan(), sql.ErrNoRows) {
-			return 0, fmt.Errorf("%w with id %d\n", repo.ErrMemberNotFound, order.MemberID)
+			return 0, fmt.Errorf("%w with id %d", repo.ErrMemberNotFound, order.MemberID)
 		}
 	}
 	memberID := sql.NullInt64{

@@ -1,4 +1,8 @@
 version: "2"
+run:
+  build-tags:
+    - js
+    - wasm
 linters:
   default: all
   disable:
@@ -24,7 +28,6 @@ linters:
     - mnd
     - interfacebloat
     - inamedparam
-    - funcorder
   settings:
     funlen:
       lines: 50

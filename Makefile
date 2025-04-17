@@ -39,7 +39,7 @@ test:
 
 lint:
 	@echo -n "Linting..."
-	@golangci-lint run ./...
+	@golangci-lint run ./backend/...
 	@echo "Done"
 
 build: generate vugugen wasm
