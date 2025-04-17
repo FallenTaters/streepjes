@@ -10,14 +10,14 @@ The frontend is WASM powered by Vugu, and the backend relies on a sqlite databas
 
 * go >= 1.18
 * go tooling:
-    * [enumer](https://github.com/alvaroloes/enumer)
+    * [enumer](https://github.com/dmarkham/enumer)
     * [vugugen](https://www.vugu.org/doc/start)
 
 #### Tooling Installation steps
 
 - [install go](https://go.dev/doc/install)
     - add `~/go/bin` to `PATH`
-- `go install github.com/alvaroloes/enumer@latest`
+- `go install github.com/dmarkham/enumer@latest`
 - `go install -u github.com/vugu/vgrun`
 - `vgrun -install-tools`
 
