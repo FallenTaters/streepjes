@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net"
 	"net/http"
 	"time"
 
@@ -30,6 +31,8 @@ func postLogin(authService auth.Service) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, credentials api.Credentials) {
 		user, ok := authService.Login(credentials.Username, credentials.Password)
 		if !ok {
+			host, _, _ := net.SplitHostPort(r.RemoteAddr)
+			log.Printf("authentication failure from %s", host)
 			chio.Empty(w, http.StatusUnauthorized)
 			return
 		}
