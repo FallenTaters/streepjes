@@ -14,7 +14,11 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-var ErrInvalidOrder = errors.New(`invalid order`)
+var (
+	ErrInvalidOrder    = errors.New(`invalid order`)
+	ErrOrderNotFound   = errors.New(`order not found`)
+	ErrOrderNotAllowed = errors.New(`bartender does not have access to this order`)
+)
 
 type Service interface {
 	// GetAllMembers gets all the members
@@ -39,8 +43,7 @@ type Service interface {
 	PlaceOrder(order orderdomain.Order, bartender authdomain.User) error
 
 	// BartenderDeleteOrder marks an order as deleted for a bartender
-	// if the bartender does not have access or if the order is not found, it returns false
-	BartenderDeleteOrder(bartenderID, orderID int) bool
+	BartenderDeleteOrder(bartenderID, orderID int) error
 
 	// NewCategory creates a new category
 	// It can return repo.ErrCategoryNameEmty or repo.ErrCategoryNameTaken
@@ -198,10 +201,14 @@ func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User)
 	return nil
 }
 
-func (s *service) BartenderDeleteOrder(bartenderID, orderID int) bool {
+func (s *service) BartenderDeleteOrder(bartenderID, orderID int) error {
 	order, ok := s.orders.Get(orderID)
-	if !ok || order.BartenderID != bartenderID {
-		return false
+	if !ok {
+		return ErrOrderNotFound
+	}
+
+	if order.BartenderID != bartenderID {
+		return ErrOrderNotAllowed
 	}
 
 	return s.orders.Delete(order.ID)
@@ -340,9 +347,5 @@ func (s *service) DeleteMember(id int) error {
 		return repo.ErrMemberHasOrders
 	}
 
-	if !s.members.Delete(id) {
-		return repo.ErrMemberNotFound
-	}
-
-	return nil
+	return s.members.Delete(id)
 }

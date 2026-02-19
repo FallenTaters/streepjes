@@ -108,7 +108,7 @@ func (mr *memberRepo) Update(member orderdomain.Member) error {
 	return nil
 }
 
-func (mr *memberRepo) Delete(id int) bool {
+func (mr *memberRepo) Delete(id int) error {
 	res, err := mr.db.Exec(`DELETE FROM members WHERE id = $1;`, id)
 	if err != nil {
 		panic(err)
@@ -119,9 +119,11 @@ func (mr *memberRepo) Delete(id int) bool {
 		panic(err)
 	}
 
-	if affected != 0 {
-		mr.logger.Info("member deleted", zap.Int("id", id))
+	if affected == 0 {
+		return repo.ErrMemberNotFound
 	}
 
-	return affected != 0
+	mr.logger.Info("member deleted", zap.Int("id", id))
+
+	return nil
 }

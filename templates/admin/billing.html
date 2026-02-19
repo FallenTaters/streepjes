@@ -1,0 +1,38 @@
+{{ define "content" }}
+{{ template "nav" . }}
+<div class="full-height page-content">
+  <h4>Billing</h4>
+  <form method="GET" action="/admin/billing" style="display:inline-flex;align-items:center;gap:10px;">
+    <div class="field label border">
+      <input type="month" name="month" id="billing-month" value="{{ .Month }}" required>
+      <label for="billing-month">Month</label>
+    </div>
+    <button type="submit" class="responsive">Load</button>
+  </form>
+  {{ if .Month }}
+  <a href="/admin/download?month={{ .Month }}" class="button primary extra small-margin">
+    <i>download</i> <span>Download CSV</span>
+  </a>
+  {{ end }}
+  {{ if .Orders }}
+  <div class="container" style="margin-top:10px;">
+    <table class="border">
+      <tr>
+        <th>Member</th>
+        <th>Price</th>
+        <th>Date</th>
+        <th>Contents</th>
+      </tr>
+      {{ range .Orders }}
+      <tr>
+        <td>{{ .MemberName }}</td>
+        <td>{{ .Price }}</td>
+        <td>{{ .OrderTime }}</td>
+        <td>{{ range .Lines }}<div>{{ . }}</div>{{ end }}</td>
+      </tr>
+      {{ end }}
+    </table>
+  </div>
+  {{ end }}
+</div>
+{{ end }}

@@ -169,7 +169,7 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	return orders
 }
 
-func (or *orderRepo) Delete(id int) bool {
+func (or *orderRepo) Delete(id int) error {
 	result, err := or.db.Exec(`UPDATE orders SET status = $1 WHERE id = $2;`, orderdomain.StatusCancelled, id)
 	if err != nil {
 		panic(err)
@@ -180,9 +180,11 @@ func (or *orderRepo) Delete(id int) bool {
 		panic(err)
 	}
 
-	if affected == 1 {
-		or.logger.Info("order cancelled", zap.Int("id", id))
+	if affected == 0 {
+		return repo.ErrOrderNotFound
 	}
 
-	return affected == 1
+	or.logger.Info("order cancelled", zap.Int("id", id))
+
+	return nil
 }

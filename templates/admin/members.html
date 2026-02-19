@@ -1,0 +1,47 @@
+{{ define "content" }}
+{{ template "nav" . }}
+<div class="full-height page-content">
+  <div class="grid-2col">
+    <h4 style="grid-area:title1;">Members</h4>
+    <h4 style="grid-area:title2;">{{ .FormTitle }}</h4>
+    <div style="grid-area:col1;overflow:auto;">
+      <a href="/admin/members?action=new" class="button responsive extra small-margin border">+</a>
+      {{ range .Members }}
+      <a href="/admin/members?action=edit&id={{ .ID }}"
+         class="button responsive extra small-margin {{ clubClass .Club }}">
+        <div style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">{{ .Name }}</div>
+      </a>
+      {{ end }}
+    </div>
+    <div style="grid-area:col2;overflow:auto;">
+      {{ if .ShowForm }}
+      <form method="POST" action="/admin/members" class="no-margin">
+        {{ if .EditMember }}
+        <input type="hidden" name="id" value="{{ .EditMember.ID }}">
+        {{ end }}
+        <div class="field label border">
+          <input type="text" name="name" id="member-form-name" value="{{ .FormName }}" required>
+          <label for="member-form-name">Name</label>
+        </div>
+        <button type="submit" class="responsive small-margin">
+          <i>save</i>
+          <span>Save</span>
+        </button>
+      </form>
+      {{ if .EditMember }}
+      <form method="POST" action="/admin/members/{{ .EditMember.ID }}/delete"
+            onsubmit="return confirm('Are you sure?');">
+        <button type="submit" class="responsive error small-margin">
+          <i>delete</i>
+          <span>Delete</span>
+        </button>
+      </form>
+      {{ end }}
+      {{ if .Error }}
+      <article class="error" style="margin-top:10px;">{{ .Error }}</article>
+      {{ end }}
+      {{ end }}
+    </div>
+  </div>
+</div>
+{{ end }}

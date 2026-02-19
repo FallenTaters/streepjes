@@ -27,8 +27,8 @@ type Member interface {
 	// if name is taken for the club, it returns ErrMemberNameTaken
 	Create(member orderdomain.Member) (int, error)
 
-	// Delete a member by id. Returns false if member is not found
-	Delete(id int) bool
+	// Delete a member by id
+	Delete(id int) error
 }
 
 var ErrMemberNotFound = errors.New("member not found")

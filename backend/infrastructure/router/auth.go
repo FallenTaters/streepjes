@@ -1,11 +1,9 @@
 package router
 
 import (
-	"net"
+	"context"
 	"net/http"
-	"time"
 
-	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/chio/middleware"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
@@ -19,123 +17,75 @@ func userFromContext(r *http.Request) authdomain.User {
 }
 
 func authRoutes(r chi.Router, authService auth.Service, logger *zap.Logger) {
-	r.Post(`/logout`, postLogout(authService))
-	r.Post(`/active`, postActive(logger))
+	r.Get(`/logout`, getLogout(authService))
+	r.Post(`/active`, postActive(authService, logger))
 
-	r.Post(`/me/name`, postMeName(authService, logger))
-	r.Post(`/me/password`, postMePassword(authService, logger))
+	r.Get(`/profile`, getProfilePage(authService, logger))
+	r.Post(`/profile/password`, postProfilePasswordPage(authService, logger))
+	r.Post(`/profile/name`, postProfileNamePage(authService, logger))
 }
 
-func postLogin(authService auth.Service, secureCookies bool, logger *zap.Logger) http.HandlerFunc {
-	return chio.JSON(func(w http.ResponseWriter, r *http.Request, credentials api.Credentials) {
-		user, ok := authService.Login(credentials.Username, credentials.Password)
-		if !ok {
-			host, _, _ := net.SplitHostPort(r.RemoteAddr)
-			logger.Warn("authentication failure", zap.String("ip", host))
-			chio.Empty(w, http.StatusUnauthorized)
-			return
-		}
-
-		http.SetCookie(w, &http.Cookie{ //nolint:exhaustivestruct
-			Name:   api.AuthTokenCookieName,
-			Value:  user.AuthToken,
-			Path:   ``,
-			Domain: ``,
-			MaxAge: 24 * int(time.Hour/time.Second),
-			Secure: secureCookies,
-		})
-
-		chio.WriteJSON(w, http.StatusOK, user)
-	})
-}
-
-func postLogout(authService auth.Service) http.HandlerFunc {
+func getLogout(authService auth.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
-
 		authService.Logout(user.ID)
-
-		chio.Empty(w, http.StatusOK)
+		http.SetCookie(w, &http.Cookie{
+			Name:   api.AuthTokenCookieName,
+			Value:  ``,
+			Path:   `/`,
+			MaxAge: -1,
+		})
+		http.Redirect(w, r, `/login`, http.StatusSeeOther)
 	}
 }
 
-func postActive(logger *zap.Logger) http.HandlerFunc {
+func postActive(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
-
+		authService.Active(user.ID)
 		logger.Debug("received activity refresh", zap.String("user", user.Username))
-
-		chio.WriteJSON(w, http.StatusOK, user)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
-func authMiddleware(authService auth.Service, logger *zap.Logger) func(http.Handler) http.Handler {
-	return middleware.SetValue(`user`, func(w http.ResponseWriter, r *http.Request) (authdomain.User, bool) {
-		token, err := r.Cookie(`auth_token`)
-		if err != nil {
-			logger.Debug("auth aborted - no token cookie")
-			chio.Empty(w, http.StatusUnauthorized)
-			return authdomain.User{}, false
-		}
+func pageAuthMiddleware(authService auth.Service, logger *zap.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			token, err := r.Cookie(api.AuthTokenCookieName)
+			if err != nil {
+				logger.Debug("page auth - no token cookie")
+				http.Redirect(w, r, `/login`, http.StatusSeeOther)
+				return
+			}
 
-		user, ok := authService.Check(token.Value)
-		if !ok {
-			logger.Debug("auth aborted - token not valid")
-			chio.Empty(w, http.StatusUnauthorized)
-		}
+			user, ok := authService.Check(token.Value)
+			if !ok {
+				logger.Debug("page auth - token not valid")
+				http.Redirect(w, r, `/login`, http.StatusSeeOther)
+				return
+			}
 
-		return user, ok
-	})
+			ctx := context.WithValue(r.Context(), `user`, user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
-func permissionMiddleware(permission authdomain.Permission, logger *zap.Logger) func(http.Handler) http.Handler {
+func pagePermissionMiddleware(permission authdomain.Permission, logger *zap.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			user := userFromContext(r)
 
 			if !user.Role.Has(permission) {
-				logger.Debug("auth aborted - no permission",
+				logger.Debug("page auth - no permission",
 					zap.String("role", user.Role.String()),
 					zap.Int("permission", int(permission)),
 				)
-				chio.Empty(w, http.StatusForbidden)
+				http.Redirect(w, r, `/`, http.StatusSeeOther)
 				return
 			}
 
 			next.ServeHTTP(w, r)
 		})
 	}
-}
-
-func postMeName(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
-	return chio.JSON(func(w http.ResponseWriter, r *http.Request, name string) {
-		user := userFromContext(r)
-
-		logger.Debug("received change name request",
-			zap.String("user", user.Username),
-			zap.String("name", name),
-		)
-
-		if !authService.ChangeName(user, name) {
-			chio.Empty(w, http.StatusBadRequest)
-			return
-		}
-
-		chio.Empty(w, http.StatusOK)
-	})
-}
-
-func postMePassword(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
-	return chio.JSON(func(w http.ResponseWriter, r *http.Request, changePassword api.ChangePassword) {
-		user := userFromContext(r)
-
-		logger.Debug("received password change request", zap.String("user", user.Username))
-
-		if !authService.ChangePassword(user, changePassword) {
-			chio.Empty(w, http.StatusBadRequest)
-			return
-		}
-
-		chio.Empty(w, http.StatusOK)
-	})
 }

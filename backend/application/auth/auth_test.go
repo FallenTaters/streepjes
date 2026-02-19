@@ -337,12 +337,12 @@ func TestChangePassword(t *testing.T) {
 	t.Run(`change password of existing user`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		ok := s.ChangePassword(testUser, api.ChangePassword{
+		err := s.ChangePassword(testUser, api.ChangePassword{
 			Original: `abc`,
 			New:      `cba`,
 		})
 
-		assert.True(ok)
+		assert.NoError(err)
 		assert.Eq(1, updateCalledWith.ID)
 		assert.True(auth.CheckPassword(updateCalledWith.PasswordHash, `cba`))
 
@@ -352,12 +352,12 @@ func TestChangePassword(t *testing.T) {
 	t.Run(`wrong password`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		ok := s.ChangePassword(testUser, api.ChangePassword{
+		err := s.ChangePassword(testUser, api.ChangePassword{
 			Original: `abcasdfasdfasdf`,
 			New:      `cba`,
 		})
 
-		assert.False(ok)
+		assert.Error(err)
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
 		cleanup()
@@ -366,12 +366,12 @@ func TestChangePassword(t *testing.T) {
 	t.Run(`empty password`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		ok := s.ChangePassword(testUser, api.ChangePassword{
+		err := s.ChangePassword(testUser, api.ChangePassword{
 			Original: `abc`,
 			New:      ``,
 		})
 
-		assert.False(ok)
+		assert.Error(err)
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
 		cleanup()
@@ -384,12 +384,12 @@ func TestChangePassword(t *testing.T) {
 			return repo.ErrUserNotFound
 		}
 
-		ok := s.ChangePassword(testUser, api.ChangePassword{
+		err := s.ChangePassword(testUser, api.ChangePassword{
 			Original: `abc`,
 			New:      `cba`,
 		})
 
-		assert.False(ok)
+		assert.Error(err)
 
 		cleanup()
 	})
@@ -418,9 +418,9 @@ func TestChangeName(t *testing.T) {
 	t.Run(`change name`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		ok := s.ChangeName(testUser, `Dory`)
+		err := s.ChangeName(testUser, `Dory`)
 
-		assert.True(ok)
+		assert.NoError(err)
 		assert.Eq(`Dory`, updateCalledWith.Name)
 
 		cleanup()
@@ -429,9 +429,9 @@ func TestChangeName(t *testing.T) {
 	t.Run(`empty name`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		ok := s.ChangeName(testUser, ``)
+		err := s.ChangeName(testUser, ``)
 
-		assert.False(ok)
+		assert.Error(err)
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
 		cleanup()
@@ -444,9 +444,9 @@ func TestChangeName(t *testing.T) {
 			return repo.ErrUserNotFound
 		}
 
-		ok := s.ChangeName(testUser, `Dory`)
+		err := s.ChangeName(testUser, `Dory`)
 
-		assert.False(ok)
+		assert.Error(err)
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
 		cleanup()

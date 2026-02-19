@@ -14,16 +14,10 @@ default: build
 generate:
     go generate ./...
 
-vugugen:
-    bash ./frontend/generate.bash
+run:
+    find . -name '*.go' -o -name '*.html' -o -name '*.js' | entr -cr go run -ldflags "-X {{package}}.buildVersion=development" .
 
-wasm:
-    GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
-
-run: vugugen wasm
-    go run -ldflags "-X {{package}}.buildVersion=development" .
-
-run-backend:
+run-once:
     go run -ldflags "-X {{package}}.buildVersion=development" .
 
 test:
@@ -32,11 +26,8 @@ test:
 lint:
     golangci-lint run ./backend/...
 
-build: generate vugugen wasm
-    CGO_ENABLED=1 go build -o ./bin/streepjes -ldflags '{{ldflags}}' .
-
-build-arm: generate vugugen wasm
-    GOOS=linux GOARCH=arm CGO_ENABLED=1 go build -o ./bin/streepjes-linux-arm -ldflags '{{ldflags}}' .
+build: generate
+    CGO_ENABLED=0 go build -o ./bin/streepjes -ldflags '{{ldflags}}' .
 
 container:
     podman build \

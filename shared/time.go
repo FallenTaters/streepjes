@@ -3,7 +3,7 @@ package shared
 import "time"
 
 func PrettyDatetime(t time.Time) string {
-	t, now := t.In(time.Local), time.Now()
+	now := time.Now().In(t.Location())
 	timePretty := prettyTime(t, now)
 	if timePretty == `Just now` {
 		return timePretty
@@ -13,11 +13,11 @@ func PrettyDatetime(t time.Time) string {
 }
 
 func PrettyDate(t time.Time) string {
-	return prettyDate(t.In(time.Local), time.Now())
+	return prettyDate(t, time.Now().In(t.Location()))
 }
 
 func PrettyTime(t time.Time) string {
-	return prettyTime(t.In(time.Local), time.Now())
+	return prettyTime(t, time.Now().In(t.Location()))
 }
 
 func prettyDate(t, now time.Time) string {
@@ -43,7 +43,7 @@ func prettyTime(t, now time.Time) string {
 		return `Just now`
 	}
 
-	return t.Format(`03:04`)
+	return t.Format(`15:04`)
 }
 
 func SameDate(a, b time.Time) bool {
