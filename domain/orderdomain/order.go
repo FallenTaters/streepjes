@@ -7,7 +7,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain"
 )
 
-//go:generate enumer -json -sql -linecomment -type Status
+//go:generate go tool enumer -json -sql -linecomment -type Status
 
 type Order struct {
 	ID          int         `json:"id"`

@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -10,6 +11,8 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
@@ -60,14 +63,6 @@ func run() int {
 	}
 	defer db.Close()
 
-	sigChan := make(chan os.Signal)
-	shutdown := make(chan int)
-	signal.Notify(sigChan, os.Interrupt, os.Kill)
-	go func() {
-		<-sigChan
-		shutdown <- 0
-	}()
-
 	postgres.Migrate(db)
 
 	userRepo := postgres.NewUserRepo(db)
@@ -81,15 +76,30 @@ func run() int {
 	orderService := order.New(memberRepo, orderRepo, catalogRepo)
 
 	handler := router.New(static.Get, authService, orderService)
+	srv := &http.Server{Handler: handler}
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	log.Info("Starting server", "port", settings.Port)
 	go func() {
-		err := http.Serve(lis, handler)
-		log.Fatal("server exited", "error", err)
-		shutdown <- 1
+		if err := srv.Serve(lis); err != nil && err != http.ErrServerClosed {
+			log.Fatal("server exited", "error", err)
+		}
 	}()
 
-	return <-shutdown
+	<-sigChan
+	log.Info("Shutting down server")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Error("server forced to shutdown", "error", err)
+		return 1
+	}
+
+	return 0
 }
 
 func redirectHTTPS() {

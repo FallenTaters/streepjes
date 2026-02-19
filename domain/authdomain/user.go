@@ -24,7 +24,7 @@ type User struct {
 	AuthTime  time.Time `json:"-"`
 }
 
-//go:generate enumer -type Role -linecomment -sql -json
+//go:generate go tool enumer -type Role -linecomment -sql -json
 
 type Role int
 

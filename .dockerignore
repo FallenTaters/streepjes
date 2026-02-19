@@ -4,6 +4,7 @@ tmp/
 *.wasm
 *_enumer.go
 *_gen.go
-.env
+.env*
 air.log
 streepjes.db
+justfile
