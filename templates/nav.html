@@ -1,0 +1,80 @@
+{{ define "nav" }}
+<div>
+  <div class="menu left l m">
+    {{ if .IsBartender }}
+    <a href="/order" {{ if eq .ActivePage "order" }}class="active"{{ end }}>
+      <i>shopping_cart</i>
+      <div>Order</div>
+    </a>
+    <a href="/history" {{ if eq .ActivePage "history" }}class="active"{{ end }}>
+      <i>history</i>
+      <div>History</div>
+    </a>
+    <a href="/leaderboard" {{ if eq .ActivePage "leaderboard" }}class="active"{{ end }}>
+      <i>leaderboard</i>
+      <div>Leaderboard</div>
+    </a>
+    {{ end }}
+    {{ if .IsAdmin }}
+    <a href="/admin/billing" {{ if eq .ActivePage "billing" }}class="active"{{ end }}>
+      <i>receipt</i>
+      <div>Billing</div>
+    </a>
+    <a href="/admin/catalog" {{ if eq .ActivePage "catalog" }}class="active"{{ end }}>
+      <i>fastfood</i>
+      <div>Catalog</div>
+    </a>
+    <a href="/admin/members" {{ if eq .ActivePage "members" }}class="active"{{ end }}>
+      <i>people</i>
+      <div>Members</div>
+    </a>
+    <a href="/admin/users" {{ if eq .ActivePage "users" }}class="active"{{ end }}>
+      <i>manage_accounts</i>
+      <div>Users</div>
+    </a>
+    {{ end }}
+    <a href="/profile" {{ if eq .ActivePage "profile" }}class="active"{{ end }}>
+      <i>person</i>
+      <div>{{ .UserDisplay }}</div>
+    </a>
+  </div>
+  <div class="menu bottom s">
+    {{ if .IsBartender }}
+    <a href="/order" {{ if eq .ActivePage "order" }}class="active"{{ end }}>
+      <i>shopping_cart</i>
+      <div>Order</div>
+    </a>
+    <a href="/history" {{ if eq .ActivePage "history" }}class="active"{{ end }}>
+      <i>history</i>
+      <div>History</div>
+    </a>
+    <a href="/leaderboard" {{ if eq .ActivePage "leaderboard" }}class="active"{{ end }}>
+      <i>leaderboard</i>
+      <div>Leaderboard</div>
+    </a>
+    {{ end }}
+    {{ if .IsAdmin }}
+    <a href="/admin/billing" {{ if eq .ActivePage "billing" }}class="active"{{ end }}>
+      <i>receipt</i>
+      <div>Billing</div>
+    </a>
+    <a href="/admin/catalog" {{ if eq .ActivePage "catalog" }}class="active"{{ end }}>
+      <i>fastfood</i>
+      <div>Catalog</div>
+    </a>
+    <a href="/admin/members" {{ if eq .ActivePage "members" }}class="active"{{ end }}>
+      <i>people</i>
+      <div>Members</div>
+    </a>
+    <a href="/admin/users" {{ if eq .ActivePage "users" }}class="active"{{ end }}>
+      <i>manage_accounts</i>
+      <div>Users</div>
+    </a>
+    {{ end }}
+    <a href="/profile" {{ if eq .ActivePage "profile" }}class="active"{{ end }}>
+      <i>person</i>
+      <div>{{ .UserDisplay }}</div>
+    </a>
+  </div>
+</div>
+{{ end }}

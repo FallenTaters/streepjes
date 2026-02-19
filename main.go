@@ -1,5 +1,3 @@
-//go:build !dev
-
 package main
 
 import (
@@ -79,7 +77,7 @@ func loadConfig(cmd *cobra.Command, configFile string) (settings.Config, error) 
 	if configFile != "" {
 		v.SetConfigFile(configFile)
 	} else {
-		v.SetConfigName("streepjes")
+		v.SetConfigName("config")
 		v.SetConfigType("toml")
 		v.AddConfigPath(".")
 	}

@@ -9,7 +9,6 @@ require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.15
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9
