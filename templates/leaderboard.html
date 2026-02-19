@@ -1,6 +1,53 @@
 {{ define "content" }}
 {{ template "nav" . }}
 <div class="full-height page-content">
-  <p>Leaderboard - not yet implemented</p>
+  <h3>Leaderboard</h3>
+
+  <form method="GET" action="/leaderboard">
+    <div class="field middle-align">
+      <nav>
+        <label class="checkbox">
+          <input type="checkbox" name="gladiators" value="1" {{ if .Gladiators }}checked{{ end }} onchange="this.form.submit();">
+          <span>Gladiators</span>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="parabool" value="1" {{ if .Parabool }}checked{{ end }} onchange="this.form.submit();">
+          <span>Parabool</span>
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="calamari" value="1" {{ if .Calamari }}checked{{ end }} onchange="this.form.submit();">
+          <span>Calamari</span>
+        </label>
+        <div class="field suffix border" style="min-width:160px;">
+          <select name="sort" onchange="this.form.submit();">
+            <option value="items" {{ if eq .Sort "items" }}selected{{ end }}>Items Bought</option>
+            <option value="money" {{ if eq .Sort "money" }}selected{{ end }}>Money Spent</option>
+          </select>
+          <i>arrow_drop_down</i>
+        </div>
+      </nav>
+    </div>
+  </form>
+
+  <h5 class="right-align" style="padding-right:75px;">Total: {{ .Total }}</h5>
+
+  <div style="overflow:auto;">
+    {{ range $i, $rank := .Ranking }}
+    <div class="{{ $rank.ClubClass }}">
+      <button class="primary round responsive extra large-text margin"
+              style="display:flex;justify-content:space-between;"
+              onclick="var d=this.parentElement.querySelector('.expand');d.style.display=d.style.display==='none'?'block':'none';">
+        <span>{{ add $i 1 }}.</span>
+        <span>{{ $rank.Name }}</span>
+        <span>{{ $rank.Total }} <i>arrow_drop_down</i></span>
+      </button>
+      <div class="expand small-text center-align" style="display:none;">
+        {{ range $rank.Items }}
+        <div>{{ . }}</div>
+        {{ end }}
+      </div>
+    </div>
+    {{ end }}
+  </div>
 </div>
 {{ end }}

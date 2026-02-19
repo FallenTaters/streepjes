@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
@@ -225,10 +226,135 @@ func postDeleteOrderPage(orderService order.Service) http.HandlerFunc {
 	}
 }
 
-func getLeaderboardPage(_ order.Service) http.HandlerFunc {
+var itemWeights = map[string]int{
+	"Bier":           1,
+	"Weizen glas":    1,
+	"Pitcher":        5,
+	"Weizen Pitcher": 5,
+	"Flugel":         1,
+	"Bier Barcie":    1,
+	"Bier BarCie":    1,
+	"Seltzer BarCie": 1,
+	"Seltzer":        1,
+	"Wine Bottle":    5,
+	"Wijn":           1,
+	"Radler":         0,
+}
+
+type leaderboardRank struct {
+	Name      string
+	ClubClass string
+	Total     string
+	Items     []string
+}
+
+type leaderboardData struct {
+	pageData
+	Gladiators bool
+	Parabool   bool
+	Calamari   bool
+	Sort       string
+	Total      string
+	Ranking    []leaderboardRank
+}
+
+func getLeaderboardPage(orderService order.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		render(w, "leaderboard.html", newPageData(r, "leaderboard"))
+		q := r.URL.Query()
+
+		gladiators := q.Get("gladiators") == "1"
+		parabool := q.Get("parabool") == "1"
+		calamari := q.Get("calamari") == "1"
+		sortMode := q.Get("sort")
+
+		hasFilters := q.Has("gladiators") || q.Has("parabool") || q.Has("calamari")
+		if !hasFilters {
+			gladiators = true
+			parabool = true
+			calamari = true
+		}
+		if sortMode == "" {
+			sortMode = "items"
+		}
+
+		leaderboard := orderService.GetLeaderboard(api.LeaderboardFilter{
+			Start: time.Now().AddDate(-10, 0, 0),
+			End:   time.Now().AddDate(10, 0, 0),
+		})
+
+		var totalStr string
+		var ranking []api.LeaderboardRank
+
+		if sortMode == "money" {
+			total, r := leaderboard.MoneyRanking()
+			totalStr = total.String()
+			ranking = r
+		} else {
+			total, r := leaderboard.ItemRanking(itemWeights)
+			totalStr = strconv.Itoa(total)
+			ranking = r
+		}
+
+		filtered := make([]leaderboardRank, 0, len(ranking))
+		for _, rank := range ranking {
+			show := (rank.Club == domain.ClubGladiators && gladiators) ||
+				(rank.Club == domain.ClubParabool && parabool) ||
+				(rank.Club == domain.ClubCalamari && calamari)
+			if !show {
+				continue
+			}
+
+			items := sortItemInfo(rank.ItemInfo)
+			filtered = append(filtered, leaderboardRank{
+				Name:      rank.Name,
+				ClubClass: rank.Club.String(),
+				Total:     rank.Total,
+				Items:     items,
+			})
+		}
+
+		data := leaderboardData{
+			pageData:   newPageData(r, "leaderboard"),
+			Gladiators: gladiators,
+			Parabool:   parabool,
+			Calamari:   calamari,
+			Sort:       sortMode,
+			Total:      totalStr,
+			Ranking:    filtered,
+		}
+
+		render(w, "leaderboard.html", data)
 	}
+}
+
+func sortItemInfo(itemInfo map[string]int) []string {
+	type mc struct {
+		msg   string
+		count int
+	}
+
+	out := make([]mc, 0, len(itemInfo))
+	for name, count := range itemInfo {
+		if w, ok := itemWeights[name]; !ok || w > 0 {
+			out = append(out, mc{
+				msg:   strconv.Itoa(count) + " " + name,
+				count: count,
+			})
+		}
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].count == out[j].count {
+			return out[i].msg < out[j].msg
+		}
+		return out[i].count > out[j].count
+	})
+
+	result := make([]string, len(out))
+	for i, o := range out {
+		result[i] = o.msg
+	}
+	return result
 }
 
 // Admin pages

@@ -20,6 +20,9 @@ var funcMap = template.FuncMap{
 		}
 		return c.String()
 	},
+	"add": func(a, b int) int {
+		return a + b
+	},
 }
 
 var (
