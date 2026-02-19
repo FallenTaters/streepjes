@@ -1,7 +1,7 @@
 (function() {
-  var TOKEN_DURATION_MS = 24 * 60 * 60 * 1000;
-  var WARNING_BEFORE_MS = 60 * 60 * 1000;
-  var KEEPALIVE_INTERVAL_MS = 5 * 60 * 1000;
+  var INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
+  var WARNING_BEFORE_MS = 10 * 60 * 1000;
+  var KEEPALIVE_INTERVAL_MS = 2 * 60 * 1000;
 
   var lastActivity = Date.now();
   var warningShown = false;
@@ -45,11 +45,11 @@
 
   function check() {
     var elapsed = Date.now() - lastActivity;
-    if (elapsed >= TOKEN_DURATION_MS) {
+    if (elapsed >= INACTIVITY_TIMEOUT_MS) {
       window.location.href = "/logout";
       return;
     }
-    if (elapsed >= TOKEN_DURATION_MS - WARNING_BEFORE_MS) {
+    if (elapsed >= INACTIVITY_TIMEOUT_MS - WARNING_BEFORE_MS) {
       showWarning();
     }
   }
@@ -57,9 +57,9 @@
   document.addEventListener("click", resetActivity);
   document.addEventListener("keypress", resetActivity);
 
-  setInterval(check, 30000);
+  setInterval(check, 10000);
   setInterval(function() {
-    if (Date.now() - lastActivity < TOKEN_DURATION_MS - WARNING_BEFORE_MS) {
+    if (Date.now() - lastActivity < INACTIVITY_TIMEOUT_MS - WARNING_BEFORE_MS) {
       sendKeepalive();
     }
   }, KEEPALIVE_INTERVAL_MS);

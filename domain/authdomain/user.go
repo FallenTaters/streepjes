@@ -6,10 +6,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain"
 )
 
-const (
-	TokenDuration         = 24 * time.Hour
-	LockScreenWarningTime = 24 * time.Hour
-)
+const TokenDuration = 20 * time.Minute
 
 type User struct {
 	ID           int    `json:"id"`
