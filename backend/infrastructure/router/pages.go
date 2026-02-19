@@ -18,11 +18,8 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/FallenTaters/streepjes/shared"
 	"github.com/FallenTaters/streepjes/templates"
-	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
-
-var pageLogger *zap.Logger
 
 type pageData struct {
 	ActivePage  string
@@ -47,12 +44,10 @@ func newPageData(r *http.Request, activePage string) pageData {
 	}
 }
 
-func render(w http.ResponseWriter, tmpl string, data any) {
+func render(w http.ResponseWriter, logger *zap.Logger, tmpl string, data any) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := templates.Render(w, tmpl, data); err != nil {
-		if pageLogger != nil {
-			pageLogger.Error("template render failed", zap.String("template", tmpl), zap.Error(err))
-		}
+		logger.Error("template render failed", zap.String("template", tmpl), zap.Error(err))
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 	}
 }
@@ -65,9 +60,9 @@ type profileData struct {
 	NameMsg     string
 }
 
-func getProfilePage(_ auth.Service, _ *zap.Logger) http.HandlerFunc {
+func getProfilePage(logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		render(w, "profile.html", profileData{
+		render(w, logger, "profile.html", profileData{
 			pageData:    newPageData(r, "profile"),
 			PasswordMsg: r.URL.Query().Get("pw"),
 			NameMsg:     r.URL.Query().Get("name"),
@@ -132,7 +127,7 @@ type orderData struct {
 	MembersJSON template.JS
 }
 
-func getOrderPage(orderService order.Service) http.HandlerFunc {
+func getOrderPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
 		catalog := orderService.GetCatalog()
@@ -148,7 +143,7 @@ func getOrderPage(orderService order.Service) http.HandlerFunc {
 			MembersJSON: template.JS(membersBytes),
 		}
 
-		render(w, "order.html", data)
+		render(w, logger, "order.html", data)
 	}
 }
 
@@ -175,7 +170,7 @@ type historyData struct {
 	Error  string
 }
 
-func getHistoryPage(orderService order.Service) http.HandlerFunc {
+func getHistoryPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
 		orders := orderService.GetOrdersForBartender(user.ID)
@@ -229,17 +224,17 @@ func getHistoryPage(orderService order.Service) http.HandlerFunc {
 			Error:    r.URL.Query().Get("error"),
 		}
 
-		render(w, "history.html", data)
+		render(w, logger, "history.html", data)
 	}
 }
 
-func postDeleteOrderPage(orderService order.Service) http.HandlerFunc {
+func postDeleteOrderPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
-		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+		id, _ := strconv.Atoi(r.PathValue("id"))
 
 		if err := orderService.BartenderDeleteOrder(user.ID, id); err != nil {
-			pageLogger.Warn("order delete failed", zap.Int("id", id), zap.Error(err))
+			logger.Warn("order delete failed", zap.Int("id", id), zap.Error(err))
 			http.Redirect(w, r, "/history?error=Unable+to+delete+order.", http.StatusSeeOther)
 			return
 		}
@@ -280,7 +275,7 @@ type leaderboardData struct {
 	Ranking    []leaderboardRank
 }
 
-func getLeaderboardPage(orderService order.Service) http.HandlerFunc {
+func getLeaderboardPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 
@@ -345,7 +340,7 @@ func getLeaderboardPage(orderService order.Service) http.HandlerFunc {
 			Ranking:    filtered,
 		}
 
-		render(w, "leaderboard.html", data)
+		render(w, logger, "leaderboard.html", data)
 	}
 }
 
@@ -404,7 +399,7 @@ func clubClass(c domain.Club) string {
 	return c.String()
 }
 
-func getUsersPage(authService auth.Service, _ *zap.Logger) http.HandlerFunc {
+func getUsersPage(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		users := authService.GetUsers()
 		sort.Slice(users, func(i, j int) bool {
@@ -451,7 +446,7 @@ func getUsersPage(authService auth.Service, _ *zap.Logger) http.HandlerFunc {
 			data.Error = errMsg
 		}
 
-		render(w, "admin/users.html", data)
+		render(w, logger, "admin/users.html", data)
 	}
 }
 
@@ -519,7 +514,7 @@ func postUsersPage(authService auth.Service, logger *zap.Logger) http.HandlerFun
 
 func postDeleteUserPage(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+		id, _ := strconv.Atoi(r.PathValue("id"))
 
 		if err := authService.Delete(id); err != nil {
 			logger.Warn("user delete failed", zap.Int("id", id), zap.Error(err))
@@ -541,7 +536,7 @@ type membersData struct {
 	Error      string
 }
 
-func getMembersPage(orderService order.Service, _ *zap.Logger) http.HandlerFunc {
+func getMembersPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
 		allMembers := orderService.GetAllMembers()
@@ -587,7 +582,7 @@ func getMembersPage(orderService order.Service, _ *zap.Logger) http.HandlerFunc 
 			data.Error = errMsg
 		}
 
-		render(w, "admin/members.html", data)
+		render(w, logger, "admin/members.html", data)
 	}
 }
 
@@ -641,7 +636,7 @@ func postMembersPage(orderService order.Service, logger *zap.Logger) http.Handle
 
 func postDeleteMemberPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+		id, _ := strconv.Atoi(r.PathValue("id"))
 
 		if err := orderService.DeleteMember(id); err != nil {
 			logger.Warn("member delete failed", zap.Int("id", id), zap.Error(err))
@@ -677,7 +672,7 @@ type catalogData struct {
 	Error string
 }
 
-func getCatalogPage(orderService order.Service, _ *zap.Logger) http.HandlerFunc {
+func getCatalogPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		catalog := orderService.GetCatalog()
 
@@ -761,7 +756,7 @@ func getCatalogPage(orderService order.Service, _ *zap.Logger) http.HandlerFunc 
 			data.Error = errMsg
 		}
 
-		render(w, "admin/catalog.html", data)
+		render(w, logger, "admin/catalog.html", data)
 	}
 }
 
@@ -813,7 +808,7 @@ func postCatalogCategoryPage(orderService order.Service, logger *zap.Logger) htt
 
 func postDeleteCategoryPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+		id, _ := strconv.Atoi(r.PathValue("id"))
 
 		if err := orderService.DeleteCategory(id); err != nil {
 			logger.Warn("category delete failed", zap.Int("id", id), zap.Error(err))
@@ -875,7 +870,7 @@ func postCatalogItemPage(orderService order.Service, logger *zap.Logger) http.Ha
 
 func postDeleteItemPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+		id, _ := strconv.Atoi(r.PathValue("id"))
 
 		catIDStr := r.URL.Query().Get("cat")
 		catID, _ := strconv.Atoi(catIDStr)
@@ -916,7 +911,7 @@ func parseOrderLines(contents string) []string {
 	return out
 }
 
-func getBillingPage(orderService order.Service) http.HandlerFunc {
+func getBillingPage(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
 
@@ -963,6 +958,6 @@ func getBillingPage(orderService order.Service) http.HandlerFunc {
 			}
 		}
 
-		render(w, "admin/billing.html", data)
+		render(w, logger, "admin/billing.html", data)
 	}
 }
