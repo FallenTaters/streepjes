@@ -5,12 +5,12 @@ package main
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -24,42 +24,122 @@ import (
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/static"
 	"github.com/charmbracelet/log"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	os.Exit(run())
+	if err := newRootCmd().Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
-func run() int {
-	readSettings()
+func newRootCmd() *cobra.Command {
+	var configFile string
 
+	cmd := &cobra.Command{
+		Use:          "streepjes",
+		Short:        "Streepjes POS server",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			cfg, err := loadConfig(cmd, configFile)
+			if err != nil {
+				return err
+			}
+
+			return run(cfg)
+		},
+	}
+
+	defaults := settings.DefaultConfig()
+
+	flags := cmd.Flags()
+	flags.StringVar(&configFile, "config", "", "path to TOML config file")
+	flags.Bool("disable-secure", defaults.DisableSecure, "disable TLS (serve plain HTTP)")
+	flags.Int("port", defaults.Port, "server port")
+	flags.Bool("debug", defaults.Debug, "enable debug logging")
+	flags.String("db-connection-string", defaults.DBConnectionString, "PostgreSQL connection string")
+	flags.String("tls-cert-path", defaults.TLSCertPath, "path to TLS certificate")
+	flags.String("tls-key-path", defaults.TLSKeyPath, "path to TLS key")
+
+	return cmd
+}
+
+func loadConfig(cmd *cobra.Command, configFile string) (settings.Config, error) {
+	v := viper.New()
+
+	defaults := settings.DefaultConfig()
+	v.SetDefault("disable_secure", defaults.DisableSecure)
+	v.SetDefault("port", defaults.Port)
+	v.SetDefault("debug", defaults.Debug)
+	v.SetDefault("db_connection_string", defaults.DBConnectionString)
+	v.SetDefault("tls_cert_path", defaults.TLSCertPath)
+	v.SetDefault("tls_key_path", defaults.TLSKeyPath)
+
+	if configFile != "" {
+		v.SetConfigFile(configFile)
+	} else {
+		v.SetConfigName("streepjes")
+		v.SetConfigType("toml")
+		v.AddConfigPath(".")
+	}
+
+	if err := v.ReadInConfig(); err != nil {
+		var notFound viper.ConfigFileNotFoundError
+		if configFile != "" || !errors.As(err, &notFound) {
+			return settings.Config{}, fmt.Errorf("reading config file: %w", err)
+		}
+	}
+
+	v.SetEnvPrefix("STREEPJES")
+	v.AutomaticEnv()
+
+	_ = v.BindPFlag("disable_secure", cmd.Flags().Lookup("disable-secure"))
+	_ = v.BindPFlag("port", cmd.Flags().Lookup("port"))
+	_ = v.BindPFlag("debug", cmd.Flags().Lookup("debug"))
+	_ = v.BindPFlag("db_connection_string", cmd.Flags().Lookup("db-connection-string"))
+	_ = v.BindPFlag("tls_cert_path", cmd.Flags().Lookup("tls-cert-path"))
+	_ = v.BindPFlag("tls_key_path", cmd.Flags().Lookup("tls-key-path"))
+
+	var cfg settings.Config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return settings.Config{}, fmt.Errorf("parsing config: %w", err)
+	}
+
+	return cfg, nil
+}
+
+func run(cfg settings.Config) error {
 	logLevel := log.ErrorLevel
-	if settings.Debug {
+	if cfg.Debug {
 		logLevel = log.DebugLevel
 	}
 	log.Default().SetLevel(logLevel)
 
 	var lis net.Listener
 	var err error
-	if !settings.DisableSecure {
-		cer, err := tls.LoadX509KeyPair(settings.TLSCertPath, settings.TLSKeyPath)
+	if !cfg.DisableSecure {
+		cer, err := tls.LoadX509KeyPair(cfg.TLSCertPath, cfg.TLSKeyPath)
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("loading TLS keypair: %w", err)
 		}
 
 		lis, err = tls.Listen("tcp", ":443", &tls.Config{Certificates: []tls.Certificate{cer}})
+		if err != nil {
+			return fmt.Errorf("TLS listen: %w", err)
+		}
 
 		go redirectHTTPS()
 	} else {
-		lis, err = net.Listen("tcp", fmt.Sprintf(":%d", settings.Port))
-	}
-	if err != nil {
-		panic(err)
+		lis, err = net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
+		if err != nil {
+			return fmt.Errorf("listen: %w", err)
+		}
 	}
 
-	db, err := postgres.OpenDB(settings.DBConnectionString)
+	db, err := postgres.OpenDB(cfg.DBConnectionString)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("opening database: %w", err)
 	}
 	defer db.Close()
 
@@ -75,13 +155,13 @@ func run() int {
 
 	orderService := order.New(memberRepo, orderRepo, catalogRepo)
 
-	handler := router.New(static.Get, authService, orderService)
+	handler := router.New(static.Get, authService, orderService, !cfg.DisableSecure)
 	srv := &http.Server{Handler: handler}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-	log.Info("Starting server", "port", settings.Port)
+	log.Info("Starting server", "port", cfg.Port)
 	go func() {
 		if err := srv.Serve(lis); err != nil && err != http.ErrServerClosed {
 			log.Fatal("server exited", "error", err)
@@ -95,11 +175,10 @@ func run() int {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Error("server forced to shutdown", "error", err)
-		return 1
+		return fmt.Errorf("server forced to shutdown: %w", err)
 	}
 
-	return 0
+	return nil
 }
 
 func redirectHTTPS() {
@@ -107,11 +186,10 @@ func redirectHTTPS() {
 		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 	}))
 	if err != nil {
-		panic(err)
+		log.Fatal("HTTPS redirect server failed", "error", err)
 	}
 }
 
-// check if there are no users in the database, if so, insert some
 func checkNoUsers(userRepo repo.User, authService auth.Service) {
 	if len(userRepo.GetAll()) == 0 {
 		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
@@ -132,37 +210,5 @@ func checkNoUsers(userRepo repo.User, authService auth.Service) {
 			Name:     `Calamari Admin`,
 			Role:     authdomain.RoleAdmin,
 		}, `blub`)
-	}
-}
-
-// read settings from environment
-func readSettings() {
-	disableSecure, ok := os.LookupEnv(`STREEPJES_DISABLE_SECURE`)
-	settings.DisableSecure = ok && disableSecure == `true`
-
-	port, ok := os.LookupEnv(`STREEPJES_PORT`)
-	if ok {
-		portN, err := strconv.Atoi(port)
-		if err != nil {
-			panic(err)
-		}
-
-		settings.Port = portN
-	}
-
-	settings.Debug = os.Getenv("STREEPJES_DEBUG") == "true"
-	dbConnectionString := os.Getenv("STREEPJES_DB_CONNECTION_STRING")
-	if dbConnectionString != "" {
-		settings.DBConnectionString = dbConnectionString
-	}
-
-	tlsCertPath := os.Getenv("STREEPJES_TLS_CERT_PATH")
-	if tlsCertPath != "" {
-		settings.TLSCertPath = tlsCertPath
-	}
-
-	tlsKeyPath := os.Getenv("STREEPJES_TLS_KEY_PATH")
-	if tlsKeyPath != "" {
-		settings.TLSKeyPath = tlsKeyPath
 	}
 }

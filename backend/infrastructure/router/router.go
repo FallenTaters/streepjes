@@ -18,7 +18,7 @@ import (
 
 type Static func(filename string) ([]byte, error)
 
-func New(static Static, authService auth.Service, orderService order.Service) http.Handler {
+func New(static Static, authService auth.Service, orderService order.Service, secureCookies bool) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(logMiddleware)
@@ -27,7 +27,7 @@ func New(static Static, authService auth.Service, orderService order.Service) ht
 		w.WriteHeader(http.StatusNotFound)
 	})
 
-	publicRoutes(r, static, authService)
+	publicRoutes(r, static, authService, secureCookies)
 
 	auth := r.With(authMiddleware(authService))
 	authRoutes(auth, authService)

@@ -11,11 +11,11 @@ import (
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
-func publicRoutes(r chi.Router, static Static, authService auth.Service) {
+func publicRoutes(r chi.Router, static Static, authService auth.Service, secureCookies bool) {
 	r.Get(`/`, getIndex(static))
 	r.Get(`/version`, getVersion)
 	r.With(chiMiddleware.Compress(5)).Get(`/static/*`, getStatic(static))
-	r.Post(`/login`, postLogin(authService))
+	r.Post(`/login`, postLogin(authService, secureCookies))
 }
 
 var (

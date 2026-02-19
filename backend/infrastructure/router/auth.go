@@ -9,7 +9,6 @@ import (
 	"github.com/FallenTaters/chio/middleware"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
-	"github.com/FallenTaters/streepjes/backend/global/settings"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi/v5"
@@ -27,7 +26,7 @@ func authRoutes(r chi.Router, authService auth.Service) {
 	r.Post(`/me/password`, postMePassword(authService))
 }
 
-func postLogin(authService auth.Service) http.HandlerFunc {
+func postLogin(authService auth.Service, secureCookies bool) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, credentials api.Credentials) {
 		user, ok := authService.Login(credentials.Username, credentials.Password)
 		if !ok {
@@ -43,7 +42,7 @@ func postLogin(authService auth.Service) http.HandlerFunc {
 			Path:   ``,
 			Domain: ``,
 			MaxAge: 24 * int(time.Hour/time.Second),
-			Secure: !settings.DisableSecure,
+			Secure: secureCookies,
 		})
 
 		chio.WriteJSON(w, http.StatusOK, user)
