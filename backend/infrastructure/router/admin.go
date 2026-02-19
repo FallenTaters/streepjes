@@ -3,38 +3,36 @@ package router
 import (
 	"net/http"
 
-	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
-	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
-func adminPageRoutes(r chi.Router, authService auth.Service, orderService order.Service, logger *zap.Logger) {
-	r.Get(`/users`, getUsersPage(authService, logger))
-	r.Post(`/users`, postUsersPage(authService, logger))
-	r.Post(`/users/{id}/delete`, postDeleteUserPage(authService, logger))
+func adminPageRoutes(mux *http.ServeMux, admin middleware, authService auth.Service, orderService order.Service, logger *zap.Logger) {
+	handle(mux, "GET /admin/users", admin, getUsersPage(authService, logger))
+	handle(mux, "POST /admin/users", admin, postUsersPage(authService, logger))
+	handle(mux, "POST /admin/users/{id}/delete", admin, postDeleteUserPage(authService, logger))
 
-	r.Get(`/members`, getMembersPage(orderService, logger))
-	r.Post(`/members`, postMembersPage(orderService, logger))
-	r.Post(`/members/{id}/delete`, postDeleteMemberPage(orderService, logger))
+	handle(mux, "GET /admin/members", admin, getMembersPage(orderService, logger))
+	handle(mux, "POST /admin/members", admin, postMembersPage(orderService, logger))
+	handle(mux, "POST /admin/members/{id}/delete", admin, postDeleteMemberPage(orderService, logger))
 
-	r.Get(`/catalog`, getCatalogPage(orderService, logger))
-	r.Post(`/catalog/category`, postCatalogCategoryPage(orderService, logger))
-	r.Post(`/catalog/category/{id}/delete`, postDeleteCategoryPage(orderService, logger))
-	r.Post(`/catalog/item`, postCatalogItemPage(orderService, logger))
-	r.Post(`/catalog/item/{id}/delete`, postDeleteItemPage(orderService, logger))
+	handle(mux, "GET /admin/catalog", admin, getCatalogPage(orderService, logger))
+	handle(mux, "POST /admin/catalog/category", admin, postCatalogCategoryPage(orderService, logger))
+	handle(mux, "POST /admin/catalog/category/{id}/delete", admin, postDeleteCategoryPage(orderService, logger))
+	handle(mux, "POST /admin/catalog/item", admin, postCatalogItemPage(orderService, logger))
+	handle(mux, "POST /admin/catalog/item/{id}/delete", admin, postDeleteItemPage(orderService, logger))
 
-	r.Get(`/billing`, getBillingPage(orderService))
-	r.Get(`/download`, getDownload(orderService))
+	handle(mux, "GET /admin/billing", admin, getBillingPage(orderService, logger))
+	handle(mux, "GET /admin/download", admin, getDownload(orderService, logger))
 }
 
-func getDownload(orderService order.Service) http.HandlerFunc {
+func getDownload(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m, err := orderdomain.ParseMonth(r.URL.Query().Get(`month`))
 		if err != nil {
-			chio.Empty(w, http.StatusBadRequest)
+			http.Error(w, "bad request", http.StatusBadRequest)
 			return
 		}
 
@@ -42,7 +40,8 @@ func getDownload(orderService order.Service) http.HandlerFunc {
 		csv := orderService.BillingCSV(user.Club, m)
 
 		filename := m.String() + `-` + user.Club.String() + `.csv`
-		w.Header().Set(`content-disposition`, `attachment; filename="`+filename+`"`)
-		chio.WriteBlob(w, http.StatusOK, `text/csv`, csv)
+		w.Header().Set(`Content-Disposition`, `attachment; filename="`+filename+`"`)
+		w.Header().Set(`Content-Type`, `text/csv`)
+		w.Write(csv)
 	}
 }

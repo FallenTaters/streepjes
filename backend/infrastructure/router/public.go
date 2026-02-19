@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"io"
 	"mime"
 	"net"
 	"net/http"
@@ -9,21 +10,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
-	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 )
 
-func publicRoutes(r chi.Router, static Static, authService auth.Service, secureCookies bool, logger *zap.Logger) {
-	r.Get(`/`, getRoot(authService))
-	r.Get(`/login`, getLogin)
-	r.Post(`/login`, postLoginPage(authService, secureCookies, logger))
-	r.Get(`/version`, getVersion)
-	r.With(chiMiddleware.Compress(5)).Get(`/static/*`, getStatic(static))
+func publicRoutes(mux *http.ServeMux, static Static, authService auth.Service, secureCookies bool, logger *zap.Logger) {
+	mux.HandleFunc("GET /{$}", getRoot(authService))
+	mux.HandleFunc("GET /login", getLogin(logger))
+	mux.HandleFunc("POST /login", postLoginPage(authService, secureCookies, logger))
+	mux.HandleFunc("GET /version", getVersion)
+	mux.HandleFunc("GET /static/", getStatic(static))
 }
 
 var (
@@ -38,7 +36,7 @@ func version() string {
 }
 
 func getVersion(w http.ResponseWriter, r *http.Request) {
-	chio.WriteString(w, http.StatusOK, version())
+	io.WriteString(w, version())
 }
 
 func getRoot(authService auth.Service) http.HandlerFunc {
@@ -63,9 +61,11 @@ func getRoot(authService auth.Service) http.HandlerFunc {
 	}
 }
 
-func getLogin(w http.ResponseWriter, r *http.Request) {
-	data := struct{ Error bool }{Error: r.URL.Query().Get(`error`) == `1`}
-	render(w, "login.html", data)
+func getLogin(logger *zap.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data := struct{ Error bool }{Error: r.URL.Query().Get(`error`) == `1`}
+		render(w, logger, "login.html", data)
+	}
 }
 
 func postLoginPage(authService auth.Service, secureCookies bool, logger *zap.Logger) http.HandlerFunc {
@@ -110,7 +110,7 @@ func getStatic(assets Static) http.HandlerFunc {
 
 		asset, err := assets(name)
 		if err != nil {
-			chio.Empty(w, http.StatusNotFound)
+			http.NotFound(w, r)
 			return
 		}
 
@@ -119,8 +119,9 @@ func getStatic(assets Static) http.HandlerFunc {
 			contentType = detectContentType(name, asset)
 		}
 
-		setCacheHeader(w)
-		chio.WriteBlob(w, http.StatusOK, contentType, asset)
+		w.Header().Set(`Cache-Control`, `max-age=86400, must-revalidate, private`)
+		w.Header().Set(`Content-Type`, contentType)
+		w.Write(asset)
 	}
 }
 
@@ -129,8 +130,4 @@ func detectContentType(name string, data []byte) string {
 		return "text/css; charset=utf-8"
 	}
 	return http.DetectContentType(data)
-}
-
-func setCacheHeader(w http.ResponseWriter) {
-	w.Header().Set(`Cache-Control`, `max-age=86400, must-revalidate, private`)
 }
