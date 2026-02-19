@@ -50,14 +50,19 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 		return 0, fmt.Errorf("%w: %#v", repo.ErrOrderFieldsNotFilled, order)
 	}
 
-	row := or.db.QueryRow(`SELECT * FROM users WHERE id = $1;`, order.BartenderID)
-	if errors.Is(row.Scan(), sql.ErrNoRows) {
+	var exists bool
+	if err := or.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)`, order.BartenderID).Scan(&exists); err != nil {
+		panic(err)
+	}
+	if !exists {
 		return 0, fmt.Errorf("%w with id %d", repo.ErrUserNotFound, order.BartenderID)
 	}
 
 	if order.MemberID != 0 {
-		row = or.db.QueryRow(`SELECT * FROM members WHERE id = $1;`, order.MemberID)
-		if errors.Is(row.Scan(), sql.ErrNoRows) {
+		if err := or.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM members WHERE id = $1)`, order.MemberID).Scan(&exists); err != nil {
+			panic(err)
+		}
+		if !exists {
 			return 0, fmt.Errorf("%w with id %d", repo.ErrMemberNotFound, order.MemberID)
 		}
 	}
@@ -66,13 +71,11 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 		Int64: int64(order.MemberID),
 	}
 
-	row = or.db.QueryRow(
+	var id int
+	if err := or.db.QueryRow(
 		`INSERT INTO orders (club, bartender_id, member_id, contents, price, order_time, status, status_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;`,
 		order.Club, order.BartenderID, memberID, order.Contents, order.Price, order.OrderTime, order.Status, order.StatusTime,
-	)
-
-	var id int
-	if err := row.Scan(&id); err != nil {
+	).Scan(&id); err != nil {
 		return 0, err
 	}
 
@@ -135,8 +138,8 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 		}
 	}
 	if filter.Limit > 0 {
-		q += fmt.Sprintf(` LIMIT $%d`, len(args))
 		args = append(args, filter.Limit)
+		q += fmt.Sprintf(` LIMIT $%d`, len(args))
 	}
 	q += `;`
 
