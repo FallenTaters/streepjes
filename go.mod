@@ -5,14 +5,11 @@ go 1.26.0
 require (
 	git.fuyu.moe/Fuyu/assert v0.2.1
 	github.com/FallenTaters/chio v0.2.3
-	github.com/FallenTaters/timefmt v1.0.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/lib/pq v1.10.9
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
-	github.com/vugu/vjson v0.0.0-20200505061711-f9cbed27d3d9
-	github.com/vugu/vugu v0.3.5-0.20221005220046-fff6df3754fe
 	go.uber.org/zap v1.27.1
 	golang.org/x/crypto v0.37.0
 	golang.org/x/text v0.28.0
@@ -31,7 +28,6 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/vugu/xxhash v0.0.0-20191111030615-ed24d0179019 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/mod v0.26.0 // indirect
