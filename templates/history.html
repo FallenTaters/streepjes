@@ -6,37 +6,48 @@
   <article class="error" style="margin-top:10px;">{{ .Error }}</article>
   {{ end }}
   <div style="overflow:auto;">
-    {{ range .Orders }}
-    <button class="responsive extra small-margin {{ .ClubClass }}" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none';">
+    {{ range $i, $o := .Orders }}
+    <button class="responsive extra small-margin {{ $o.ClubClass }}" onclick="document.getElementById('history-modal-{{ $i }}').style.display='block';">
       <div class="row no-wrap large-text">
-        <div class="col min middle-align" style="min-width:120px;">{{ .Date }}</div>
-        <div class="col middle-align">{{ .MemberName }}</div>
-        <div class="col min middle-align">{{ .Price }}</div>
+        <div class="col min middle-align" style="min-width:120px;">{{ $o.Date }}</div>
+        <div class="col middle-align">{{ $o.MemberName }}</div>
+        <div class="col min middle-align">{{ $o.Price }}</div>
       </div>
     </button>
-    <div style="display:none;padding:10px 20px;margin-bottom:5px;">
-      <h6>{{ .MemberName }} ({{ .ClubName }})</h6>
-      {{ range .Lines }}
-      <div class="row no-wrap">
-        <div class="col min">{{ .Amount }}</div>
-        <div class="col max">{{ .Name }}</div>
-        <div class="col min">{{ .LinePrice }}</div>
-      </div>
-      {{ end }}
-      <h5 class="row no-wrap" style="margin-top:10px;">
-        <div class="col min">Total</div>
-        <div class="col"></div>
-        <div class="col min">{{ .Price }}</div>
-      </h5>
-      {{ if not .Cancelled }}
-      <form method="POST" action="/history/{{ .ID }}/delete"
-            onsubmit="return confirm('Are you sure you want to delete this order?');"
-            style="margin-top:20px;">
-        <button type="submit" class="responsive error">
-          <i>delete</i> Delete
-        </button>
-      </form>
-      {{ end }}
+    <div id="history-modal-{{ $i }}" style="display:none;">
+      <div class="modal-backdrop" onclick="this.parentElement.style.display='none';"></div>
+      <modal class="modal active">
+        <header class="fixed no-club">
+          <a onclick="document.getElementById('history-modal-{{ $i }}').style.display='none';"><i>arrow_backward</i><h5>Back</h5></a>
+        </header>
+        <div>
+          <h5>
+            <span>{{ $o.MemberName }}</span>
+            (<span>{{ $o.ClubName }}</span>)
+          </h5>
+          {{ range $o.Lines }}
+          <div class="row no-wrap">
+            <div class="col min">{{ .Amount }}</div>
+            <div class="col max">{{ .Name }}</div>
+            <div class="col min">{{ .LinePrice }}</div>
+          </div>
+          {{ end }}
+          <h4 class="row no-wrap">
+            <div class="col min">Total</div>
+            <div class="col"></div>
+            <div class="col min">{{ $o.Price }}</div>
+          </h4>
+          {{ if not $o.Cancelled }}
+          <form method="POST" action="/history/{{ $o.ID }}/delete"
+                onsubmit="return confirm('Are you sure you want to delete this order?');"
+                style="margin-top:20px;">
+            <button type="submit" class="responsive error">
+              <i>delete</i> Delete
+            </button>
+          </form>
+          {{ end }}
+        </div>
+      </modal>
     </div>
     {{ end }}
     {{ if not .Orders }}

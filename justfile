@@ -21,7 +21,7 @@ wasm:
     GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
 
 run:
-    find . -name '*.go' -o -name '*.html' | entr -cr go run -ldflags "-X {{package}}.buildVersion=development" .
+    find . -name '*.go' -o -name '*.html' -o -name '*.js' | entr -cr go run -ldflags "-X {{package}}.buildVersion=development" .
 
 run-once:
     go run -ldflags "-X {{package}}.buildVersion=development" .

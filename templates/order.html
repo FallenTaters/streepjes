@@ -1,6 +1,43 @@
 {{ define "content" }}
 {{ template "nav" . }}
-<div class="full-height page-content">
-  <p>Order - not yet implemented</p>
+<div class="full-height page-content" id="order-page" data-club="{{ .UserClub }}"
+     data-catalog='{{ .CatalogJSON }}' data-members='{{ .MembersJSON }}'>
+  <div id="order-grid">
+    <h5 style="grid-area:cat-title;">Categories</h5>
+    <h5 style="grid-area:item-title;">Items</h5>
+    <h5 style="grid-area:over-title;">Overview</h5>
+
+    <div id="category-list" style="grid-area:categories;overflow:auto;"></div>
+    <div id="item-list" style="grid-area:items;overflow:auto;"></div>
+    <div id="overview" style="grid-area:overview;overflow:auto;"></div>
+
+    <div style="grid-area:toggler;" id="club-toggler"></div>
+    <div style="grid-area:payment;" id="summary"></div>
+  </div>
+
+  <!-- Member picker modal -->
+  <div id="member-modal" style="display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:1000;background:rgba(0,0,0,0.5);">
+    <div style="position:absolute;right:0;top:0;bottom:0;width:320px;background:var(--surface);padding:20px;overflow:auto;">
+      <button class="circle flat" onclick="closeMemberModal();" style="float:right;"><i>close</i></button>
+      <h5>Choose Member</h5>
+      <div class="field label border">
+        <input type="text" id="member-search" oninput="filterMembers();" autocomplete="off">
+        <label>Search Members</label>
+      </div>
+      <div id="member-list"></div>
+    </div>
+  </div>
+
+  <!-- Payment modal -->
+  <div id="payment-modal" style="display:none;">
+    <div class="modal-backdrop" id="payment-backdrop"></div>
+    <modal class="modal active">
+      <header class="fixed no-club">
+        <a id="payment-back-btn"><i>arrow_backward</i><h5>Back</h5></a>
+      </header>
+      <div id="payment-content"></div>
+    </modal>
+  </div>
 </div>
+<script src="/static/js/order.js" type="text/javascript"></script>
 {{ end }}

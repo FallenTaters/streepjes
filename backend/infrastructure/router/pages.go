@@ -3,6 +3,7 @@ package router
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"sort"
 	"strconv"
@@ -124,9 +125,30 @@ func postProfileNamePage(authService auth.Service, logger *zap.Logger) http.Hand
 
 // Bartender pages
 
-func getOrderPage(_ order.Service) http.HandlerFunc {
+type orderData struct {
+	pageData
+	UserClub    string
+	CatalogJSON template.JS
+	MembersJSON template.JS
+}
+
+func getOrderPage(orderService order.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		render(w, "order.html", newPageData(r, "order"))
+		user := userFromContext(r)
+		catalog := orderService.GetCatalog()
+		allMembers := orderService.GetAllMembers()
+
+		catalogBytes, _ := json.Marshal(catalog)
+		membersBytes, _ := json.Marshal(allMembers)
+
+		data := orderData{
+			pageData:    newPageData(r, "order"),
+			UserClub:    user.Club.String(),
+			CatalogJSON: template.JS(catalogBytes),
+			MembersJSON: template.JS(membersBytes),
+		}
+
+		render(w, "order.html", data)
 	}
 }
 
