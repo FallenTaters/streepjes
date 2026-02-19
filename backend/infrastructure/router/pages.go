@@ -14,6 +14,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"github.com/FallenTaters/streepjes/shared"
 	"github.com/FallenTaters/streepjes/templates"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
@@ -128,14 +129,98 @@ func getOrderPage(_ order.Service) http.HandlerFunc {
 	}
 }
 
-func getHistoryPage(_ order.Service) http.HandlerFunc {
+type historyLine struct {
+	Amount    int
+	Name      string
+	LinePrice orderdomain.Price
+}
+
+type historyOrder struct {
+	ID         int
+	Date       string
+	MemberName string
+	ClubName   string
+	ClubClass  string
+	Price      orderdomain.Price
+	Lines      []historyLine
+	Cancelled  bool
+}
+
+type historyData struct {
+	pageData
+	Orders []historyOrder
+	Error  string
+}
+
+func getHistoryPage(orderService order.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		render(w, "history.html", newPageData(r, "history"))
+		user := userFromContext(r)
+		orders := orderService.GetOrdersForBartender(user.ID)
+		members := orderService.GetAllMembers()
+
+		membersByID := make(map[int]orderdomain.Member)
+		for _, m := range members {
+			membersByID[m.ID] = m
+		}
+
+		sort.Slice(orders, func(i, j int) bool {
+			return orders[i].OrderTime.After(orders[j].OrderTime)
+		})
+
+		viewOrders := make([]historyOrder, 0, len(orders))
+		for _, o := range orders {
+			member := membersByID[o.MemberID]
+
+			var lines []historyLine
+			var parsed []orderdomain.Line
+			if err := json.Unmarshal([]byte(o.Contents), &parsed); err == nil {
+				for _, l := range parsed {
+					lines = append(lines, historyLine{
+						Amount:    l.Amount,
+						Name:      l.Item.Name,
+						LinePrice: l.Price(o.Club),
+					})
+				}
+			}
+
+			cc := o.Club.String()
+			if o.Status == orderdomain.StatusCancelled {
+				cc = "grey"
+			}
+
+			viewOrders = append(viewOrders, historyOrder{
+				ID:         o.ID,
+				Date:       shared.PrettyDatetime(o.OrderTime),
+				MemberName: member.Name,
+				ClubName:   member.Club.String(),
+				ClubClass:  cc,
+				Price:      o.Price,
+				Lines:      lines,
+				Cancelled:  o.Status == orderdomain.StatusCancelled,
+			})
+		}
+
+		data := historyData{
+			pageData: newPageData(r, "history"),
+			Orders:   viewOrders,
+			Error:    r.URL.Query().Get("error"),
+		}
+
+		render(w, "history.html", data)
 	}
 }
 
-func postDeleteOrderPage(_ order.Service) http.HandlerFunc {
+func postDeleteOrderPage(orderService order.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		user := userFromContext(r)
+		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+
+		if err := orderService.BartenderDeleteOrder(user.ID, id); err != nil {
+			pageLogger.Warn("order delete failed", zap.Int("id", id), zap.Error(err))
+			http.Redirect(w, r, "/history?error=Unable+to+delete+order.", http.StatusSeeOther)
+			return
+		}
+
 		http.Redirect(w, r, "/history", http.StatusSeeOther)
 	}
 }

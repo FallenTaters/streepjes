@@ -1,6 +1,47 @@
 {{ define "content" }}
 {{ template "nav" . }}
 <div class="full-height page-content">
-  <p>History - not yet implemented</p>
+  <h2>Order History</h2>
+  {{ if .Error }}
+  <article class="error" style="margin-top:10px;">{{ .Error }}</article>
+  {{ end }}
+  <div style="overflow:auto;">
+    {{ range .Orders }}
+    <button class="responsive extra small-margin {{ .ClubClass }}" onclick="var d=this.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none';">
+      <div class="row no-wrap large-text">
+        <div class="col min middle-align" style="min-width:120px;">{{ .Date }}</div>
+        <div class="col middle-align">{{ .MemberName }}</div>
+        <div class="col min middle-align">{{ .Price }}</div>
+      </div>
+    </button>
+    <div style="display:none;padding:10px 20px;margin-bottom:5px;">
+      <h6>{{ .MemberName }} ({{ .ClubName }})</h6>
+      {{ range .Lines }}
+      <div class="row no-wrap">
+        <div class="col min">{{ .Amount }}</div>
+        <div class="col max">{{ .Name }}</div>
+        <div class="col min">{{ .LinePrice }}</div>
+      </div>
+      {{ end }}
+      <h5 class="row no-wrap" style="margin-top:10px;">
+        <div class="col min">Total</div>
+        <div class="col"></div>
+        <div class="col min">{{ .Price }}</div>
+      </h5>
+      {{ if not .Cancelled }}
+      <form method="POST" action="/history/{{ .ID }}/delete"
+            onsubmit="return confirm('Are you sure you want to delete this order?');"
+            style="margin-top:20px;">
+        <button type="submit" class="responsive error">
+          <i>delete</i> Delete
+        </button>
+      </form>
+      {{ end }}
+    </div>
+    {{ end }}
+    {{ if not .Orders }}
+    <p>No orders this month.</p>
+    {{ end }}
+  </div>
 </div>
 {{ end }}
