@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
@@ -47,21 +48,67 @@ func render(w http.ResponseWriter, tmpl string, data any) {
 
 // Profile
 
+type profileData struct {
+	pageData
+	PasswordMsg string
+	NameMsg     string
+}
+
 func getProfilePage(_ auth.Service, _ *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		render(w, "profile.html", newPageData(r, "profile"))
+		render(w, "profile.html", profileData{
+			pageData:    newPageData(r, "profile"),
+			PasswordMsg: r.URL.Query().Get("pw"),
+			NameMsg:     r.URL.Query().Get("name"),
+		})
 	}
 }
 
-func postProfilePasswordPage(_ auth.Service, _ *zap.Logger) http.HandlerFunc {
+func postProfilePasswordPage(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		if err := r.ParseForm(); err != nil {
+			http.Redirect(w, r, "/profile?pw=error", http.StatusSeeOther)
+			return
+		}
+
+		user := userFromContext(r)
+		err := authService.ChangePassword(user, api.ChangePassword{
+			Original: r.FormValue("original"),
+			New:      r.FormValue("new"),
+		})
+
+		if err != nil {
+			logger.Warn("password change failed", zap.String("user", user.Username), zap.Error(err))
+			http.Redirect(w, r, "/profile?pw=error", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/profile?pw=success", http.StatusSeeOther)
 	}
 }
 
-func postProfileNamePage(_ auth.Service, _ *zap.Logger) http.HandlerFunc {
+func postProfileNamePage(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/profile", http.StatusSeeOther)
+		if err := r.ParseForm(); err != nil {
+			http.Redirect(w, r, "/profile?name=error", http.StatusSeeOther)
+			return
+		}
+
+		user := userFromContext(r)
+		name := r.FormValue("name")
+
+		logger.Debug("received change name request",
+			zap.String("user", user.Username),
+			zap.String("name", name),
+		)
+
+		if err := authService.ChangeName(user, name); err != nil {
+			logger.Warn("name change failed", zap.String("user", user.Username), zap.Error(err))
+			http.Redirect(w, r, "/profile?name=error", http.StatusSeeOther)
+			return
+		}
+
+		http.Redirect(w, r, "/profile?name=success", http.StatusSeeOther)
 	}
 }
 

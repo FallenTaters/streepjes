@@ -1,11 +1,19 @@
 package auth
 
 import (
+	"errors"
 	"time"
 
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+)
+
+var (
+	ErrPasswordEmpty   = errors.New("new password cannot be empty")
+	ErrPasswordWrong   = errors.New("original password is incorrect")
+	ErrNameEmpty       = errors.New("name cannot be empty")
+	ErrUserHasOrders   = errors.New("cannot delete user with orders")
 )
 
 type Service interface {
@@ -36,19 +44,16 @@ type Service interface {
 	Update(user authdomain.User, password string) error
 
 	// ChangePassword verifies the original password and changes it to the new password
-	// if anything goes wrong, it returns false
-	ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool
+	ChangePassword(user authdomain.User, changePassword api.ChangePassword) error
 
-	// ChangeName attempts to change the name of the user
-	// if anything goes wrong, it returns false
-	ChangeName(user authdomain.User, name string) bool
+	// ChangeName changes the name of the user
+	ChangeName(user authdomain.User, name string) error
 
 	// GetUsers gets all users
 	GetUsers() []authdomain.User
 
-	// Delete deletes a user. If the user doesn't exist or has orders,
-	// it does not delete the user and return false.
-	Delete(id int) bool
+	// Delete deletes a user.
+	Delete(id int) error
 }
 
 func New(userRepo repo.User, orderRepo repo.Order) Service {
@@ -153,42 +158,42 @@ func (s *service) Update(userChanges authdomain.User, password string) error {
 	return s.users.Update(user)
 }
 
-func (s *service) ChangePassword(user authdomain.User, changePassword api.ChangePassword) bool {
+func (s *service) ChangePassword(user authdomain.User, changePassword api.ChangePassword) error {
 	if changePassword.New == `` {
-		return false
+		return ErrPasswordEmpty
 	}
 
 	if !CheckPassword(user.PasswordHash, changePassword.Original) {
-		return false
+		return ErrPasswordWrong
 	}
 
 	user.PasswordHash = HashPassword(changePassword.New)
 
-	return s.users.Update(user) == nil
+	return s.users.Update(user)
 }
 
-func (s *service) ChangeName(user authdomain.User, name string) bool {
+func (s *service) ChangeName(user authdomain.User, name string) error {
 	if name == `` {
-		return false
+		return ErrNameEmpty
 	}
 
 	user.Name = name
 
-	return s.users.Update(user) == nil
+	return s.users.Update(user)
 }
 
 func (s *service) GetUsers() []authdomain.User {
 	return s.users.GetAll()
 }
 
-func (s *service) Delete(id int) bool {
+func (s *service) Delete(id int) error {
 	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
 		BartenderID: id,
 	})
 
 	if len(orders) > 0 {
-		return false
+		return ErrUserHasOrders
 	}
 
-	return s.users.Delete(id) == nil
+	return s.users.Delete(id)
 }

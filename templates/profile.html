@@ -1,6 +1,70 @@
 {{ define "content" }}
 {{ template "nav" . }}
 <div class="full-height" style="padding: 20px 40px 20px 120px;">
-  <p>Profile - not yet implemented</p>
+  <div class="container">
+    <h3>{{ .User.Name }}</h3>
+
+    <article class="card">
+      <h4>Account Details</h4>
+      <div class="row middle-align divider">
+        <div class="col s4 m3 l2">Username</div>
+        <div class="col s8 m9 l10">{{ .User.Username }}</div>
+      </div>
+      <div class="row middle-align divider">
+        <div class="col s4 m3 l2">Name</div>
+        <div class="col s8 m9 l10">{{ .User.Name }}</div>
+      </div>
+      <div class="row middle-align divider">
+        <div class="col s4 m3 l2">Club</div>
+        <div class="col s8 m9 l10">{{ .User.Club }}</div>
+      </div>
+      <div class="row middle-align divider">
+        <div class="col s4 m3 l2">Role</div>
+        <div class="col s8 m9 l10">{{ .User.Role }}</div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h4>Change Password</h4>
+      <form method="POST" action="/profile/password">
+        <div class="field label border">
+          <input type="password" name="original" id="password-old" required>
+          <label for="password-old">Current Password</label>
+        </div>
+        <div class="field label border">
+          <input type="password" name="new" id="password-new" required>
+          <label for="password-new">New Password</label>
+        </div>
+        <button type="submit">Change Password</button>
+      </form>
+      {{ if eq .PasswordMsg "error" }}
+      <article class="error" style="margin-top:10px;">That didn't work.</article>
+      {{ end }}
+      {{ if eq .PasswordMsg "success" }}
+      <article class="border" style="margin-top:10px;">Password changed successfully.</article>
+      {{ end }}
+    </article>
+
+    <article class="card">
+      <h4>Change Name</h4>
+      <form method="POST" action="/profile/name">
+        <div class="field label border">
+          <input type="text" name="name" id="name-new" value="{{ .User.Name }}" required>
+          <label for="name-new">New Name</label>
+        </div>
+        <button type="submit">Change Name</button>
+      </form>
+      {{ if eq .NameMsg "error" }}
+      <article class="error" style="margin-top:10px;">That didn't work.</article>
+      {{ end }}
+      {{ if eq .NameMsg "success" }}
+      <article class="border" style="margin-top:10px;">Name changed successfully.</article>
+      {{ end }}
+    </article>
+
+    <p>
+      <a href="/logout" class="button error"><i>logout</i> <span>Log Out</span></a>
+    </p>
+  </div>
 </div>
 {{ end }}

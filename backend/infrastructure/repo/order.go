@@ -8,7 +8,10 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
-var ErrOrderFieldsNotFilled = errors.New(`order fields not filled`)
+var (
+	ErrOrderFieldsNotFilled = errors.New(`order fields not filled`)
+	ErrOrderNotFound        = errors.New(`order not found`)
+)
 
 type Order interface {
 	// Get a single order by ID
@@ -23,7 +26,7 @@ type Order interface {
 	Create(orderdomain.Order) (int, error)
 
 	// Delete an order by ID
-	Delete(id int) bool
+	Delete(id int) error
 }
 
 type OrderFilter struct {

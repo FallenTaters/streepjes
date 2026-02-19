@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/chio/middleware"
 	"github.com/FallenTaters/streepjes/api"
 	"github.com/FallenTaters/streepjes/backend/application/auth"
@@ -19,7 +18,7 @@ func userFromContext(r *http.Request) authdomain.User {
 
 func authRoutes(r chi.Router, authService auth.Service, logger *zap.Logger) {
 	r.Get(`/logout`, getLogout(authService))
-	r.Post(`/active`, postActive(logger))
+	r.Post(`/active`, postActive(authService, logger))
 
 	r.Get(`/profile`, getProfilePage(authService, logger))
 	r.Post(`/profile/password`, postProfilePasswordPage(authService, logger))
@@ -40,11 +39,12 @@ func getLogout(authService auth.Service) http.HandlerFunc {
 	}
 }
 
-func postActive(logger *zap.Logger) http.HandlerFunc {
+func postActive(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := userFromContext(r)
+		authService.Active(user.ID)
 		logger.Debug("received activity refresh", zap.String("user", user.Username))
-		chio.WriteJSON(w, http.StatusOK, user)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
