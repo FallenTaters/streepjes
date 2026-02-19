@@ -9,16 +9,19 @@ import (
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"go.uber.org/zap"
 )
 
-func NewOrderRepo(db Queryable) repo.Order {
+func NewOrderRepo(db Queryable, logger *zap.Logger) repo.Order {
 	return &orderRepo{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
 type orderRepo struct {
-	db Queryable
+	db     Queryable
+	logger *zap.Logger
 }
 
 func (or *orderRepo) Get(id int) (orderdomain.Order, bool) {
@@ -69,7 +72,19 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 	)
 
 	var id int
-	return id, row.Scan(&id)
+	if err := row.Scan(&id); err != nil {
+		return 0, err
+	}
+
+	or.logger.Info("order created",
+		zap.Int("id", id),
+		zap.String("club", order.Club.String()),
+		zap.Int("bartender_id", order.BartenderID),
+		zap.Int("member_id", order.MemberID),
+		zap.Int("price", int(order.Price)),
+	)
+
+	return id, nil
 }
 
 func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,gocyclo,cyclop
@@ -163,6 +178,10 @@ func (or *orderRepo) Delete(id int) bool {
 	affected, err := result.RowsAffected()
 	if err != nil {
 		panic(err)
+	}
+
+	if affected == 1 {
+		or.logger.Info("order cancelled", zap.Int("id", id))
 	}
 
 	return affected == 1

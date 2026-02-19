@@ -4,24 +4,24 @@ import (
 	"embed"
 	"fmt"
 
-	"github.com/charmbracelet/log"
+	"go.uber.org/zap"
 )
 
 //go:embed migrations/*
 var migrations embed.FS
 
-func Migrate(db Queryable) {
+func Migrate(db Queryable, logger *zap.Logger) {
 	row := db.QueryRow(`SELECT version FROM version;`)
 
 	var version int
 
 	err := row.Scan(&version)
 	if err != nil {
-		log.Info("failed to scan version: ", err, "; creating version table")
+		logger.Info("version table not found, creating", zap.Error(err))
 		createVersionTable(db)
 	}
 
-	migrate(db, version)
+	migrate(db, version, logger)
 }
 
 func createVersionTable(db Queryable) {
@@ -36,7 +36,7 @@ func createVersionTable(db Queryable) {
 	}
 }
 
-func migrate(db Queryable, version int) {
+func migrate(db Queryable, version int, logger *zap.Logger) {
 	for {
 		filename := fmt.Sprintf(`migrations/%04d.sql`, version+1)
 
@@ -47,7 +47,10 @@ func migrate(db Queryable, version int) {
 
 		_, err = db.Exec(string(file))
 		if err != nil {
-			log.Fatal("Couldn't run migration, file: ", fmt.Sprintf("%04d.sql\n", version+1), " error: ", err)
+			logger.Fatal("migration failed",
+				zap.String("file", fmt.Sprintf("%04d.sql", version+1)),
+				zap.Error(err),
+			)
 		}
 
 		version++
@@ -56,5 +59,7 @@ func migrate(db Queryable, version int) {
 		if err != nil {
 			panic(err)
 		}
+
+		logger.Info("migration applied", zap.Int("version", version))
 	}
 }

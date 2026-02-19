@@ -4,46 +4,43 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/FallenTaters/chio"
 	"github.com/FallenTaters/chio/middleware"
-	"github.com/charmbracelet/log"
-	"github.com/go-chi/chi/v5"
-
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 type Static func(filename string) ([]byte, error)
 
-func New(static Static, authService auth.Service, orderService order.Service, secureCookies bool) http.Handler {
+func New(static Static, authService auth.Service, orderService order.Service, secureCookies bool, logger *zap.Logger) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(logMiddleware)
 	r.Use(middleware.Recover(middleware.DefaultPanicLogger(os.Stderr)))
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	})
 
-	publicRoutes(r, static, authService, secureCookies)
+	publicRoutes(r, static, authService, secureCookies, logger)
 
-	auth := r.With(authMiddleware(authService))
-	authRoutes(auth, authService)
+	authed := r.With(authMiddleware(authService, logger))
+	authRoutes(authed, authService, logger)
 
-	bar := auth.With(permissionMiddleware(authdomain.PermissionBarStuff))
+	bar := authed.With(permissionMiddleware(authdomain.PermissionBarStuff, logger))
 	bartenderRoutes(bar, orderService)
 
-	admin := auth.Route(`/admin`, func(r chi.Router) {
-		r.Use(permissionMiddleware(authdomain.PermissionAdminStuff))
+	admin := authed.Route(`/admin`, func(r chi.Router) {
+		r.Use(permissionMiddleware(authdomain.PermissionAdminStuff, logger))
 	})
-	adminRoutes(admin, authService, orderService)
+	adminRoutes(admin, authService, orderService, logger)
 
 	return r
 }
 
-func allowErrors(w http.ResponseWriter, err error, allowed ...error) {
+func allowErrors(w http.ResponseWriter, logger *zap.Logger, err error, allowed ...error) {
 	for _, er := range allowed {
 		if errors.Is(err, er) {
 			chio.WriteString(w, http.StatusBadRequest, er.Error())
@@ -51,41 +48,6 @@ func allowErrors(w http.ResponseWriter, err error, allowed ...error) {
 		}
 	}
 
-	log.Error("error not allowed for this call", "error", err.Error())
+	logger.Error("unexpected error", zap.Error(err))
 	chio.Empty(w, http.StatusInternalServerError)
-}
-
-func logMiddleware(next http.Handler) http.Handler {
-	logger := log.New(os.Stderr)
-	logger.SetLevel(log.DebugLevel)
-	logger.SetReportTimestamp(true)
-	logger.SetPrefix("HTTP")
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rec := &statusRecorder{w, 0}
-		next.ServeHTTP(rec, r)
-		logger.Debug(r.Method + " " + strconv.Itoa(rec.status) + " " + r.URL.Path)
-	})
-}
-
-type statusRecorder struct {
-	http.ResponseWriter
-
-	status int
-}
-
-func (sr *statusRecorder) Write(data []byte) (int, error) {
-	if sr.status == 0 {
-		sr.status = http.StatusOK
-	}
-
-	return sr.ResponseWriter.Write(data)
-}
-
-func (sr *statusRecorder) WriteHeader(status int) {
-	if sr.status == 0 {
-		sr.status = status
-	}
-
-	sr.ResponseWriter.WriteHeader(status)
 }

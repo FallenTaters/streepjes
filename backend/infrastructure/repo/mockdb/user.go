@@ -9,7 +9,8 @@ type User struct {
 	GetAllFunc        func() []authdomain.User
 	GetByTokenFunc    func(token string) (authdomain.User, bool)
 	GetByUsernameFunc func(username string) (authdomain.User, bool)
-	UpdateFunc        func(user authdomain.User) error
+	UpdateFunc         func(user authdomain.User) error
+	UpdateActivityFunc func(user authdomain.User) error
 	CreateFunc        func(user authdomain.User) (int, error)
 	DeleteFunc        func(id int) error
 }
@@ -31,6 +32,13 @@ func (u User) GetByUsername(username string) (authdomain.User, bool) {
 }
 
 func (u User) Update(user authdomain.User) error {
+	return u.UpdateFunc(user)
+}
+
+func (u User) UpdateActivity(user authdomain.User) error {
+	if u.UpdateActivityFunc != nil {
+		return u.UpdateActivityFunc(user)
+	}
 	return u.UpdateFunc(user)
 }
 

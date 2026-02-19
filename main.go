@@ -23,9 +23,10 @@ import (
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
 	"github.com/FallenTaters/streepjes/static"
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
@@ -36,6 +37,7 @@ func main() {
 
 func newRootCmd() *cobra.Command {
 	var configFile string
+	defaults := settings.DefaultConfig()
 
 	cmd := &cobra.Command{
 		Use:          "streepjes",
@@ -51,13 +53,11 @@ func newRootCmd() *cobra.Command {
 		},
 	}
 
-	defaults := settings.DefaultConfig()
-
 	flags := cmd.Flags()
 	flags.StringVar(&configFile, "config", "", "path to TOML config file")
 	flags.Bool("disable-secure", defaults.DisableSecure, "disable TLS (serve plain HTTP)")
 	flags.Int("port", defaults.Port, "server port")
-	flags.Bool("debug", defaults.Debug, "enable debug logging")
+	flags.String("log-level", defaults.LogLevel, "log level (debug, info, warn, error)")
 	flags.String("db-connection-string", defaults.DBConnectionString, "PostgreSQL connection string")
 	flags.String("tls-cert-path", defaults.TLSCertPath, "path to TLS certificate")
 	flags.String("tls-key-path", defaults.TLSKeyPath, "path to TLS key")
@@ -71,7 +71,7 @@ func loadConfig(cmd *cobra.Command, configFile string) (settings.Config, error) 
 	defaults := settings.DefaultConfig()
 	v.SetDefault("disable_secure", defaults.DisableSecure)
 	v.SetDefault("port", defaults.Port)
-	v.SetDefault("debug", defaults.Debug)
+	v.SetDefault("log_level", defaults.LogLevel)
 	v.SetDefault("db_connection_string", defaults.DBConnectionString)
 	v.SetDefault("tls_cert_path", defaults.TLSCertPath)
 	v.SetDefault("tls_key_path", defaults.TLSKeyPath)
@@ -96,7 +96,7 @@ func loadConfig(cmd *cobra.Command, configFile string) (settings.Config, error) 
 
 	_ = v.BindPFlag("disable_secure", cmd.Flags().Lookup("disable-secure"))
 	_ = v.BindPFlag("port", cmd.Flags().Lookup("port"))
-	_ = v.BindPFlag("debug", cmd.Flags().Lookup("debug"))
+	_ = v.BindPFlag("log_level", cmd.Flags().Lookup("log-level"))
 	_ = v.BindPFlag("db_connection_string", cmd.Flags().Lookup("db-connection-string"))
 	_ = v.BindPFlag("tls_cert_path", cmd.Flags().Lookup("tls-cert-path"))
 	_ = v.BindPFlag("tls_key_path", cmd.Flags().Lookup("tls-key-path"))
@@ -109,15 +109,32 @@ func loadConfig(cmd *cobra.Command, configFile string) (settings.Config, error) 
 	return cfg, nil
 }
 
-func run(cfg settings.Config) error {
-	logLevel := log.ErrorLevel
-	if cfg.Debug {
-		logLevel = log.DebugLevel
+func newLogger(levelStr string) (*zap.Logger, error) {
+	var level zapcore.Level
+	if err := level.UnmarshalText([]byte(levelStr)); err != nil {
+		return nil, fmt.Errorf("invalid log level %q: %w", levelStr, err)
 	}
-	log.Default().SetLevel(logLevel)
+
+	encoderCfg := zap.NewProductionEncoderConfig()
+	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	core := zapcore.NewCore(
+		zapcore.NewConsoleEncoder(encoderCfg),
+		zapcore.AddSync(os.Stderr),
+		level,
+	)
+
+	return zap.New(core), nil
+}
+
+func run(cfg settings.Config) error {
+	logger, err := newLogger(cfg.LogLevel)
+	if err != nil {
+		return err
+	}
+	defer logger.Sync() //nolint:errcheck
 
 	var lis net.Listener
-	var err error
 	if !cfg.DisableSecure {
 		cer, err := tls.LoadX509KeyPair(cfg.TLSCertPath, cfg.TLSKeyPath)
 		if err != nil {
@@ -129,7 +146,7 @@ func run(cfg settings.Config) error {
 			return fmt.Errorf("TLS listen: %w", err)
 		}
 
-		go redirectHTTPS()
+		go redirectHTTPS(logger)
 	} else {
 		lis, err = net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
 		if err != nil {
@@ -143,33 +160,33 @@ func run(cfg settings.Config) error {
 	}
 	defer db.Close()
 
-	postgres.Migrate(db)
+	postgres.Migrate(db, logger)
 
-	userRepo := postgres.NewUserRepo(db)
-	memberRepo := postgres.NewMemberRepo(db)
-	orderRepo := postgres.NewOrderRepo(db)
-	catalogRepo := postgres.NewCatalogRepo(db)
+	userRepo := postgres.NewUserRepo(db, logger)
+	memberRepo := postgres.NewMemberRepo(db, logger)
+	orderRepo := postgres.NewOrderRepo(db, logger)
+	catalogRepo := postgres.NewCatalogRepo(db, logger)
 
 	authService := auth.New(userRepo, orderRepo)
 	checkNoUsers(userRepo, authService)
 
 	orderService := order.New(memberRepo, orderRepo, catalogRepo)
 
-	handler := router.New(static.Get, authService, orderService, !cfg.DisableSecure)
+	handler := router.New(static.Get, authService, orderService, !cfg.DisableSecure, logger)
 	srv := &http.Server{Handler: handler}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-	log.Info("Starting server", "port", cfg.Port)
+	logger.Info("starting server", zap.Int("port", cfg.Port))
 	go func() {
 		if err := srv.Serve(lis); err != nil && err != http.ErrServerClosed {
-			log.Fatal("server exited", "error", err)
+			logger.Fatal("server exited", zap.Error(err))
 		}
 	}()
 
 	<-sigChan
-	log.Info("Shutting down server")
+	logger.Info("shutting down server")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -181,12 +198,12 @@ func run(cfg settings.Config) error {
 	return nil
 }
 
-func redirectHTTPS() {
+func redirectHTTPS(logger *zap.Logger) {
 	err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 	}))
 	if err != nil {
-		log.Fatal("HTTPS redirect server failed", "error", err)
+		logger.Fatal("HTTPS redirect server failed", zap.Error(err))
 	}
 }
 

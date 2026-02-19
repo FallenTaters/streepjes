@@ -8,16 +8,19 @@ import (
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"go.uber.org/zap"
 )
 
-func NewMemberRepo(db Queryable) repo.Member {
+func NewMemberRepo(db Queryable, logger *zap.Logger) repo.Member {
 	return &memberRepo{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
 type memberRepo struct {
-	db Queryable
+	db     Queryable
+	logger *zap.Logger
 }
 
 func (mr *memberRepo) GetAll() []orderdomain.Member {
@@ -60,6 +63,12 @@ func (mr *memberRepo) Create(member orderdomain.Member) (int, error) {
 		panic(err)
 	}
 
+	mr.logger.Info("member created",
+		zap.Int64("id", id),
+		zap.String("name", member.Name),
+		zap.String("club", member.Club.String()),
+	)
+
 	return int(id), nil
 }
 
@@ -97,6 +106,8 @@ func (mr *memberRepo) Update(member orderdomain.Member) error {
 		return repo.ErrMemberNotFound
 	}
 
+	mr.logger.Info("member updated", zap.Int("id", member.ID), zap.String("name", member.Name))
+
 	return nil
 }
 
@@ -109,6 +120,10 @@ func (mr *memberRepo) Delete(id int) bool {
 	affected, err := res.RowsAffected()
 	if err != nil {
 		panic(err)
+	}
+
+	if affected != 0 {
+		mr.logger.Info("member deleted", zap.Int("id", id))
 	}
 
 	return affected != 0

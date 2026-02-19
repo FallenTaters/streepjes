@@ -8,16 +8,19 @@ import (
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"go.uber.org/zap"
 )
 
-func NewUserRepo(db Queryable) repo.User {
+func NewUserRepo(db Queryable, logger *zap.Logger) repo.User {
 	return &userRepo{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
 type userRepo struct {
-	db Queryable
+	db     Queryable
+	logger *zap.Logger
 }
 
 func (ur *userRepo) GetAll() []authdomain.User {
@@ -119,6 +122,29 @@ func (ur *userRepo) Update(user authdomain.User) error {
 		return repo.ErrUserNotFound
 	}
 
+	ur.logger.Info("user updated", zap.Int("id", user.ID), zap.String("username", user.Username))
+
+	return nil
+}
+
+func (ur *userRepo) UpdateActivity(user authdomain.User) error {
+	res, err := ur.db.Exec(
+		`UPDATE users SET auth_token = ?, auth_time = ? WHERE id = ?;`,
+		user.AuthToken, user.AuthTime, user.ID,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	if affected == 0 {
+		return repo.ErrUserNotFound
+	}
+
 	return nil
 }
 
@@ -151,6 +177,13 @@ func (ur *userRepo) Create(user authdomain.User) (int, error) {
 	if err != nil {
 		panic(err)
 	}
+
+	ur.logger.Info("user created",
+		zap.Int64("id", id),
+		zap.String("username", user.Username),
+		zap.String("role", user.Role.String()),
+		zap.String("club", user.Club.String()),
+	)
 
 	return int(id), nil
 }
@@ -189,6 +222,8 @@ func (ur *userRepo) Delete(id int) error {
 	if affected == 0 {
 		return repo.ErrUserNotFound
 	}
+
+	ur.logger.Info("user deleted", zap.Int("id", id))
 
 	return nil
 }

@@ -73,7 +73,7 @@ func (s *service) Login(username, pass string) (authdomain.User, bool) {
 	user.AuthToken = generateToken()
 	user.AuthTime = time.Now()
 
-	err := s.users.Update(user)
+	err := s.users.UpdateActivity(user)
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +96,7 @@ func (s *service) Check(token string) (authdomain.User, bool) {
 	}
 
 	user.AuthTime = time.Now()
-	err := s.users.Update(user)
+	err := s.users.UpdateActivity(user)
 	if err != nil {
 		return authdomain.User{}, false
 	}
@@ -112,7 +112,7 @@ func (s *service) Active(id int) {
 
 	user.AuthTime = time.Now()
 
-	_ = s.users.Update(user)
+	_ = s.users.UpdateActivity(user)
 }
 
 func (s *service) Logout(id int) {
@@ -124,7 +124,7 @@ func (s *service) Logout(id int) {
 	user.AuthToken = ``
 	user.AuthTime = time.Now().Add(-authdomain.TokenDuration)
 
-	_ = s.users.Update(user)
+	_ = s.users.UpdateActivity(user)
 }
 
 func (s *service) Register(user authdomain.User, password string) error {

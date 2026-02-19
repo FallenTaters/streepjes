@@ -29,6 +29,9 @@ type User interface {
 	// Update a specific user. Returns ErrUserNotFound if the ID is not found
 	Update(user authdomain.User) error
 
+	// UpdateActivity updates only auth token and time (no audit logging).
+	UpdateActivity(user authdomain.User) error
+
 	// Create a new user. Returns ErrUsernameTaken if the username already exists.
 	// if name is taken, it returns ErrNameTaken.
 	// if mandatory fields are missing, it returns ErrUserMissingFields

@@ -15,25 +15,26 @@ import (
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
-func adminRoutes(r chi.Router, authService auth.Service, orderService order.Service) {
+func adminRoutes(r chi.Router, authService auth.Service, orderService order.Service, logger *zap.Logger) {
 	r.Get(`/users`, getUsers(authService))
-	r.Post(`/users/new`, postNewUser(authService))
-	r.Post(`/users/edit`, postEditUser(authService))
+	r.Post(`/users/new`, postNewUser(authService, logger))
+	r.Post(`/users/edit`, postEditUser(authService, logger))
 	r.Post(`/users/{id}/delete`, postDeleteUser(authService))
 
-	r.Post(`/category/new`, postNewCategory(orderService))
-	r.Post(`/category/update`, postUpdateCategory(orderService))
-	r.Post(`/category/{id}/delete`, postDeleteCategory(orderService))
+	r.Post(`/category/new`, postNewCategory(orderService, logger))
+	r.Post(`/category/update`, postUpdateCategory(orderService, logger))
+	r.Post(`/category/{id}/delete`, postDeleteCategory(orderService, logger))
 
-	r.Post(`/item/new`, postNewItem(orderService))
-	r.Post(`/item/update`, postUpdateItem(orderService))
-	r.Post(`/item/{id}/delete`, postDeleteItem(orderService))
+	r.Post(`/item/new`, postNewItem(orderService, logger))
+	r.Post(`/item/update`, postUpdateItem(orderService, logger))
+	r.Post(`/item/{id}/delete`, postDeleteItem(orderService, logger))
 
-	r.Post(`/members/new`, postNewMember(orderService))
-	r.Post(`/members/edit`, postEditMember(orderService))
-	r.Post(`/members/{id}/delete`, postDeleteMember(orderService))
+	r.Post(`/members/new`, postNewMember(orderService, logger))
+	r.Post(`/members/edit`, postEditMember(orderService, logger))
+	r.Post(`/members/{id}/delete`, postDeleteMember(orderService, logger))
 
 	r.Get(`/billing/orders`, getBillingOrders(orderService))
 	r.Get(`/download`, getDownload(orderService))
@@ -46,11 +47,11 @@ func getUsers(authService auth.Service) http.HandlerFunc {
 	}
 }
 
-func postNewUser(authService auth.Service) http.HandlerFunc {
+func postNewUser(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, user api.UserWithPassword) {
 		err := authService.Register(user.User, user.Password)
 		if err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrUsernameTaken,
 				repo.ErrUserMissingFields,
 			)
@@ -61,11 +62,11 @@ func postNewUser(authService auth.Service) http.HandlerFunc {
 	})
 }
 
-func postEditUser(authService auth.Service) http.HandlerFunc {
+func postEditUser(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, user api.UserWithPassword) {
 		err := authService.Update(user.User, user.Password)
 		if err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrUserNotFound,
 				repo.ErrUsernameTaken,
 				repo.ErrUserMissingFields,
@@ -95,10 +96,10 @@ func postDeleteUser(authService auth.Service) http.HandlerFunc {
 	}
 }
 
-func postNewCategory(orderService order.Service) http.HandlerFunc {
+func postNewCategory(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, cat orderdomain.Category) {
 		if err := orderService.NewCategory(cat); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrCategoryNameTaken,
 				repo.ErrCategoryNameEmpty,
 			)
@@ -109,10 +110,10 @@ func postNewCategory(orderService order.Service) http.HandlerFunc {
 	})
 }
 
-func postUpdateCategory(orderService order.Service) http.HandlerFunc {
+func postUpdateCategory(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, cat orderdomain.Category) {
 		if err := orderService.UpdateCategory(cat); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrCategoryNameTaken,
 				repo.ErrCategoryNameEmpty,
 				repo.ErrCategoryNotFound,
@@ -124,7 +125,7 @@ func postUpdateCategory(orderService order.Service) http.HandlerFunc {
 	})
 }
 
-func postDeleteCategory(orderService order.Service) http.HandlerFunc {
+func postDeleteCategory(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, `id`))
 		if err != nil {
@@ -133,7 +134,7 @@ func postDeleteCategory(orderService order.Service) http.HandlerFunc {
 		}
 
 		if err := orderService.DeleteCategory(id); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrCategoryNotFound,
 				repo.ErrCategoryHasItems,
 			)
@@ -144,10 +145,10 @@ func postDeleteCategory(orderService order.Service) http.HandlerFunc {
 	}
 }
 
-func postNewItem(orderService order.Service) http.HandlerFunc {
+func postNewItem(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, item orderdomain.Item) {
 		if err := orderService.NewItem(item); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrItemNameTaken,
 				repo.ErrItemNameEmpty,
 				repo.ErrCategoryNotFound,
@@ -159,10 +160,10 @@ func postNewItem(orderService order.Service) http.HandlerFunc {
 	})
 }
 
-func postUpdateItem(orderService order.Service) http.HandlerFunc {
+func postUpdateItem(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, item orderdomain.Item) {
 		if err := orderService.UpdateItem(item); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrItemNameTaken,
 				repo.ErrItemNameEmpty,
 				repo.ErrItemNotFound,
@@ -175,7 +176,7 @@ func postUpdateItem(orderService order.Service) http.HandlerFunc {
 	})
 }
 
-func postDeleteItem(orderService order.Service) http.HandlerFunc {
+func postDeleteItem(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, `id`))
 		if err != nil {
@@ -184,7 +185,7 @@ func postDeleteItem(orderService order.Service) http.HandlerFunc {
 		}
 
 		if err := orderService.DeleteItem(id); err != nil {
-			allowErrors(w, err, repo.ErrItemNotFound)
+			allowErrors(w, logger, err, repo.ErrItemNotFound)
 			return
 		}
 
@@ -192,7 +193,7 @@ func postDeleteItem(orderService order.Service) http.HandlerFunc {
 	}
 }
 
-func postNewMember(orderService order.Service) http.HandlerFunc {
+func postNewMember(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, member orderdomain.Member) {
 		if member.Club != userFromContext(r).Club {
 			chio.WriteString(w, http.StatusBadRequest, `you can only create members for your own club`)
@@ -200,7 +201,7 @@ func postNewMember(orderService order.Service) http.HandlerFunc {
 		}
 
 		if err := orderService.NewMember(member); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrMemberNameTaken,
 				repo.ErrMemberFieldsNotFilled,
 			)
@@ -211,10 +212,10 @@ func postNewMember(orderService order.Service) http.HandlerFunc {
 	})
 }
 
-func postEditMember(orderService order.Service) http.HandlerFunc {
+func postEditMember(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return chio.JSON(func(w http.ResponseWriter, r *http.Request, member orderdomain.Member) {
 		if err := orderService.EditMember(member); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrMemberNameTaken,
 				repo.ErrMemberFieldsNotFilled,
 				repo.ErrClubChange,
@@ -227,7 +228,7 @@ func postEditMember(orderService order.Service) http.HandlerFunc {
 	})
 }
 
-func postDeleteMember(orderService order.Service) http.HandlerFunc {
+func postDeleteMember(orderService order.Service, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, `id`))
 		if err != nil {
@@ -236,7 +237,7 @@ func postDeleteMember(orderService order.Service) http.HandlerFunc {
 		}
 
 		if err := orderService.DeleteMember(id); err != nil {
-			allowErrors(w, err,
+			allowErrors(w, logger, err,
 				repo.ErrMemberNotFound,
 				repo.ErrMemberHasOrders,
 			)

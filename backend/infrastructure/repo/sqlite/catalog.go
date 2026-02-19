@@ -6,16 +6,19 @@ import (
 
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
+	"go.uber.org/zap"
 )
 
-func NewCatalogRepo(db Queryable) repo.Catalog {
+func NewCatalogRepo(db Queryable, logger *zap.Logger) repo.Catalog {
 	return &catalogRepo{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
 type catalogRepo struct {
-	db Queryable
+	db     Queryable
+	logger *zap.Logger
 }
 
 func (cr catalogRepo) GetCategories() []orderdomain.Category {
@@ -81,6 +84,8 @@ func (cr catalogRepo) CreateItem(item orderdomain.Item) (int, error) {
 		panic(err)
 	}
 
+	cr.logger.Info("item created", zap.Int64("id", id), zap.String("name", item.Name), zap.Int("category_id", item.CategoryID))
+
 	return int(id), nil
 }
 
@@ -103,6 +108,8 @@ func (cr catalogRepo) CreateCategory(category orderdomain.Category) (int, error)
 	if err != nil {
 		panic(err)
 	}
+
+	cr.logger.Info("category created", zap.Int64("id", id), zap.String("name", category.Name))
 
 	return int(id), nil
 }
@@ -137,11 +144,12 @@ func (cr catalogRepo) UpdateCategory(cat orderdomain.Category) error {
 		return repo.ErrCategoryNotFound
 	}
 
+	cr.logger.Info("category updated", zap.Int("id", cat.ID), zap.String("name", cat.Name))
+
 	return nil
 }
 
 func (cr catalogRepo) DeleteCategory(id int) error {
-	// check for existing items
 	rows, err := cr.db.Query(`SELECT * from items WHERE category_id = ?;`, id)
 	if err != nil {
 		panic(err)
@@ -152,13 +160,11 @@ func (cr catalogRepo) DeleteCategory(id int) error {
 		return repo.ErrCategoryHasItems
 	}
 
-	// exec delete
 	res, err := cr.db.Exec(`DELETE FROM categories WHERE id = ?`, id)
 	if err != nil {
 		panic(err)
 	}
 
-	// check if actually found
 	affected, err := res.RowsAffected()
 	if err != nil {
 		panic(err)
@@ -166,6 +172,8 @@ func (cr catalogRepo) DeleteCategory(id int) error {
 	if affected == 0 {
 		return repo.ErrCategoryNotFound
 	}
+
+	cr.logger.Info("category deleted", zap.Int("id", id))
 
 	return nil
 }
@@ -190,6 +198,8 @@ func (cr catalogRepo) UpdateItem(item orderdomain.Item) error {
 		return repo.ErrItemNotFound
 	}
 
+	cr.logger.Info("item updated", zap.Int("id", item.ID), zap.String("name", item.Name))
+
 	return nil
 }
 
@@ -199,7 +209,6 @@ func (cr catalogRepo) DeleteItem(id int) error {
 		panic(err)
 	}
 
-	// check if actually found
 	affected, err := res.RowsAffected()
 	if err != nil {
 		panic(err)
@@ -207,6 +216,8 @@ func (cr catalogRepo) DeleteItem(id int) error {
 	if affected == 0 {
 		return repo.ErrItemNotFound
 	}
+
+	cr.logger.Info("item deleted", zap.Int("id", id))
 
 	return nil
 }

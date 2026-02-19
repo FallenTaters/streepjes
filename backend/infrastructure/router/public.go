@@ -9,13 +9,14 @@ import (
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 )
 
-func publicRoutes(r chi.Router, static Static, authService auth.Service, secureCookies bool) {
+func publicRoutes(r chi.Router, static Static, authService auth.Service, secureCookies bool, logger *zap.Logger) {
 	r.Get(`/`, getIndex(static))
 	r.Get(`/version`, getVersion)
 	r.With(chiMiddleware.Compress(5)).Get(`/static/*`, getStatic(static))
-	r.Post(`/login`, postLogin(authService, secureCookies))
+	r.Post(`/login`, postLogin(authService, secureCookies, logger))
 }
 
 var (
