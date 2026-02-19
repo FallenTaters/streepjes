@@ -30,10 +30,12 @@ func getLogout(authService auth.Service) http.HandlerFunc {
 		user := userFromContext(r)
 		authService.Logout(user.ID)
 		http.SetCookie(w, &http.Cookie{
-			Name:   api.AuthTokenCookieName,
-			Value:  ``,
-			Path:   `/`,
-			MaxAge: -1,
+			Name:     api.AuthTokenCookieName,
+			Value:    ``,
+			Path:     `/`,
+			MaxAge:   -1,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
 		})
 		http.Redirect(w, r, `/login`, http.StatusSeeOther)
 	}

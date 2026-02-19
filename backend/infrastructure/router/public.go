@@ -87,11 +87,13 @@ func postLoginPage(authService auth.Service, secureCookies bool, logger *zap.Log
 		}
 
 		http.SetCookie(w, &http.Cookie{
-			Name:   api.AuthTokenCookieName,
-			Value:  user.AuthToken,
-			Path:   `/`,
-			MaxAge: 24 * int(time.Hour/time.Second),
-			Secure: secureCookies,
+			Name:     api.AuthTokenCookieName,
+			Value:    user.AuthToken,
+			Path:     `/`,
+			MaxAge:   int(authdomain.TokenDuration / time.Second),
+			Secure:   secureCookies,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
 		})
 
 		if user.Role.Has(authdomain.PermissionAdminStuff) {
