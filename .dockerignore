@@ -1,0 +1,9 @@
+.git
+bin/
+tmp/
+*.wasm
+*_enumer.go
+*_gen.go
+.env
+air.log
+streepjes.db
