@@ -39,6 +39,10 @@ func (cr catalogRepo) GetCategories() []orderdomain.Category {
 		categories = append(categories, category)
 	}
 
+	if err := rows.Err(); err != nil {
+		panic(err)
+	}
+
 	return categories
 }
 
@@ -60,6 +64,10 @@ func (cr catalogRepo) GetItems() []orderdomain.Item {
 		items = append(items, item)
 	}
 
+	if err := rows.Err(); err != nil {
+		panic(err)
+	}
+
 	return items
 }
 
@@ -68,16 +76,18 @@ func (cr catalogRepo) CreateItem(item orderdomain.Item) (int, error) {
 		return 0, repo.ErrItemNameEmpty
 	}
 
-	row := cr.db.QueryRow(`SELECT * FROM items WHERE name = $1;`, item.Name)
-	if !errors.Is(row.Scan(), sql.ErrNoRows) {
+	var exists bool
+	if err := cr.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM items WHERE name = $1)`, item.Name).Scan(&exists); err != nil {
+		panic(err)
+	}
+	if exists {
 		return 0, repo.ErrItemNameTaken
 	}
 
-	row = cr.db.QueryRow(`INSERT INTO items (category_id, name, price_gladiators, price_parabool, price_calamari) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
-		item.CategoryID, item.Name, item.PriceGladiators, item.PriceParabool, item.PriceCalamari)
-
 	var id int
-	if err := row.Scan(&id); err != nil {
+	if err := cr.db.QueryRow(`INSERT INTO items (category_id, name, price_gladiators, price_parabool, price_calamari) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+		item.CategoryID, item.Name, item.PriceGladiators, item.PriceParabool, item.PriceCalamari,
+	).Scan(&id); err != nil {
 		return 0, err
 	}
 
@@ -91,15 +101,17 @@ func (cr catalogRepo) CreateCategory(category orderdomain.Category) (int, error)
 		return 0, repo.ErrCategoryNameEmpty
 	}
 
-	row := cr.db.QueryRow(`SELECT * FROM categories WHERE name = $1;`, category.Name)
-	if !errors.Is(row.Scan(), sql.ErrNoRows) {
+	var exists bool
+	if err := cr.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM categories WHERE name = $1)`, category.Name).Scan(&exists); err != nil {
+		panic(err)
+	}
+	if exists {
 		return 0, repo.ErrCategoryNameTaken
 	}
 
-	row = cr.db.QueryRow(`INSERT INTO categories (name) VALUES ($1) RETURNING id;`, category.Name)
-
 	var id int
-	if err := row.Scan(&id); err != nil {
+	if err := cr.db.QueryRow(`INSERT INTO categories (name) VALUES ($1) RETURNING id;`, category.Name,
+	).Scan(&id); err != nil {
 		return 0, err
 	}
 

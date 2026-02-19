@@ -313,7 +313,7 @@ func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) a
 	}
 
 	sort.Slice(leaderboard.Members, func(i, j int) bool {
-		return leaderboard.Members[i].Total >= leaderboard.Members[j].Total
+		return leaderboard.Members[i].Total > leaderboard.Members[j].Total
 	})
 
 	return leaderboard
