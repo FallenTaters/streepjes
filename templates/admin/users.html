@@ -1,6 +1,70 @@
 {{ define "content" }}
 {{ template "nav" . }}
-<div class="full-height" style="padding: 20px 40px 20px 120px;">
-  <p>Users - not yet implemented</p>
+<div class="full-height page-content">
+  <div class="grid-2col">
+    <h2 style="grid-area:title1;">Users</h2>
+    <div style="grid-area:title2;"></div>
+    <div style="grid-area:col1;overflow:auto;">
+      <a href="/admin/users?action=new" class="button no-club responsive extra border" style="margin:5px;">+</a>
+      {{ range .Users }}
+      <a href="/admin/users?action=edit&id={{ .ID }}"
+         class="button {{ clubClass .Club }} responsive extra" style="margin:5px;">{{ .Name }}</a>
+      {{ end }}
+    </div>
+    <div style="grid-area:col2;">
+      {{ if .ShowForm }}
+      <h3>{{ .FormTitle }}</h3>
+      <form method="POST" action="/admin/users">
+        {{ if .EditUser }}
+        <input type="hidden" name="id" value="{{ .EditUser.ID }}">
+        {{ end }}
+        <div class="field label border">
+          <input type="text" name="username" id="user-username" value="{{ .FormUsername }}" required>
+          <label for="user-username">Username</label>
+        </div>
+        <div class="field label border">
+          <input type="password" name="password" id="user-password" value=""
+                 {{ if not .EditUser }}required{{ end }}>
+          <label for="user-password">{{ .PasswordLabel }}</label>
+        </div>
+        <div class="field label border">
+          <input type="text" name="name" id="user-name" value="{{ .FormName }}" required>
+          <label for="user-name">Name</label>
+        </div>
+        <div class="field suffix border">
+          <select name="club" id="select-club" required>
+            <option value="" disabled {{ if eq .FormClub 0 }}selected{{ end }}>Select Club</option>
+            <option value="1" {{ if eq .FormClub 1 }}selected{{ end }}>De Parabool</option>
+            <option value="2" {{ if eq .FormClub 2 }}selected{{ end }}>Gladiators</option>
+            <option value="3" {{ if eq .FormClub 3 }}selected{{ end }}>Calamari</option>
+          </select>
+          <i>arrow_drop_down</i>
+        </div>
+        <div class="field suffix border">
+          <select name="role" id="select-role" required>
+            <option value="" disabled {{ if eq .FormRole 0 }}selected{{ end }}>Select Role</option>
+            <option value="1" {{ if eq .FormRole 1 }}selected{{ end }}>Bartender</option>
+            <option value="2" {{ if eq .FormRole 2 }}selected{{ end }}>Admin</option>
+          </select>
+          <i>arrow_drop_down</i>
+        </div>
+        <p>
+          <button type="submit" class="large responsive {{ .FormClubClass }}">{{ .SaveButtonText }}</button>
+        </p>
+      </form>
+      {{ if .EditUser }}
+      <p>
+        <form method="POST" action="/admin/users/{{ .EditUser.ID }}/delete"
+              onsubmit="return confirm('Are you sure you want to delete this user?');">
+          <button type="submit" class="large responsive error">Delete</button>
+        </form>
+      </p>
+      {{ end }}
+      {{ if .Error }}
+      <article class="error" style="margin-top:10px;">{{ .Error }}</article>
+      {{ end }}
+      {{ end }}
+    </div>
+  </div>
 </div>
 {{ end }}

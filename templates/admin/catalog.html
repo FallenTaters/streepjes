@@ -1,6 +1,111 @@
 {{ define "content" }}
 {{ template "nav" . }}
-<div class="full-height" style="padding: 20px 40px 20px 120px;">
-  <p>Catalog - not yet implemented</p>
+<div class="full-height page-content">
+  <div class="grid-3col">
+    <h4 style="grid-area:title1;">Categories</h4>
+    <h4 style="grid-area:title2;">Items</h4>
+    <h4 style="grid-area:title3;">{{ .FormTitle }}</h4>
+
+    <div style="grid-area:col1;overflow:auto;">
+      <a href="/admin/catalog?action=new-category{{ if .SelectedCategory }}&cat={{ .SelectedCategory.ID }}{{ end }}"
+         class="button responsive extra small-margin border">+</a>
+      {{ range .Categories }}
+      <a href="/admin/catalog?cat={{ .ID }}"
+         class="button responsive extra small-margin{{ if eq .ID $.SelectedCategoryID }} primary{{ end }}">
+        <div style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">{{ .Name }}</div>
+      </a>
+      {{ end }}
+    </div>
+
+    <div style="grid-area:col2;overflow:auto;">
+      {{ if .SelectedCategory }}
+      <a href="/admin/catalog?cat={{ .SelectedCategory.ID }}&action=new-item"
+         class="button responsive extra small-margin border">+</a>
+      {{ range .DisplayItems }}
+      <a href="/admin/catalog?cat={{ $.SelectedCategory.ID }}&action=edit-item&id={{ .ID }}"
+         class="button responsive extra small-margin{{ if eq .ID $.SelectedItemID }} primary{{ end }}">
+        <div style="text-overflow:ellipsis;white-space:nowrap;overflow:hidden;">{{ .Name }}</div>
+      </a>
+      {{ end }}
+      {{ end }}
+    </div>
+
+    <div style="grid-area:col3;overflow:auto;">
+      {{ if .ShowCategoryForm }}
+      <form method="POST" action="/admin/catalog/category" class="no-margin">
+        {{ if .EditCategory }}
+        <input type="hidden" name="id" value="{{ .EditCategory.ID }}">
+        {{ end }}
+        <div class="field label border">
+          <input type="text" name="name" id="category-form-name" value="{{ .CategoryName }}" required>
+          <label for="category-form-name">Category Name</label>
+        </div>
+        <button type="submit" class="responsive small-margin">
+          <i>save</i>
+          <span>Save</span>
+        </button>
+      </form>
+      {{ if .EditCategory }}
+      <form method="POST" action="/admin/catalog/category/{{ .EditCategory.ID }}/delete"
+            onsubmit="return confirm('Are you sure you want to delete this category?');">
+        <button type="submit" class="responsive error small-margin">
+          <i>delete</i>
+          <span>Delete</span>
+        </button>
+      </form>
+      {{ end }}
+      {{ end }}
+
+      {{ if .ShowItemForm }}
+      <form method="POST" action="/admin/catalog/item" class="no-margin">
+        {{ if .EditItem }}
+        <input type="hidden" name="id" value="{{ .EditItem.ID }}">
+        {{ end }}
+        <div class="field suffix border">
+          <select name="category_id" id="item-category" required>
+            <option value="" disabled {{ if eq .ItemCategoryID 0 }}selected{{ end }}>Choose Category</option>
+            {{ range .Categories }}
+            <option value="{{ .ID }}" {{ if eq .ID $.ItemCategoryID }}selected{{ end }}>{{ .Name }}</option>
+            {{ end }}
+          </select>
+          <i>arrow_drop_down</i>
+        </div>
+        <div class="field label border">
+          <input type="text" name="name" id="item-form-name" value="{{ .ItemName }}" required>
+          <label for="item-form-name">Item Name</label>
+        </div>
+        <div class="field label border">
+          <input type="number" name="price_gladiators" id="item-price-gladiators" value="{{ .PriceGladiators }}" required>
+          <label for="item-price-gladiators">Price Gladiators (¢)</label>
+        </div>
+        <div class="field label border">
+          <input type="number" name="price_parabool" id="item-price-parabool" value="{{ .PriceParabool }}" required>
+          <label for="item-price-parabool">Price Parabool (¢)</label>
+        </div>
+        <div class="field label border">
+          <input type="number" name="price_calamari" id="item-price-calamari" value="{{ .PriceCalamari }}" required>
+          <label for="item-price-calamari">Price Calamari (¢)</label>
+        </div>
+        <button type="submit" class="responsive small-margin">
+          <i>save</i>
+          <span>Save</span>
+        </button>
+      </form>
+      {{ if .EditItem }}
+      <form method="POST" action="/admin/catalog/item/{{ .EditItem.ID }}/delete?cat={{ .SelectedCategoryID }}"
+            onsubmit="return confirm('Are you sure you want to delete this item?');">
+        <button type="submit" class="responsive error small-margin">
+          <i>delete</i>
+          <span>Delete</span>
+        </button>
+      </form>
+      {{ end }}
+      {{ end }}
+
+      {{ if .Error }}
+      <article class="error" style="margin-top:10px;">{{ .Error }}</article>
+      {{ end }}
+    </div>
+  </div>
 </div>
 {{ end }}

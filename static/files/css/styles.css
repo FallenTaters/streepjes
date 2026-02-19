@@ -3,3 +3,43 @@
     height:calc(100vh);
     overflow:auto;
 }
+
+.page-content {
+    padding: 20px 40px 20px 120px;
+}
+
+.grid-2col {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 'title1 title2' 'col1 col2';
+}
+
+.grid-3col {
+    height: 100%;
+    display: grid;
+    grid-gap: 5px;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 80px 1fr;
+    grid-template-areas: 'title1 title2 title3' 'col1 col2 col3';
+}
+
+@media (max-width: 900px) {
+    .page-content {
+        padding: 20px 10px 80px 10px;
+    }
+
+    .grid-2col {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        grid-template-areas: 'title1' 'col1' 'title2' 'col2';
+    }
+
+    .grid-3col {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto auto;
+        grid-template-areas: 'title1' 'col1' 'title2' 'col2' 'title3' 'col3';
+    }
+}

@@ -6,10 +6,21 @@ import (
 	"html/template"
 	"io"
 	"sync"
+
+	"github.com/FallenTaters/streepjes/domain"
 )
 
 //go:embed *.html admin/*.html
 var files embed.FS
+
+var funcMap = template.FuncMap{
+	"clubClass": func(c domain.Club) string {
+		if c == domain.ClubUnknown {
+			return "no-club"
+		}
+		return c.String()
+	},
+}
 
 var (
 	once  sync.Once
@@ -34,7 +45,7 @@ func buildPages() {
 	shared := []string{"base.html", "nav.html"}
 
 	for _, pf := range pageFiles {
-		t := template.Must(template.ParseFS(files, append(shared, pf)...))
+		t := template.Must(template.New("").Funcs(funcMap).ParseFS(files, append(shared, pf)...))
 		pages[pf] = t
 	}
 }

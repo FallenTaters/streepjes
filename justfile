@@ -20,10 +20,10 @@ vugugen:
 wasm:
     GOARCH=wasm GOOS=js go build -o ./static/files/app.wasm ./frontend/
 
-run: vugugen wasm
-    go run -ldflags "-X {{package}}.buildVersion=development" .
+run:
+    find . -name '*.go' -o -name '*.html' | entr -cr go run -ldflags "-X {{package}}.buildVersion=development" .
 
-run-backend:
+run-once:
     go run -ldflags "-X {{package}}.buildVersion=development" .
 
 test:
