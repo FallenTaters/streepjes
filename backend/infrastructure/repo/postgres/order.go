@@ -13,10 +13,7 @@ import (
 )
 
 func NewOrderRepo(db Queryable, logger *zap.Logger) repo.Order {
-	return &orderRepo{
-		db:     db,
-		logger: logger,
-	}
+	return &orderRepo{db: db, logger: logger}
 }
 
 type orderRepo struct {
@@ -24,7 +21,7 @@ type orderRepo struct {
 	logger *zap.Logger
 }
 
-func (or *orderRepo) Get(id int) (orderdomain.Order, bool) {
+func (or *orderRepo) Get(id int) (orderdomain.Order, error) {
 	row := or.db.QueryRow(`SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, `+
 		`O.price, O.order_time, O.status, O.status_time FROM orders O WHERE id = $1;`, id)
 
@@ -34,15 +31,14 @@ func (or *orderRepo) Get(id int) (orderdomain.Order, bool) {
 	err := row.Scan(&order.ID, &order.Club, &order.BartenderID, &memberID, &order.Contents,
 		&order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
 	if errors.Is(err, sql.ErrNoRows) {
-		return order, false
+		return orderdomain.Order{}, repo.ErrOrderNotFound
 	}
 	if err != nil {
-		panic(err)
+		return orderdomain.Order{}, fmt.Errorf("orderRepo.Get(%d): %w", id, err)
 	}
 
 	order.MemberID = int(memberID.Int64)
-
-	return order, true
+	return order, nil
 }
 
 func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
@@ -52,7 +48,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 
 	var exists bool
 	if err := or.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)`, order.BartenderID).Scan(&exists); err != nil {
-		panic(err)
+		return 0, fmt.Errorf("orderRepo.Create: check bartender: %w", err)
 	}
 	if !exists {
 		return 0, fmt.Errorf("%w with id %d", repo.ErrUserNotFound, order.BartenderID)
@@ -60,7 +56,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 
 	if order.MemberID != 0 {
 		if err := or.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM members WHERE id = $1)`, order.MemberID).Scan(&exists); err != nil {
-			panic(err)
+			return 0, fmt.Errorf("orderRepo.Create: check member: %w", err)
 		}
 		if !exists {
 			return 0, fmt.Errorf("%w with id %d", repo.ErrMemberNotFound, order.MemberID)
@@ -76,7 +72,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 		`INSERT INTO orders (club, bartender_id, member_id, contents, price, order_time, status, status_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id;`,
 		order.Club, order.BartenderID, memberID, order.Contents, order.Price, order.OrderTime, order.Status, order.StatusTime,
 	).Scan(&id); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("orderRepo.Create: insert: %w", err)
 	}
 
 	or.logger.Info("order created",
@@ -90,7 +86,7 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 	return id, nil
 }
 
-func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nolint:funlen,gocyclo,cyclop
+func (or *orderRepo) Filter(filter repo.OrderFilter) ([]orderdomain.Order, error) { //nolint:funlen,gocyclo,cyclop
 	q := `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
 		`O.price, O.order_time, O.status, O.status_time FROM orders O `
 	var conditions []string
@@ -143,9 +139,9 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	}
 	q += `;`
 
-	rows, err := ur.db.Query(q, args...)
+	rows, err := or.db.Query(q, args...)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("orderRepo.Filter: query: %w", err)
 	}
 	defer rows.Close()
 
@@ -154,11 +150,10 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 		var order orderdomain.Order
 		var memberID sql.NullInt64
 
-		err := rows.Scan(
+		if err := rows.Scan(
 			&order.ID, &order.Club, &order.BartenderID, &memberID, &order.Contents,
-			&order.Price, &order.OrderTime, &order.Status, &order.StatusTime)
-		if err != nil {
-			panic(err)
+			&order.Price, &order.OrderTime, &order.Status, &order.StatusTime); err != nil {
+			return nil, fmt.Errorf("orderRepo.Filter: scan: %w", err)
 		}
 
 		order.MemberID = int(memberID.Int64)
@@ -166,28 +161,26 @@ func (ur *orderRepo) Filter(filter repo.OrderFilter) []orderdomain.Order { //nol
 	}
 
 	if err := rows.Err(); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("orderRepo.Filter: rows: %w", err)
 	}
 
-	return orders
+	return orders, nil
 }
 
 func (or *orderRepo) Delete(id int) error {
 	result, err := or.db.Exec(`UPDATE orders SET status = $1 WHERE id = $2;`, orderdomain.StatusCancelled, id)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("orderRepo.Delete(%d): %w", id, err)
 	}
 
 	affected, err := result.RowsAffected()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("orderRepo.Delete(%d): rows affected: %w", id, err)
 	}
-
 	if affected == 0 {
 		return repo.ErrOrderNotFound
 	}
 
 	or.logger.Info("order cancelled", zap.Int("id", id))
-
 	return nil
 }

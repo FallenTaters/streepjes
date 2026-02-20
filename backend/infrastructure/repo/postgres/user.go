@@ -12,10 +12,7 @@ import (
 )
 
 func NewUserRepo(db Queryable, logger *zap.Logger) repo.User {
-	return &userRepo{
-		db:     db,
-		logger: logger,
-	}
+	return &userRepo{db: db, logger: logger}
 }
 
 type userRepo struct {
@@ -23,85 +20,71 @@ type userRepo struct {
 	logger *zap.Logger
 }
 
-func (ur *userRepo) GetAll() []authdomain.User {
-	rows, err := ur.db.Query(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U;`)
+const userColumns = `id, username, password, club, name, role, auth_token, auth_time`
+
+func scanUser(sc interface{ Scan(...any) error }) (authdomain.User, error) {
+	var u authdomain.User
+	err := sc.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.Club, &u.Name, &u.Role, &u.AuthToken, &u.AuthTime)
+	return u, err
+}
+
+func (ur *userRepo) GetAll() ([]authdomain.User, error) {
+	rows, err := ur.db.Query(`SELECT ` + userColumns + ` FROM users;`)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("userRepo.GetAll: query: %w", err)
 	}
 	defer rows.Close()
 
-	var user authdomain.User
-	users := make([]authdomain.User, 0)
-
+	var users []authdomain.User
 	for rows.Next() {
-		err := rows.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+		u, err := scanUser(rows)
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("userRepo.GetAll: scan: %w", err)
 		}
-
-		users = append(users, user)
+		users = append(users, u)
 	}
-
 	if err := rows.Err(); err != nil {
-		panic(err)
+		return nil, fmt.Errorf("userRepo.GetAll: rows: %w", err)
 	}
 
-	return users
+	return users, nil
 }
 
-func (ur *userRepo) Get(id int) (authdomain.User, bool) {
-	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.id = $1;`, id)
-
-	var user authdomain.User
-
-	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+func (ur *userRepo) Get(id int) (authdomain.User, error) {
+	u, err := scanUser(ur.db.QueryRow(`SELECT `+userColumns+` FROM users WHERE id = $1;`, id))
 	if errors.Is(err, sql.ErrNoRows) {
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 	if err != nil {
-		panic(err)
+		return authdomain.User{}, fmt.Errorf("userRepo.Get(%d): %w", id, err)
 	}
-
-	return user, true
+	return u, nil
 }
 
-func (ur *userRepo) GetByUsername(username string) (authdomain.User, bool) {
-	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.username = $1;`, username) //nolint:lll
-
-	var user authdomain.User
-
-	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+func (ur *userRepo) GetByUsername(username string) (authdomain.User, error) {
+	u, err := scanUser(ur.db.QueryRow(`SELECT `+userColumns+` FROM users WHERE username = $1;`, username))
 	if errors.Is(err, sql.ErrNoRows) {
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 	if err != nil {
-		panic(err)
+		return authdomain.User{}, fmt.Errorf("userRepo.GetByUsername: %w", err)
 	}
-
-	return user, true
+	return u, nil
 }
 
-func (ur *userRepo) GetByToken(token string) (authdomain.User, bool) {
-	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.auth_token = $1;`, token) //nolint:lll
-
-	var user authdomain.User
-
-	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+func (ur *userRepo) GetByToken(token string) (authdomain.User, error) {
+	u, err := scanUser(ur.db.QueryRow(`SELECT `+userColumns+` FROM users WHERE auth_token = $1;`, token))
 	if errors.Is(err, sql.ErrNoRows) {
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 	if err != nil {
-		panic(err)
+		return authdomain.User{}, fmt.Errorf("userRepo.GetByToken: %w", err)
 	}
-
-	return user, true
+	return u, nil
 }
 
 func (ur *userRepo) Update(user authdomain.User) error {
-	if user.Username == `` ||
-		user.Name == `` ||
-		user.Club == domain.ClubUnknown ||
-		user.Role == authdomain.RoleNotAuthorized {
+	if user.Username == `` || user.Name == `` || user.Club == domain.ClubUnknown || user.Role == authdomain.RoleNotAuthorized {
 		return repo.ErrUserMissingFields
 	}
 
@@ -110,20 +93,18 @@ func (ur *userRepo) Update(user authdomain.User) error {
 		user.Username, user.PasswordHash, user.Club, user.Name, user.Role, user.AuthToken, user.AuthTime, user.ID,
 	)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("userRepo.Update(%d): %w", user.ID, err)
 	}
 
 	affected, err := res.RowsAffected()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("userRepo.Update(%d): rows affected: %w", user.ID, err)
 	}
-
 	if affected == 0 {
 		return repo.ErrUserNotFound
 	}
 
 	ur.logger.Info("user updated", zap.Int("id", user.ID), zap.String("username", user.Username))
-
 	return nil
 }
 
@@ -133,14 +114,13 @@ func (ur *userRepo) UpdateActivity(user authdomain.User) error {
 		user.AuthToken, user.AuthTime, user.ID,
 	)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("userRepo.UpdateActivity(%d): %w", user.ID, err)
 	}
 
 	affected, err := res.RowsAffected()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("userRepo.UpdateActivity(%d): rows affected: %w", user.ID, err)
 	}
-
 	if affected == 0 {
 		return repo.ErrUserNotFound
 	}
@@ -149,30 +129,32 @@ func (ur *userRepo) UpdateActivity(user authdomain.User) error {
 }
 
 func (ur *userRepo) Create(user authdomain.User) (int, error) {
-	if user.Username == `` ||
-		len(user.PasswordHash) == 0 ||
-		user.Club == domain.ClubUnknown ||
-		user.Name == `` ||
-		user.Role == authdomain.RoleNotAuthorized {
+	if user.Username == `` || len(user.PasswordHash) == 0 || user.Club == domain.ClubUnknown || user.Name == `` || user.Role == authdomain.RoleNotAuthorized {
 		return 0, fmt.Errorf(`%w: %#v`, repo.ErrUserMissingFields, user)
 	}
 
-	if _, ok := ur.getByName(user.Name); ok {
-		return 0, fmt.Errorf(`%w, %#v`, repo.ErrUsernameTaken, user)
+	_, err := ur.getByName(user.Name)
+	if err == nil {
+		return 0, fmt.Errorf(`%w: name %q`, repo.ErrUsernameTaken, user.Name)
+	}
+	if !errors.Is(err, repo.ErrUserNotFound) {
+		return 0, fmt.Errorf("userRepo.Create: check name: %w", err)
 	}
 
-	if _, ok := ur.GetByUsername(user.Username); ok {
-		return 0, fmt.Errorf(`%w, %#v`, repo.ErrUsernameTaken, user)
+	_, err = ur.GetByUsername(user.Username)
+	if err == nil {
+		return 0, fmt.Errorf(`%w: username %q`, repo.ErrUsernameTaken, user.Username)
 	}
-
-	row := ur.db.QueryRow(
-		`INSERT INTO users (username, password, club, name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
-		user.Username, user.PasswordHash, user.Club, user.Name, user.Role,
-	)
+	if !errors.Is(err, repo.ErrUserNotFound) {
+		return 0, fmt.Errorf("userRepo.Create: check username: %w", err)
+	}
 
 	var id int
-	if err := row.Scan(&id); err != nil {
-		return 0, err
+	if err := ur.db.QueryRow(
+		`INSERT INTO users (username, password, club, name, role) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+		user.Username, user.PasswordHash, user.Club, user.Name, user.Role,
+	).Scan(&id); err != nil {
+		return 0, fmt.Errorf("userRepo.Create: insert: %w", err)
 	}
 
 	ur.logger.Info("user created",
@@ -185,20 +167,15 @@ func (ur *userRepo) Create(user authdomain.User) (int, error) {
 	return id, nil
 }
 
-func (ur *userRepo) getByName(name string) (authdomain.User, bool) {
-	row := ur.db.QueryRow(`SELECT id, username, password, club, name, role, auth_token, auth_time FROM users U WHERE U.name = $1;`, name)
-
-	var user authdomain.User
-
-	err := row.Scan(&user.ID, &user.Username, &user.PasswordHash, &user.Club, &user.Name, &user.Role, &user.AuthToken, &user.AuthTime)
+func (ur *userRepo) getByName(name string) (authdomain.User, error) {
+	u, err := scanUser(ur.db.QueryRow(`SELECT `+userColumns+` FROM users WHERE name = $1;`, name))
 	if errors.Is(err, sql.ErrNoRows) {
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 	if err != nil {
-		panic(err)
+		return authdomain.User{}, fmt.Errorf("userRepo.getByName: %w", err)
 	}
-
-	return user, true
+	return u, nil
 }
 
 func (ur *userRepo) Delete(id int) error {
@@ -207,20 +184,17 @@ func (ur *userRepo) Delete(id int) error {
 		if err.Error() == `FOREIGN KEY constraint failed` {
 			return repo.ErrUserHasOrders
 		}
-
-		panic(err)
+		return fmt.Errorf("userRepo.Delete(%d): %w", id, err)
 	}
 
 	affected, err := res.RowsAffected()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("userRepo.Delete(%d): rows affected: %w", id, err)
 	}
-
 	if affected == 0 {
 		return repo.ErrUserNotFound
 	}
 
 	ur.logger.Info("user deleted", zap.Int("id", id))
-
 	return nil
 }

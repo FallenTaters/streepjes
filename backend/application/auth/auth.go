@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/FallenTaters/streepjes/api"
@@ -10,49 +11,24 @@ import (
 )
 
 var (
-	ErrPasswordEmpty   = errors.New("new password cannot be empty")
-	ErrPasswordWrong   = errors.New("original password is incorrect")
-	ErrNameEmpty       = errors.New("name cannot be empty")
-	ErrUserHasOrders   = errors.New("cannot delete user with orders")
+	ErrPasswordEmpty      = errors.New("new password cannot be empty")
+	ErrPasswordWrong      = errors.New("original password is incorrect")
+	ErrNameEmpty          = errors.New("name cannot be empty")
+	ErrUserHasOrders      = errors.New("cannot delete user with orders")
+	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidToken       = errors.New("invalid or expired token")
 )
 
 type Service interface {
-	// Login returns the user if credentials are correct
-	// otherwise, it returns false
-	Login(user, pass string) (authdomain.User, bool)
-
-	// Check gets the user with the correct token
-	// if the token is expired or unknown, it returns false
-	Check(token string) (authdomain.User, bool)
-
-	// Active refreshes a users token, setting AuthTime to now
-	// if the user is not found, it is a no-op
-	Active(id int)
-
-	// Logout deletes the users AuthToken, if found
-	// if the user is not found, it is a no-op
-	Logout(id int)
-
-	// Register registers a new user. It sets the passwordHash and ID
-	// if the username is taken, it return repo.ErrUsernameTaken
-	// if mandatory fields are missing, it returns repo.ErrUserMissingFields
+	Login(user, pass string) (authdomain.User, error)
+	Check(token string) (authdomain.User, error)
+	Active(id int) error
+	Logout(id int) error
 	Register(user authdomain.User, password string) error
-
-	// Update updates a user
-	// it can return repo.ErrUserMissingFields and repo.ErrUsernameTaken
-	// if password == ``, it doesn't edit password
 	Update(user authdomain.User, password string) error
-
-	// ChangePassword verifies the original password and changes it to the new password
 	ChangePassword(user authdomain.User, changePassword api.ChangePassword) error
-
-	// ChangeName changes the name of the user
 	ChangeName(user authdomain.User, name string) error
-
-	// GetUsers gets all users
-	GetUsers() []authdomain.User
-
-	// Delete deletes a user.
+	GetUsers() ([]authdomain.User, error)
 	Delete(id int) error
 }
 
@@ -65,71 +41,87 @@ type service struct {
 	orders repo.Order
 }
 
-func (s *service) Login(username, pass string) (authdomain.User, bool) {
-	user, ok := s.users.GetByUsername(username)
-	if !ok {
-		return authdomain.User{}, false
+func (s *service) Login(username, pass string) (authdomain.User, error) {
+	user, err := s.users.GetByUsername(username)
+	if errors.Is(err, repo.ErrUserNotFound) {
+		return authdomain.User{}, ErrInvalidCredentials
+	}
+	if err != nil {
+		return authdomain.User{}, fmt.Errorf("auth.Login: %w", err)
 	}
 
 	if !CheckPassword(user.PasswordHash, pass) {
-		return authdomain.User{}, false
+		return authdomain.User{}, ErrInvalidCredentials
 	}
 
 	user.AuthToken = generateToken()
 	user.AuthTime = time.Now()
 
-	err := s.users.UpdateActivity(user)
-	if err != nil {
-		panic(err)
+	if err := s.users.UpdateActivity(user); err != nil {
+		return authdomain.User{}, fmt.Errorf("auth.Login: update activity: %w", err)
 	}
 
-	return user, true
+	return user, nil
 }
 
-func (s *service) Check(token string) (authdomain.User, bool) {
+func (s *service) Check(token string) (authdomain.User, error) {
 	if token == `` {
-		return authdomain.User{}, false
+		return authdomain.User{}, ErrInvalidToken
 	}
 
-	user, ok := s.users.GetByToken(token)
-	if !ok {
-		return authdomain.User{}, false
+	user, err := s.users.GetByToken(token)
+	if errors.Is(err, repo.ErrUserNotFound) {
+		return authdomain.User{}, ErrInvalidToken
+	}
+	if err != nil {
+		return authdomain.User{}, fmt.Errorf("auth.Check: %w", err)
 	}
 
 	if time.Since(user.AuthTime) > authdomain.TokenDuration {
-		return authdomain.User{}, false
+		return authdomain.User{}, ErrInvalidToken
 	}
 
 	user.AuthTime = time.Now()
-	err := s.users.UpdateActivity(user)
+	if err := s.users.UpdateActivity(user); err != nil {
+		return authdomain.User{}, fmt.Errorf("auth.Check: update activity: %w", err)
+	}
+
+	return user, nil
+}
+
+func (s *service) Active(id int) error {
+	user, err := s.users.Get(id)
+	if errors.Is(err, repo.ErrUserNotFound) {
+		return nil
+	}
 	if err != nil {
-		return authdomain.User{}, false
-	}
-
-	return user, true
-}
-
-func (s *service) Active(id int) {
-	user, ok := s.users.Get(id)
-	if !ok {
-		return
+		return fmt.Errorf("auth.Active: %w", err)
 	}
 
 	user.AuthTime = time.Now()
 
-	_ = s.users.UpdateActivity(user)
+	if err := s.users.UpdateActivity(user); err != nil {
+		return fmt.Errorf("auth.Active: update: %w", err)
+	}
+	return nil
 }
 
-func (s *service) Logout(id int) {
-	user, ok := s.users.Get(id)
-	if !ok {
-		return
+func (s *service) Logout(id int) error {
+	user, err := s.users.Get(id)
+	if errors.Is(err, repo.ErrUserNotFound) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("auth.Logout: %w", err)
 	}
 
 	user.AuthToken = ``
 	user.AuthTime = time.Now().Add(-authdomain.TokenDuration)
 
-	_ = s.users.UpdateActivity(user)
+	if err := s.users.UpdateActivity(user); err != nil {
+		return fmt.Errorf("auth.Logout: update: %w", err)
+	}
+	return nil
 }
 
 func (s *service) Register(user authdomain.User, password string) error {
@@ -140,16 +132,15 @@ func (s *service) Register(user authdomain.User, password string) error {
 }
 
 func (s *service) Update(userChanges authdomain.User, password string) error {
-	user, ok := s.users.Get(userChanges.ID)
-	if !ok {
-		return repo.ErrUserNotFound
+	user, err := s.users.Get(userChanges.ID)
+	if err != nil {
+		return fmt.Errorf("auth.Update: %w", err)
 	}
 
 	if password != `` {
 		user.PasswordHash = HashPassword(password)
 	}
 
-	// only update the following fields
 	user.Name = userChanges.Name
 	user.Username = userChanges.Username
 	user.Club = userChanges.Club
@@ -182,14 +173,17 @@ func (s *service) ChangeName(user authdomain.User, name string) error {
 	return s.users.Update(user)
 }
 
-func (s *service) GetUsers() []authdomain.User {
+func (s *service) GetUsers() ([]authdomain.User, error) {
 	return s.users.GetAll()
 }
 
 func (s *service) Delete(id int) error {
-	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+	orders, err := s.orders.Filter(repo.OrderFilter{
 		BartenderID: id,
 	})
+	if err != nil {
+		return fmt.Errorf("auth.Delete: check orders: %w", err)
+	}
 
 	if len(orders) > 0 {
 		return ErrUserHasOrders

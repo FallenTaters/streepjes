@@ -158,7 +158,9 @@ func run(cfg settings.Config) error {
 	}
 	defer db.Close()
 
-	postgres.Migrate(db, logger)
+	if err := postgres.Migrate(db, logger); err != nil {
+		return fmt.Errorf("running migrations: %w", err)
+	}
 
 	userRepo := postgres.NewUserRepo(db, logger)
 	memberRepo := postgres.NewMemberRepo(db, logger)
@@ -166,7 +168,7 @@ func run(cfg settings.Config) error {
 	catalogRepo := postgres.NewCatalogRepo(db, logger)
 
 	authService := auth.New(userRepo, orderRepo)
-	checkNoUsers(userRepo, authService)
+	checkNoUsers(userRepo, authService, logger)
 
 	orderService := order.New(memberRepo, orderRepo, catalogRepo)
 
@@ -205,8 +207,13 @@ func redirectHTTPS(logger *zap.Logger) {
 	}
 }
 
-func checkNoUsers(userRepo repo.User, authService auth.Service) {
-	if len(userRepo.GetAll()) == 0 {
+func checkNoUsers(userRepo repo.User, authService auth.Service, logger *zap.Logger) {
+	users, err := userRepo.GetAll()
+	if err != nil {
+		logger.Error("failed to check for existing users", zap.Error(err))
+		return
+	}
+	if len(users) == 0 {
 		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
 			Username: `adminGladiators`,
 			Club:     domain.ClubGladiators,

@@ -24,12 +24,12 @@ func TestLogin(t *testing.T) {
 		PasswordHash: auth.HashPassword(`password`),
 	}
 
-	mock.GetByUsernameFunc = func(username string) (authdomain.User, bool) {
+	mock.GetByUsernameFunc = func(username string) (authdomain.User, error) {
 		if username == `username` {
-			return testUser, true
+			return testUser, nil
 		}
 
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 
 	var updateCalled bool
@@ -46,10 +46,10 @@ func TestLogin(t *testing.T) {
 		assert := assert.New(t)
 		updateCalled = false
 
-		user, ok := s.Login(`username`, `password`)
+		user, err := s.Login(`username`, `password`)
 
 		assert.True(updateCalled)
-		assert.True(ok)
+		assert.NoError(err)
 		assert.Cmp(testUser, user, cmpopts.IgnoreFields(authdomain.User{}, `AuthTime`, `AuthToken`))
 
 		cleanup()
@@ -58,28 +58,29 @@ func TestLogin(t *testing.T) {
 	t.Run(`wrong username or password`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		_, ok := s.Login(`emanresu`, `password`)
-		assert.False(ok)
+		_, err := s.Login(`emanresu`, `password`)
+		assert.Error(err)
 
-		_, ok = s.Login(`username`, `drowssap`)
-		assert.False(ok)
+		_, err = s.Login(`username`, `drowssap`)
+		assert.Error(err)
 
 		cleanup()
 	})
 
-	t.Run(`panic on repo error`, func(t *testing.T) {
+	t.Run(`repo error on update`, func(t *testing.T) {
 		assert := assert.New(t)
 
 		mock.UpdateFunc = func(user authdomain.User) error {
-			return repo.ErrUserNotFound // not expected, but any error will do
+			return repo.ErrUserNotFound
 		}
 
-		defer func() {
-			v := recover()
-			assert.Eq(repo.ErrUserNotFound, v)
-		}()
+		_, err := s.Login(`username`, `password`)
+		assert.Error(err)
 
-		s.Login(`username`, `password`)
+		mock.UpdateFunc = func(user authdomain.User) error {
+			updateCalled = true
+			return nil
+		}
 
 		cleanup()
 	})
@@ -98,12 +99,12 @@ func TestCheck(t *testing.T) {
 		AuthTime:     time.Now().Add(-time.Minute),
 	}
 
-	mock.GetByTokenFunc = func(token string) (authdomain.User, bool) {
+	mock.GetByTokenFunc = func(token string) (authdomain.User, error) {
 		if token == `abcdefg` {
-			return testUser, true
+			return testUser, nil
 		}
 
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 
 	var updateCalled bool
@@ -120,8 +121,8 @@ func TestCheck(t *testing.T) {
 	t.Run(`valid token`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		user, ok := s.Check(`abcdefg`)
-		assert.True(ok)
+		user, err := s.Check(`abcdefg`)
+		assert.NoError(err)
 		assert.Cmp(testUser, user, cmpopts.IgnoreFields(authdomain.User{}, `AuthTime`))
 		assert.True(user.AuthTime.After(time.Now().Add(-time.Second)))
 		assert.True(updateCalled)
@@ -134,8 +135,8 @@ func TestCheck(t *testing.T) {
 
 		testUser.AuthTime = time.Now().Add(-authdomain.TokenDuration - time.Second)
 
-		_, ok := s.Check(`abcdefg`)
-		assert.False(ok)
+		_, err := s.Check(`abcdefg`)
+		assert.Error(err)
 		assert.False(updateCalled)
 
 		cleanup()
@@ -144,26 +145,30 @@ func TestCheck(t *testing.T) {
 	t.Run(`no or unknown token`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		_, ok := s.Check(``)
-		assert.False(ok)
+		_, err := s.Check(``)
+		assert.Error(err)
 		assert.False(updateCalled)
 
-		_, ok = s.Check(`gfedcba`)
-		assert.False(ok)
+		_, err = s.Check(`gfedcba`)
+		assert.Error(err)
 
 		cleanup()
 	})
 
-	t.Run(`repo error`, func(t *testing.T) {
+	t.Run(`repo error on update`, func(t *testing.T) {
 		assert := assert.New(t)
 
 		mock.UpdateFunc = func(user authdomain.User) error {
-			return repo.ErrUserNotFound // not expected but any error will do
+			return repo.ErrUserNotFound
 		}
 
-		_, ok := s.Check(`abcdefg`)
-		assert.False(ok)
-		assert.False(updateCalled)
+		_, err := s.Check(`abcdefg`)
+		assert.Error(err)
+
+		mock.UpdateFunc = func(user authdomain.User) error {
+			updateCalled = true
+			return nil
+		}
 
 		cleanup()
 	})
@@ -178,19 +183,18 @@ func TestActive(t *testing.T) {
 		ID: 1,
 	}
 
-	mock.GetFunc = func(i int) (authdomain.User, bool) {
+	mock.GetFunc = func(i int) (authdomain.User, error) {
 		if i == 1 {
-			return testUser, true
+			return testUser, nil
 		}
 
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 
 	var updateCalledWith authdomain.User
-	var updateErr error
 	mock.UpdateFunc = func(user authdomain.User) error {
 		updateCalledWith = user
-		return updateErr
+		return nil
 	}
 	cleanup := func() {
 		updateCalledWith = authdomain.User{}
@@ -199,7 +203,8 @@ func TestActive(t *testing.T) {
 	t.Run(`set user active --> update authtime`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		s.Active(1)
+		err := s.Active(1)
+		assert.NoError(err)
 		assert.Eq(testUser.ID, updateCalledWith.ID)
 		assert.True(updateCalledWith.AuthTime.After(time.Now().Add(-time.Second)))
 
@@ -209,7 +214,8 @@ func TestActive(t *testing.T) {
 	t.Run(`wrong id`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		s.Active(2)
+		err := s.Active(2)
+		assert.NoError(err)
 		assert.Eq(0, updateCalledWith.ID)
 
 		cleanup()
@@ -227,12 +233,12 @@ func TestLogout(t *testing.T) {
 		AuthTime:  time.Now().Add(-time.Second),
 	}
 
-	mock.GetFunc = func(i int) (authdomain.User, bool) {
+	mock.GetFunc = func(i int) (authdomain.User, error) {
 		if i == 1 {
-			return testUser, true
+			return testUser, nil
 		}
 
-		return authdomain.User{}, false
+		return authdomain.User{}, repo.ErrUserNotFound
 	}
 
 	var updateCalledWith authdomain.User
@@ -247,7 +253,8 @@ func TestLogout(t *testing.T) {
 	t.Run(`log out logged in user`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		s.Logout(1)
+		err := s.Logout(1)
+		assert.NoError(err)
 		assert.Eq(1, updateCalledWith.ID)
 		assert.Eq(``, updateCalledWith.AuthToken)
 		assert.True(updateCalledWith.AuthTime.Before(time.Now().Add(-authdomain.TokenDuration + time.Second)))
@@ -255,14 +262,16 @@ func TestLogout(t *testing.T) {
 		cleanup()
 	})
 
-	t.Run(`log out non-existent user --> no panic, no update`, func(t *testing.T) {
+	t.Run(`log out non-existent user --> no error, no update`, func(t *testing.T) {
 		assert := assert.New(t)
 
-		s.Logout(69)
+		err := s.Logout(69)
+		assert.NoError(err)
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
-		mock.GetFunc = func(i int) (authdomain.User, bool) { return authdomain.User{}, false }
-		s.Logout(1)
+		mock.GetFunc = func(i int) (authdomain.User, error) { return authdomain.User{}, repo.ErrUserNotFound }
+		err = s.Logout(1)
+		assert.NoError(err)
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
 		cleanup()

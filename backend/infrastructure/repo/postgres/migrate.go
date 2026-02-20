@@ -10,7 +10,7 @@ import (
 //go:embed migrations/*
 var migrations embed.FS
 
-func Migrate(db Queryable, logger *zap.Logger) {
+func Migrate(db Queryable, logger *zap.Logger) error {
 	row := db.QueryRow(`SELECT version FROM version;`)
 
 	var version int
@@ -18,46 +18,41 @@ func Migrate(db Queryable, logger *zap.Logger) {
 	err := row.Scan(&version)
 	if err != nil {
 		logger.Info("version table not found, creating", zap.Error(err))
-		createVersionTable(db)
+		if err := createVersionTable(db); err != nil {
+			return fmt.Errorf("migrate: create version table: %w", err)
+		}
 	}
 
-	migrate(db, version, logger)
+	return migrate(db, version, logger)
 }
 
-func createVersionTable(db Queryable) {
-	_, err := db.Exec(`CREATE TABLE version(version INTEGER);`)
-	if err != nil {
-		panic(err)
+func createVersionTable(db Queryable) error {
+	if _, err := db.Exec(`CREATE TABLE version(version INTEGER);`); err != nil {
+		return fmt.Errorf("create table: %w", err)
 	}
-
-	_, err = db.Exec(`INSERT INTO version(version) VALUES (0);`)
-	if err != nil {
-		panic(err)
+	if _, err := db.Exec(`INSERT INTO version(version) VALUES (0);`); err != nil {
+		return fmt.Errorf("insert version: %w", err)
 	}
+	return nil
 }
 
-func migrate(db Queryable, version int, logger *zap.Logger) {
+func migrate(db Queryable, version int, logger *zap.Logger) error {
 	for {
 		filename := fmt.Sprintf(`migrations/%04d.sql`, version+1)
 
 		file, err := migrations.ReadFile(filename)
 		if err != nil {
-			return
+			return nil
 		}
 
-		_, err = db.Exec(string(file))
-		if err != nil {
-			logger.Fatal("migration failed",
-				zap.String("file", fmt.Sprintf("%04d.sql", version+1)),
-				zap.Error(err),
-			)
+		if _, err := db.Exec(string(file)); err != nil {
+			return fmt.Errorf("migration %04d.sql: %w", version+1, err)
 		}
 
 		version++
 
-		_, err = db.Exec(`UPDATE version SET version = $1;`, version)
-		if err != nil {
-			panic(err)
+		if _, err := db.Exec(`UPDATE version SET version = $1;`, version); err != nil {
+			return fmt.Errorf("update version to %d: %w", version, err)
 		}
 
 		logger.Info("migration applied", zap.Int("version", version))
