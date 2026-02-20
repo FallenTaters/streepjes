@@ -1,6 +1,7 @@
 package auth_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -9,16 +10,20 @@ import (
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo/mockdb"
+	"github.com/FallenTaters/streepjes/domain"
 	"github.com/FallenTaters/streepjes/domain/authdomain"
+	"github.com/FallenTaters/streepjes/domain/orderdomain"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
+
+var errDB = errors.New("db error")
 
 func TestLogin(t *testing.T) {
 	t.Parallel()
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
+	testUser := authdomain.User{
 		ID:           1,
 		Username:     `username`,
 		PasswordHash: auth.HashPassword(`password`),
@@ -91,7 +96,7 @@ func TestCheck(t *testing.T) {
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
+	testUser := authdomain.User{
 		ID:           1,
 		Username:     `username`,
 		PasswordHash: auth.HashPassword(`password`),
@@ -179,9 +184,7 @@ func TestActive(t *testing.T) {
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
-		ID: 1,
-	}
+	testUser := authdomain.User{ID: 1}
 
 	mock.GetFunc = func(i int) (authdomain.User, error) {
 		if i == 1 {
@@ -227,7 +230,7 @@ func TestLogout(t *testing.T) {
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
+	testUser := authdomain.User{
 		ID:        1,
 		AuthToken: `abcdefg`,
 		AuthTime:  time.Now().Add(-time.Second),
@@ -283,9 +286,7 @@ func TestRegister(t *testing.T) {
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
-		Username: `username`,
-	}
+	testUser := authdomain.User{Username: `username`}
 
 	var createCalledWith authdomain.User
 	mock.CreateFunc = func(user authdomain.User) (int, error) {
@@ -329,7 +330,7 @@ func TestChangePassword(t *testing.T) {
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
+	testUser := authdomain.User{
 		ID:           1,
 		PasswordHash: auth.HashPassword(`abc`),
 	}
@@ -409,7 +410,7 @@ func TestChangeName(t *testing.T) {
 
 	mock := &mockdb.User{}
 	s := auth.New(mock, nil)
-	testUser := authdomain.User{ //nolint:exhaustivestruct
+	testUser := authdomain.User{
 		ID:           1,
 		Name:         `Hank`,
 		PasswordHash: auth.HashPassword(`abc`),
@@ -459,5 +460,177 @@ func TestChangeName(t *testing.T) {
 		assert.Eq(authdomain.User{}, updateCalledWith)
 
 		cleanup()
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	t.Parallel()
+
+	mock := &mockdb.User{}
+	s := auth.New(mock, nil)
+
+	existingUser := authdomain.User{
+		ID:           1,
+		Username:     `old_user`,
+		Name:         `Old Name`,
+		Club:         domain.ClubGladiators,
+		Role:         authdomain.RoleBartender,
+		PasswordHash: auth.HashPassword(`original`),
+	}
+
+	mock.GetFunc = func(id int) (authdomain.User, error) {
+		if id == 1 {
+			return existingUser, nil
+		}
+		return authdomain.User{}, repo.ErrUserNotFound
+	}
+
+	var updateCalledWith authdomain.User
+	mock.UpdateFunc = func(user authdomain.User) error {
+		updateCalledWith = user
+		return nil
+	}
+	cleanup := func() {
+		updateCalledWith = authdomain.User{}
+	}
+
+	t.Run(`update with new password`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		err := s.Update(authdomain.User{
+			ID:       1,
+			Username: `new_user`,
+			Name:     `New Name`,
+			Club:     domain.ClubParabool,
+			Role:     authdomain.RoleAdmin,
+		}, `newpass`)
+
+		assert.NoError(err)
+		assert.Eq(`new_user`, updateCalledWith.Username)
+		assert.Eq(`New Name`, updateCalledWith.Name)
+		assert.Eq(domain.ClubParabool, updateCalledWith.Club)
+		assert.Eq(authdomain.RoleAdmin, updateCalledWith.Role)
+		assert.True(auth.CheckPassword(updateCalledWith.PasswordHash, `newpass`))
+
+		cleanup()
+	})
+
+	t.Run(`update without password keeps original`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		err := s.Update(authdomain.User{
+			ID:       1,
+			Username: `new_user`,
+			Name:     `New Name`,
+			Club:     domain.ClubParabool,
+			Role:     authdomain.RoleAdmin,
+		}, ``)
+
+		assert.NoError(err)
+		assert.True(auth.CheckPassword(updateCalledWith.PasswordHash, `original`))
+
+		cleanup()
+	})
+
+	t.Run(`user not found`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		err := s.Update(authdomain.User{ID: 999}, `pass`)
+		assert.Error(err)
+
+		cleanup()
+	})
+}
+
+func TestDelete(t *testing.T) {
+	t.Parallel()
+
+	mock := &mockdb.User{}
+	orderMock := &mockdb.Order{}
+	s := auth.New(mock, orderMock)
+
+	var deleted bool
+	mock.DeleteFunc = func(_ int) error {
+		deleted = true
+		return nil
+	}
+	cleanup := func() {
+		deleted = false
+	}
+
+	t.Run(`deletes user without orders`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		orderMock.FilterFunc = func(_ repo.OrderFilter) ([]orderdomain.Order, error) {
+			return nil, nil
+		}
+
+		err := s.Delete(1)
+		assert.NoError(err)
+		assert.True(deleted)
+
+		cleanup()
+	})
+
+	t.Run(`rejects delete when user has orders`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		orderMock.FilterFunc = func(_ repo.OrderFilter) ([]orderdomain.Order, error) {
+			return []orderdomain.Order{{ID: 1}}, nil
+		}
+
+		err := s.Delete(1)
+		assert.True(errors.Is(err, auth.ErrUserHasOrders))
+		assert.False(deleted)
+
+		cleanup()
+	})
+
+	t.Run(`propagates filter error`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		orderMock.FilterFunc = func(_ repo.OrderFilter) ([]orderdomain.Order, error) {
+			return nil, errDB
+		}
+
+		err := s.Delete(1)
+		assert.Error(err)
+		assert.False(deleted)
+
+		cleanup()
+	})
+}
+
+func TestGetUsers(t *testing.T) {
+	t.Parallel()
+
+	mock := &mockdb.User{}
+	s := auth.New(mock, nil)
+
+	t.Run(`returns all users`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		expected := []authdomain.User{
+			{ID: 1, Name: "Alice"},
+			{ID: 2, Name: "Bob"},
+		}
+		mock.GetAllFunc = func() ([]authdomain.User, error) {
+			return expected, nil
+		}
+
+		users, err := s.GetUsers()
+		assert.NoError(err)
+		assert.Eq(2, len(users))
+	})
+
+	t.Run(`propagates error`, func(t *testing.T) {
+		assert := assert.New(t)
+
+		mock.GetAllFunc = func() ([]authdomain.User, error) {
+			return nil, errDB
+		}
+
+		_, err := s.GetUsers()
+		assert.Error(err)
 	})
 }

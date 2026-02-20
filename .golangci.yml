@@ -30,6 +30,7 @@ linters:
     - funlen
     - nestif
     - cyclop
+    - recvcheck
   settings:
     gocyclo:
       min-complexity: 15
@@ -48,7 +49,10 @@ linters:
         path: _test.go
       - linters:
           - testpackage
-        path: backend/application/order/order_test.go
+        path: backend/application/order/
+      - linters:
+          - testpackage
+        path: shared/time_test.go
       - linters:
           - errcheck
         source: defer .*Rollback()

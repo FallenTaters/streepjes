@@ -2,6 +2,7 @@ package templates
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/FallenTaters/streepjes/domain"
 )
+
+var ErrTemplateNotFound = errors.New("template not found")
 
 //go:embed *.html admin/*.html
 var files embed.FS
@@ -57,7 +60,7 @@ func Render(w io.Writer, name string, data any) error {
 	once.Do(buildPages)
 	t, ok := pages[name]
 	if !ok {
-		return fmt.Errorf("template %q not found", name)
+		return fmt.Errorf("template %q: %w", name, ErrTemplateNotFound)
 	}
 	return t.ExecuteTemplate(w, "base", data)
 }
