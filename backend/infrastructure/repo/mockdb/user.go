@@ -5,29 +5,29 @@ import (
 )
 
 type User struct {
-	GetFunc           func(int) (authdomain.User, bool)
-	GetAllFunc        func() []authdomain.User
-	GetByTokenFunc    func(token string) (authdomain.User, bool)
-	GetByUsernameFunc func(username string) (authdomain.User, bool)
+	GetFunc            func(int) (authdomain.User, error)
+	GetAllFunc         func() ([]authdomain.User, error)
+	GetByTokenFunc     func(token string) (authdomain.User, error)
+	GetByUsernameFunc  func(username string) (authdomain.User, error)
 	UpdateFunc         func(user authdomain.User) error
 	UpdateActivityFunc func(user authdomain.User) error
-	CreateFunc        func(user authdomain.User) (int, error)
-	DeleteFunc        func(id int) error
+	CreateFunc         func(user authdomain.User) (int, error)
+	DeleteFunc         func(id int) error
 }
 
-func (u User) Get(id int) (authdomain.User, bool) {
+func (u User) Get(id int) (authdomain.User, error) {
 	return u.GetFunc(id)
 }
 
-func (u User) GetAll() []authdomain.User {
+func (u User) GetAll() ([]authdomain.User, error) {
 	return u.GetAllFunc()
 }
 
-func (u User) GetByToken(token string) (authdomain.User, bool) {
+func (u User) GetByToken(token string) (authdomain.User, error) {
 	return u.GetByTokenFunc(token)
 }
 
-func (u User) GetByUsername(username string) (authdomain.User, bool) {
+func (u User) GetByUsername(username string) (authdomain.User, error) {
 	return u.GetByUsernameFunc(username)
 }
 

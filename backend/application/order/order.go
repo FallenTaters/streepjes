@@ -21,64 +21,23 @@ var (
 )
 
 type Service interface {
-	// GetAllMembers gets all the members
-	GetAllMembers() []orderdomain.Member
-
-	// GetMemberDetails gets a member and fills in details
-	GetMemberDetails(id int) (api.MemberDetails, bool)
-
-	// GetCatalog fetches the catalog
-	GetCatalog() api.Catalog
-
-	// GetOrdersForBartender gets all order for that bartender for the current month
-	GetOrdersForBartender(id int) []orderdomain.Order
-
-	// GetOrdersByClub gets all orders from the month for the specified month
-	GetOrdersByClub(club domain.Club, month orderdomain.Month) []orderdomain.Order
-
-	// BillingCSV makes a downloadable csv file with orders and such
-	BillingCSV(club domain.Club, month orderdomain.Month) []byte
-
-	// PlaceOrder places the order for the bartender
+	GetAllMembers() ([]orderdomain.Member, error)
+	GetMemberDetails(id int) (api.MemberDetails, error)
+	GetCatalog() (api.Catalog, error)
+	GetOrdersForBartender(id int) ([]orderdomain.Order, error)
+	GetOrdersByClub(club domain.Club, month orderdomain.Month) ([]orderdomain.Order, error)
+	BillingCSV(club domain.Club, month orderdomain.Month) ([]byte, error)
 	PlaceOrder(order orderdomain.Order, bartender authdomain.User) error
-
-	// BartenderDeleteOrder marks an order as deleted for a bartender
 	BartenderDeleteOrder(bartenderID, orderID int) error
-
-	// NewCategory creates a new category
-	// It can return repo.ErrCategoryNameEmty or repo.ErrCategoryNameTaken
 	NewCategory(orderdomain.Category) error
-
-	// UpdateCategory updates an existing category.
-	// It can return repo.ErrCategoryNotFound, repo.ErrCategoryNameEmpty or repo.ErrCategoryNameTaken
 	UpdateCategory(orderdomain.Category) error
-
-	// DeleteCategory deletes an existing category.
-	// It can return repo.ErrCategoryNotFound or repo.ErrCategoryHasItems
 	DeleteCategory(id int) error
-
-	// NewItem creates a new item.
-	// It can return repo.ErrCategoryNotFound, repo.ErrItemNameEmpty or repo.ErrItemNameTaken
 	NewItem(orderdomain.Item) error
-
-	// UpdateItem updates an existing item.
-	// It can return repo.ErrItemNameTaken, repo.ErrItemNameEmpty, repo.ErrCategoryNotFound, or repo.ErrItemNotFound
 	UpdateItem(orderdomain.Item) error
-
-	// DeleteItem deletes an item.
-	// It can return repo.ErrItemNotFound
 	DeleteItem(id int) error
-
-	// GetLeaderboard makes a leaderboard, the members will be pre-sorted by amount
-	GetLeaderboard(api.LeaderboardFilter) api.Leaderboard
-
-	// NewMember creates a new member
+	GetLeaderboard(api.LeaderboardFilter) (api.Leaderboard, error)
 	NewMember(orderdomain.Member) error
-
-	// EditMember edits a member
 	EditMember(orderdomain.Member) error
-
-	// DeleteMember deletes a member by id
 	DeleteMember(id int) error
 }
 
@@ -96,77 +55,106 @@ type service struct {
 	orders  repo.Order
 }
 
-func (s *service) GetAllMembers() []orderdomain.Member {
+func (s *service) GetAllMembers() ([]orderdomain.Member, error) {
 	return s.members.GetAll()
 }
 
-func (s *service) GetMemberDetails(id int) (api.MemberDetails, bool) {
-	var memberDetails api.MemberDetails
-
-	member, ok := s.members.Get(id)
-	if !ok {
-		return api.MemberDetails{}, false //nolint:exhaustruct
+func (s *service) GetMemberDetails(id int) (api.MemberDetails, error) {
+	member, err := s.members.Get(id)
+	if err != nil {
+		return api.MemberDetails{}, fmt.Errorf("order.GetMemberDetails: %w", err)
 	}
-	memberDetails.Member = member
 
 	month := orderdomain.CurrentMonth()
 
-	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct,exhaustruct
+	orders, err := s.orders.Filter(repo.OrderFilter{
 		MemberID:  id,
 		Start:     month.Start(),
 		End:       month.End(),
 		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
+	if err != nil {
+		return api.MemberDetails{}, fmt.Errorf("order.GetMemberDetails: filter: %w", err)
+	}
 
+	var debt orderdomain.Price
 	for _, order := range orders {
-		memberDetails.Debt += order.Price
+		debt += order.Price
 	}
 
-	return memberDetails, true
+	return api.MemberDetails{
+		Member: member,
+		Debt:   debt,
+	}, nil
 }
 
-func (s *service) GetCatalog() api.Catalog {
+func (s *service) GetCatalog() (api.Catalog, error) {
+	categories, err := s.catalog.GetCategories()
+	if err != nil {
+		return api.Catalog{}, fmt.Errorf("order.GetCatalog: categories: %w", err)
+	}
+
+	items, err := s.catalog.GetItems()
+	if err != nil {
+		return api.Catalog{}, fmt.Errorf("order.GetCatalog: items: %w", err)
+	}
+
 	return api.Catalog{
-		Categories: s.catalog.GetCategories(),
-		Items:      s.catalog.GetItems(),
-	}
+		Categories: categories,
+		Items:      items,
+	}, nil
 }
 
-func (s *service) GetOrdersForBartender(id int) []orderdomain.Order {
+func (s *service) GetOrdersForBartender(id int) ([]orderdomain.Order, error) {
 	month := orderdomain.CurrentMonth()
 
-	return s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct,exhaustruct
+	orders, err := s.orders.Filter(repo.OrderFilter{
 		BartenderID: id,
 		Start:       month.Start(),
 		End:         month.End(),
 	})
+	if err != nil {
+		return nil, fmt.Errorf("order.GetOrdersForBartender: %w", err)
+	}
+
+	return orders, nil
 }
 
-func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) []orderdomain.Order {
-	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) ([]orderdomain.Order, error) {
+	orders, err := s.orders.Filter(repo.OrderFilter{
 		Club:      club,
 		Start:     month.Start(),
 		End:       month.End(),
 		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
+	if err != nil {
+		return nil, fmt.Errorf("order.GetOrdersByClub: %w", err)
+	}
 
 	for i := range orders {
 		orders[i].OrderTime = orders[i].OrderTime.In(timezone)
 	}
 
-	return orders
+	return orders, nil
 }
 
-func (s *service) BillingCSV(club domain.Club, month orderdomain.Month) []byte {
-	orders := s.orders.Filter(repo.OrderFilter{ //nolint:exhaustivestruct
+func (s *service) BillingCSV(club domain.Club, month orderdomain.Month) ([]byte, error) {
+	orders, err := s.orders.Filter(repo.OrderFilter{
 		Club:      club,
 		Start:     month.Start(),
 		End:       month.End(),
 		StatusNot: []orderdomain.Status{orderdomain.StatusCancelled},
 	})
-	members := s.members.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("order.BillingCSV: orders: %w", err)
+	}
 
-	return writeCSV(orders, members)
+	members, err := s.members.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("order.BillingCSV: members: %w", err)
+	}
+
+	return writeCSV(orders, members), nil
 }
 
 func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User) error {
@@ -178,13 +166,12 @@ func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User)
 	}
 
 	if order.MemberID != 0 {
-		member, ok := s.members.Get(order.MemberID)
-		if !ok {
-			return repo.ErrMemberNotFound
+		member, err := s.members.Get(order.MemberID)
+		if err != nil {
+			return fmt.Errorf("order.PlaceOrder: get member: %w", err)
 		}
 
 		member.LastOrder = time.Now()
-		// ignore error to avoid successful order being reported as failed
 		_ = s.members.Update(member)
 	}
 
@@ -193,18 +180,20 @@ func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User)
 	order.OrderTime = time.Now()
 	order.StatusTime = order.OrderTime
 
-	_, err := s.orders.Create(order)
-	if err != nil {
-		return err
+	if _, err := s.orders.Create(order); err != nil {
+		return fmt.Errorf("order.PlaceOrder: create: %w", err)
 	}
 
 	return nil
 }
 
 func (s *service) BartenderDeleteOrder(bartenderID, orderID int) error {
-	order, ok := s.orders.Get(orderID)
-	if !ok {
+	order, err := s.orders.Get(orderID)
+	if errors.Is(err, repo.ErrOrderNotFound) {
 		return ErrOrderNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("order.BartenderDeleteOrder: %w", err)
 	}
 
 	if order.BartenderID != bartenderID {
@@ -218,7 +207,6 @@ func (s *service) NewCategory(cat orderdomain.Category) error {
 	if cat.Name == `` {
 		return repo.ErrCategoryNameEmpty
 	}
-
 	_, err := s.catalog.CreateCategory(cat)
 	return err
 }
@@ -227,7 +215,6 @@ func (s *service) UpdateCategory(update orderdomain.Category) error {
 	if update.Name == `` {
 		return repo.ErrCategoryNameEmpty
 	}
-
 	return s.catalog.UpdateCategory(update)
 }
 
@@ -239,7 +226,6 @@ func (s *service) NewItem(item orderdomain.Item) error {
 	if item.Name == `` {
 		return repo.ErrItemNameEmpty
 	}
-
 	_, err := s.catalog.CreateItem(item)
 	return err
 }
@@ -248,7 +234,6 @@ func (s *service) UpdateItem(update orderdomain.Item) error {
 	if update.Name == `` {
 		return repo.ErrItemNameEmpty
 	}
-
 	return s.catalog.UpdateItem(update)
 }
 
@@ -256,16 +241,21 @@ func (s *service) DeleteItem(id int) error {
 	return s.catalog.DeleteItem(id)
 }
 
-func (s *service) GetLeaderboard(filter api.LeaderboardFilter) api.Leaderboard {
-	orderFilter := repo.OrderFilter{ //nolint:exhaustruct,exhaustivestruct
-		Start: filter.Start,
-		End:   filter.End,
+func (s *service) GetLeaderboard(filter api.LeaderboardFilter) (api.Leaderboard, error) {
+	members, err := s.members.GetAll()
+	if err != nil {
+		return api.Leaderboard{}, fmt.Errorf("order.GetLeaderboard: members: %w", err)
 	}
 
-	members := s.members.GetAll()
-	orders := s.orders.Filter(orderFilter)
+	orders, err := s.orders.Filter(repo.OrderFilter{
+		Start: filter.Start,
+		End:   filter.End,
+	})
+	if err != nil {
+		return api.Leaderboard{}, fmt.Errorf("order.GetLeaderboard: orders: %w", err)
+	}
 
-	return makeLeaderboard(members, orders)
+	return makeLeaderboard(members, orders), nil
 }
 
 func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) api.Leaderboard {
@@ -282,7 +272,6 @@ func makeLeaderboard(members []orderdomain.Member, orders []orderdomain.Order) a
 		total += o.Price
 		totals[o.MemberID] += o.Price
 
-		// attempt to unmarshal contents and count by item name
 		var lines []orderdomain.Line
 		if err := json.Unmarshal([]byte(o.Contents), &lines); err != nil {
 			continue
@@ -325,9 +314,9 @@ func (s *service) NewMember(m orderdomain.Member) error {
 }
 
 func (s *service) EditMember(m orderdomain.Member) error {
-	original, ok := s.members.Get(m.ID)
-	if !ok {
-		return repo.ErrMemberNotFound
+	original, err := s.members.Get(m.ID)
+	if err != nil {
+		return fmt.Errorf("order.EditMember: %w", err)
 	}
 
 	if original.Club != m.Club {
@@ -338,12 +327,15 @@ func (s *service) EditMember(m orderdomain.Member) error {
 }
 
 func (s *service) DeleteMember(id int) error {
-	_, ok := s.members.Get(id)
-	if !ok {
-		return repo.ErrMemberNotFound
+	if _, err := s.members.Get(id); err != nil {
+		return fmt.Errorf("order.DeleteMember: %w", err)
 	}
 
-	if len(s.orders.Filter(repo.OrderFilter{MemberID: id})) > 0 { //nolint:exhaustivestruct
+	orders, err := s.orders.Filter(repo.OrderFilter{MemberID: id})
+	if err != nil {
+		return fmt.Errorf("order.DeleteMember: check orders: %w", err)
+	}
+	if len(orders) > 0 {
 		return repo.ErrMemberHasOrders
 	}
 

@@ -2,6 +2,7 @@ package router
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/FallenTaters/streepjes/api"
@@ -15,53 +16,55 @@ func userFromContext(r *http.Request) authdomain.User {
 	return user
 }
 
-func authRoutes(mux *http.ServeMux, authed middleware, authService auth.Service, logger *zap.Logger) {
-	handle(mux, "GET /logout", authed, getLogout(authService))
-	handle(mux, "POST /active", authed, postActive(authService, logger))
-
-	handle(mux, "GET /profile", authed, getProfilePage(logger))
-	handle(mux, "POST /profile/password", authed, postProfilePasswordPage(authService, logger))
-	handle(mux, "POST /profile/name", authed, postProfileNamePage(authService, logger))
+func (s *Server) authRoutes(mux *http.ServeMux, authed middleware) {
+	handle(mux, "GET /logout", authed, s.getLogout)
+	handle(mux, "POST /active", authed, s.postActive)
+	handle(mux, "GET /profile", authed, s.getProfilePage)
+	handle(mux, "POST /profile/password", authed, s.postProfilePasswordPage)
+	handle(mux, "POST /profile/name", authed, s.postProfileNamePage)
 }
 
-func getLogout(authService auth.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user := userFromContext(r)
-		authService.Logout(user.ID)
-		http.SetCookie(w, &http.Cookie{
-			Name:     api.AuthTokenCookieName,
-			Value:    ``,
-			Path:     `/`,
-			MaxAge:   -1,
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-		})
-		http.Redirect(w, r, `/login`, http.StatusSeeOther)
+func (s *Server) getLogout(w http.ResponseWriter, r *http.Request) {
+	user := userFromContext(r)
+	if err := s.auth.Logout(user.ID); err != nil {
+		s.logger.Error("logout failed", zap.Int("user_id", user.ID), zap.Error(err))
 	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     api.AuthTokenCookieName,
+		Value:    ``,
+		Path:     `/`,
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.Redirect(w, r, `/login`, http.StatusSeeOther)
 }
 
-func postActive(authService auth.Service, logger *zap.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user := userFromContext(r)
-		authService.Active(user.ID)
-		logger.Debug("received activity refresh", zap.String("user", user.Username))
-		w.WriteHeader(http.StatusNoContent)
+func (s *Server) postActive(w http.ResponseWriter, r *http.Request) {
+	user := userFromContext(r)
+	if err := s.auth.Active(user.ID); err != nil {
+		s.logger.Error("activity refresh failed", zap.Int("user_id", user.ID), zap.Error(err))
 	}
+	s.logger.Debug("received activity refresh", zap.String("user", user.Username))
+	w.WriteHeader(http.StatusNoContent)
 }
 
-func pageAuthMiddleware(authService auth.Service, logger *zap.Logger) middleware {
+func (s *Server) pageAuthMiddleware() middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token, err := r.Cookie(api.AuthTokenCookieName)
 			if err != nil {
-				logger.Debug("page auth - no token cookie")
+				s.logger.Debug("page auth - no token cookie")
 				http.Redirect(w, r, `/login`, http.StatusSeeOther)
 				return
 			}
 
-			user, ok := authService.Check(token.Value)
-			if !ok {
-				logger.Debug("page auth - token not valid")
+			user, err := s.auth.Check(token.Value)
+			if err != nil {
+				if !errors.Is(err, auth.ErrInvalidToken) {
+					s.logger.Error("auth check error", zap.Error(err))
+				}
+				s.logger.Debug("page auth - token not valid")
 				http.Redirect(w, r, `/login`, http.StatusSeeOther)
 				return
 			}
@@ -72,13 +75,13 @@ func pageAuthMiddleware(authService auth.Service, logger *zap.Logger) middleware
 	}
 }
 
-func pagePermissionMiddleware(permission authdomain.Permission, logger *zap.Logger) middleware {
+func (s *Server) pagePermissionMiddleware(permission authdomain.Permission) middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			user := userFromContext(r)
 
 			if !user.Role.Has(permission) {
-				logger.Debug("page auth - no permission",
+				s.logger.Debug("page auth - no permission",
 					zap.String("role", user.Role.String()),
 					zap.Int("permission", int(permission)),
 				)
