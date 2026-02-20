@@ -21,7 +21,7 @@ backend/
     ├── repo/            Repository interfaces (Order, Member, User, Catalog)
     │   ├── postgres/    PostgreSQL implementations + migrations
     │   └── mockdb/      Mock implementations for tests
-    └── router/          HTTP handlers and routing (chi)
+    └── router/          HTTP handlers and routing (stdlib net/http)
 
 templates/               Go html/template files (embedded via embed.FS)
 ├── base.html            Base layout
@@ -37,6 +37,7 @@ static/files/            Static assets (embedded), BeerCSS framework
 - Domain layer has zero imports from other project packages
 - Application services depend on repository _interfaces_, not implementations
 - Infrastructure implements interfaces and wires everything together
+- Router uses a `Server` struct for dependency injection (auth, order services, logger)
 
 ## Domain Model
 
@@ -50,8 +51,9 @@ static/files/            Static assets (embedded), BeerCSS framework
 
 ## Auth
 
-- Cookie-based token auth (`auth_token` cookie)
-- 24h token duration, refreshed on activity
+- Cookie-based token auth (`auth_token` cookie, `HttpOnly`, `SameSite=Lax`)
+- 20-minute token duration, refreshed on activity (server-side safety net)
+- Client-side inactivity timeout at 15 minutes with warning at 14 minutes (`activity.js`)
 - Passwords hashed with bcrypt
 - Roles: `Bartender` (PermissionBarStuff), `Admin` (BarStuff + AdminStuff)
 - Default admin users created on first run (see `main.go`)
@@ -113,6 +115,7 @@ static/files/            Static assets (embedded), BeerCSS framework
 
 - PostgreSQL, raw SQL (no ORM), `lib/pq` driver
 - Repository pattern with interfaces in `backend/infrastructure/repo/`
+- All repo methods return errors (no panics); sentinel errors for not-found cases
 - Migrations: `backend/infrastructure/repo/postgres/migrations/NNNN.sql`
   - Auto-applied on startup via version table
   - To add: create next numbered `.sql` file (e.g. `0003.sql`)
@@ -164,9 +167,10 @@ See `streepjes.example.toml` for config file format.
 ## Testing
 
 - Standard Go tests, co-located with source (`*_test.go`)
-- Mock repos in `backend/infrastructure/repo/mockdb/` — structs with function fields
+- Mock repos in `backend/infrastructure/repo/mockdb/` (User, Member, Order, Catalog) — structs with function fields
 - Assertion library: `git.fuyu.moe/Fuyu/assert`
 - Run: `just test`
+- Vulnerability scan: `go run golang.org/x/vuln/cmd/govulncheck@latest ./...`
 
 ## How to Implement a New Feature
 
@@ -194,19 +198,22 @@ See `streepjes.example.toml` for config file format.
 1. Create template in `templates/` (or `templates/admin/`)
 2. Register in `templates/templates.go` `pageFiles` slice
 3. Template must define blocks expected by `base.html`
-4. Add route in appropriate file under `backend/infrastructure/router/`:
-   - `public.go` — unauthenticated
-   - `auth.go` — any authenticated user
-   - `bartender.go` — requires PermissionBarStuff
-   - `admin.go` — requires PermissionAdminStuff
-5. Write handler function returning `http.HandlerFunc` (closure over service)
-6. Use `render(w, "template.html", data)` to render, `newPageData(r, "pagename")` for nav state
+4. Add route in `Server.routes()` in `backend/infrastructure/router/router.go`
+5. Add handler as a method on the `Server` struct in the appropriate file:
+   - `pages_profile.go` — profile/password/name
+   - `pages_bartender.go` — order, history, leaderboard
+   - `pages_admin_users.go` — user management
+   - `pages_admin_members.go` — member management
+   - `pages_admin_catalog.go` — catalog management
+   - `pages_admin_billing.go` — billing
+6. Use `s.render(w, "template.html", data)` to render, `newPageData(r, "pagename")` for nav state
 
 ### Adding a new API endpoint
 
-1. Add route in `bartender.go` or `admin.go`
-2. For JSON request bodies: use `chio.JSON(handler)` wrapper
-3. For JSON responses: use `chio.WriteJSON(w, status, data)`
+1. Add route in `Server.routes()` (`router.go`)
+2. Add handler as a method on the `Server` struct in `bartender.go` or `admin.go`
+3. For JSON request bodies: use `json.NewDecoder(r.Body).Decode(&payload)`
+4. For JSON responses: use `json.NewEncoder(w).Encode(data)` with `Content-Type: application/json`
 
 ### Adding a new migration
 
