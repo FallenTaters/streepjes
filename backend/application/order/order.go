@@ -41,18 +41,20 @@ type Service interface {
 	DeleteMember(id int) error
 }
 
-func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog) Service {
+func New(memberRepo repo.Member, orderRepo repo.Order, catalogRepo repo.Catalog, timezone *time.Location) Service {
 	return &service{
-		members: memberRepo,
-		orders:  orderRepo,
-		catalog: catalogRepo,
+		members:  memberRepo,
+		orders:   orderRepo,
+		catalog:  catalogRepo,
+		timezone: timezone,
 	}
 }
 
 type service struct {
-	catalog repo.Catalog
-	members repo.Member
-	orders  repo.Order
+	catalog  repo.Catalog
+	members  repo.Member
+	orders   repo.Order
+	timezone *time.Location
 }
 
 func (s *service) GetAllMembers() ([]orderdomain.Member, error) {
@@ -132,7 +134,7 @@ func (s *service) GetOrdersByClub(club domain.Club, month orderdomain.Month) ([]
 	}
 
 	for i := range orders {
-		orders[i].OrderTime = orders[i].OrderTime.In(timezone)
+		orders[i].OrderTime = orders[i].OrderTime.In(s.timezone)
 	}
 
 	return orders, nil
@@ -154,7 +156,7 @@ func (s *service) BillingCSV(club domain.Club, month orderdomain.Month) ([]byte,
 		return nil, fmt.Errorf("order.BillingCSV: members: %w", err)
 	}
 
-	return writeCSV(orders, members), nil
+	return writeCSV(orders, members, s.timezone), nil
 }
 
 func (s *service) PlaceOrder(order orderdomain.Order, bartender authdomain.User) error {

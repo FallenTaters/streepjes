@@ -12,14 +12,6 @@ func PrettyDatetime(t time.Time) string {
 	return prettyDate(t, now) + ` ` + timePretty
 }
 
-func PrettyDate(t time.Time) string {
-	return prettyDate(t, time.Now().In(t.Location()))
-}
-
-func PrettyTime(t time.Time) string {
-	return prettyTime(t, time.Now().In(t.Location()))
-}
-
 func prettyDate(t, now time.Time) string {
 	if SameDate(t, now) {
 		return `Today`
@@ -32,7 +24,7 @@ func prettyDate(t, now time.Time) string {
 	}
 
 	if now.Year() == t.Year() {
-		t.Format(`2 Jan`)
+		return t.Format(`2 Jan`)
 	}
 
 	return t.Format(`2 Jan 2006`)

@@ -10,22 +10,9 @@ import (
 	"time"
 
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
-
-	_ "time/tzdata"
 )
 
-func init() { //nolint:gochecknoinits
-	tz, err := time.LoadLocation("Europe/Amsterdam")
-	if err != nil {
-		panic(err)
-	}
-
-	timezone = tz
-}
-
-var timezone *time.Location
-
-func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte { //nolint:funlen,cyclop
+func writeCSV(orders []orderdomain.Order, members []orderdomain.Member, timezone *time.Location) []byte {
 	membersByID := make(map[int]orderdomain.Member)
 	for _, m := range members {
 		membersByID[m.ID] = m
@@ -50,48 +37,32 @@ func writeCSV(orders []orderdomain.Order, members []orderdomain.Member) []byte {
 
 	var buf bytes.Buffer
 	w := csv.NewWriter(&buf)
-	err := w.Write([]string{`Member`, `Price`, `Date`, `Order`})
-	if err != nil {
-		panic(err)
-	}
+
+	w.Write([]string{`Member`, `Price`, `Date`, `Order`})
 
 	memberTotals := make(map[int]orderdomain.Price, len(members))
 	for _, o := range orders {
 		memberTotals[o.MemberID] += o.Price
-		err = w.Write([]string{
+		w.Write([]string{
 			membersByID[o.MemberID].Name,
 			o.Price.String(),
 			o.OrderTime.In(timezone).Format(`2006-01-02 15:04`),
-			parseOrderLines(o.Contents),
+			csvOrderLines(o.Contents),
 		})
-		if err != nil {
-			panic(err)
-		}
 	}
-	err = w.Write(nil)
-	if err != nil {
-		panic(err)
-	}
-	err = w.Write([]string{`Member`, `Total`})
-	if err != nil {
-		panic(err)
-	}
+
+	w.Write(nil)
+	w.Write([]string{`Member`, `Total`})
 	for id, total := range memberTotals {
-		err := w.Write([]string{membersByID[id].Name, total.String()})
-		if err != nil {
-			panic(err)
-		}
+		w.Write([]string{membersByID[id].Name, total.String()})
 	}
 
 	w.Flush()
-	if err := w.Error(); err != nil {
-		panic(err)
-	}
 
 	return buf.Bytes()
 }
 
-func parseOrderLines(contents string) string {
+func csvOrderLines(contents string) string {
 	var lines []orderdomain.Line
 	if err := json.Unmarshal([]byte(contents), &lines); err != nil {
 		return `order data unreadable`
