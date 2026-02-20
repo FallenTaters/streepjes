@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/FallenTaters/streepjes/backend/application/auth"
 	"github.com/FallenTaters/streepjes/backend/application/order"
@@ -162,6 +163,11 @@ func run(cfg settings.Config) error {
 		return fmt.Errorf("running migrations: %w", err)
 	}
 
+	timezone, err := time.LoadLocation("Europe/Amsterdam")
+	if err != nil {
+		return fmt.Errorf("loading timezone: %w", err)
+	}
+
 	userRepo := postgres.NewUserRepo(db, logger)
 	memberRepo := postgres.NewMemberRepo(db, logger)
 	orderRepo := postgres.NewOrderRepo(db, logger)
@@ -170,7 +176,7 @@ func run(cfg settings.Config) error {
 	authService := auth.New(userRepo, orderRepo)
 	checkNoUsers(userRepo, authService, logger)
 
-	orderService := order.New(memberRepo, orderRepo, catalogRepo)
+	orderService := order.New(memberRepo, orderRepo, catalogRepo, timezone)
 
 	handler := router.New(static.Get, authService, orderService, !cfg.DisableSecure, logger)
 	srv := &http.Server{Handler: handler}

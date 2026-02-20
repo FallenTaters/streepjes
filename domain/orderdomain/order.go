@@ -51,10 +51,6 @@ func CurrentMonth() Month {
 	return MonthOf(time.Now())
 }
 
-func (m Month) Time() time.Time {
-	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.Local)
-}
-
 func (m Month) Start() time.Time {
 	return time.Date(m.Year, m.Month, 1, 0, 0, 0, 0, time.UTC)
 }
