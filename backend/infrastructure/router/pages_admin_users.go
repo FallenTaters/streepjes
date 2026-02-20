@@ -14,6 +14,7 @@ import (
 
 type usersData struct {
 	pageData
+
 	Users          []authdomain.User
 	ShowForm       bool
 	FormTitle      string
@@ -49,12 +50,10 @@ func (s *Server) getUsersPage(w http.ResponseWriter, r *http.Request) {
 	data := usersData{
 		pageData: newPageData(r, "users"),
 		Users:    users,
+		Error:    r.URL.Query().Get("error"),
 	}
 
-	action := r.URL.Query().Get("action")
-	errMsg := r.URL.Query().Get("error")
-
-	switch action {
+	switch r.URL.Query().Get("action") {
 	case "new":
 		data.ShowForm = true
 		data.FormTitle = "New User"
@@ -80,10 +79,6 @@ func (s *Server) getUsersPage(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 		}
-	}
-
-	if errMsg != "" {
-		data.Error = errMsg
 	}
 
 	s.render(w, "admin/users.html", data)

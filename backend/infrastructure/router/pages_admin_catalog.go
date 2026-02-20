@@ -13,6 +13,7 @@ import (
 
 type catalogData struct {
 	pageData
+
 	Categories         []orderdomain.Category
 	DisplayItems       []orderdomain.Item
 	SelectedCategory   *orderdomain.Category

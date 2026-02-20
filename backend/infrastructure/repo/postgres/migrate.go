@@ -42,7 +42,7 @@ func migrate(db Queryable, version int, logger *zap.Logger) error {
 
 		file, err := migrations.ReadFile(filename)
 		if err != nil {
-			return nil
+			return nil //nolint:nilerr // ReadFile error means no more migration files exist
 		}
 
 		if _, err := db.Exec(string(file)); err != nil {

@@ -29,9 +29,9 @@ func TestMakeLeaderboard(t *testing.T) {
 		lb := makeLeaderboard(members, orders)
 
 		assert.Eq(3, len(lb.Members))
-		assert.Eq("Bob", lb.Members[0].Member.Name)
-		assert.Eq("Carol", lb.Members[1].Member.Name)
-		assert.Eq("Alice", lb.Members[2].Member.Name)
+		assert.Eq("Bob", lb.Members[0].Name)
+		assert.Eq("Carol", lb.Members[1].Name)
+		assert.Eq("Alice", lb.Members[2].Name)
 	})
 
 	t.Run("stable sort for equal totals", func(t *testing.T) {

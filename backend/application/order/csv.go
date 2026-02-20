@@ -12,6 +12,7 @@ import (
 	"github.com/FallenTaters/streepjes/domain/orderdomain"
 )
 
+//nolint:errcheck,gosec // csv.Writer writes to bytes.Buffer, which never returns errors
 func writeCSV(orders []orderdomain.Order, members []orderdomain.Member, timezone *time.Location) []byte {
 	membersByID := make(map[int]orderdomain.Member)
 	for _, m := range members {

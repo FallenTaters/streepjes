@@ -17,6 +17,7 @@ import (
 
 type orderData struct {
 	pageData
+
 	UserClub    string
 	CatalogJSON template.JS
 	MembersJSON template.JS
@@ -37,14 +38,23 @@ func (s *Server) getOrderPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	catalogBytes, _ := json.Marshal(catalog)
-	membersBytes, _ := json.Marshal(allMembers)
+	catalogBytes, err := json.Marshal(catalog)
+	if err != nil {
+		s.internalError(w, "marshal catalog", err)
+		return
+	}
+
+	membersBytes, err := json.Marshal(allMembers)
+	if err != nil {
+		s.internalError(w, "marshal members", err)
+		return
+	}
 
 	data := orderData{
 		pageData:    newPageData(r, "order"),
 		UserClub:    user.Club.String(),
-		CatalogJSON: template.JS(catalogBytes),
-		MembersJSON: template.JS(membersBytes),
+		CatalogJSON: template.JS(catalogBytes), //nolint:gosec // data is from our own DB, not user input
+		MembersJSON: template.JS(membersBytes), //nolint:gosec // data is from our own DB, not user input
 	}
 
 	s.render(w, "order.html", data)
@@ -69,6 +79,7 @@ type historyOrder struct {
 
 type historyData struct {
 	pageData
+
 	Orders []historyOrder
 	Error  string
 }
@@ -176,6 +187,7 @@ type leaderboardRank struct {
 
 type leaderboardData struct {
 	pageData
+
 	Gladiators bool
 	Parabool   bool
 	Calamari   bool

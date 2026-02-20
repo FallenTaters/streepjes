@@ -42,5 +42,5 @@ func (s *Server) getDownload(w http.ResponseWriter, r *http.Request) {
 	filename := m.String() + `-` + user.Club.String() + `.csv`
 	w.Header().Set(`Content-Disposition`, `attachment; filename="`+filename+`"`)
 	w.Header().Set(`Content-Type`, `text/csv`)
-	w.Write(csv)
+	_, _ = w.Write(csv)
 }

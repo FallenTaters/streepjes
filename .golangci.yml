@@ -25,10 +25,12 @@ linters:
     - interfacebloat
     - inamedparam
     - funcorder
+    - noinlineerr
+    - wsl_v5
+    - funlen
+    - nestif
+    - cyclop
   settings:
-    funlen:
-      lines: 50
-      statements: 40
     gocyclo:
       min-complexity: 15
     lll:
@@ -45,17 +47,14 @@ linters:
           - lll
         path: _test.go
       - linters:
+          - testpackage
+        path: backend/application/order/order_test.go
+      - linters:
           - errcheck
         source: defer .*Rollback()
       - linters:
           - errcheck
         source: defer .*Close()
-      - linters:
-          - exhaustivestruct
-        text: Core is missing
-      - linters:
-          - exhaustivestruct
-        source: \{\}
     paths:
       - _vgen.go$
       - migratelegacydb

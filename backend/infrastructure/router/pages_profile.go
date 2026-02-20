@@ -9,6 +9,7 @@ import (
 
 type profileData struct {
 	pageData
+
 	PasswordMsg string
 	NameMsg     string
 }
