@@ -19,6 +19,7 @@ type billingOrder struct {
 
 type billingData struct {
 	pageData
+
 	Month  string
 	Orders []billingOrder
 }

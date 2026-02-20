@@ -38,7 +38,10 @@ func (s *Server) getMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(member)
+
+	if err := json.NewEncoder(w).Encode(member); err != nil {
+		s.logger.Error("encode member response", zap.Error(err))
+	}
 }
 
 func (s *Server) postOrder(w http.ResponseWriter, r *http.Request) {

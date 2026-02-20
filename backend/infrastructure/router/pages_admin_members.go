@@ -13,6 +13,7 @@ import (
 
 type membersData struct {
 	pageData
+
 	Members    []orderdomain.Member
 	ShowForm   bool
 	FormTitle  string
@@ -50,7 +51,7 @@ func (s *Server) getMembersPage(w http.ResponseWriter, r *http.Request) {
 	errMsg := r.URL.Query().Get("error")
 
 	switch action {
-	case "new":
+	case "new": //nolint:goconst // "new" is self-describing as a literal
 		data.ShowForm = true
 		data.FormTitle = "New Member"
 	case "edit":

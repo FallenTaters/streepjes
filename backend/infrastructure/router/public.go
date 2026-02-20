@@ -37,7 +37,7 @@ func version() string {
 }
 
 func getVersion(w http.ResponseWriter, _ *http.Request) {
-	io.WriteString(w, version())
+	_, _ = io.WriteString(w, version())
 }
 
 func (s *Server) getRoot(w http.ResponseWriter, r *http.Request) {
@@ -117,15 +117,15 @@ func (s *Server) getStatic(w http.ResponseWriter, r *http.Request) {
 
 	contentType := mime.TypeByExtension(filepath.Ext(name))
 	if contentType == "" {
-		contentType = detectContentType(name, asset)
+		contentType = detectContentType(asset)
 	}
 
 	w.Header().Set(`Cache-Control`, `max-age=86400, must-revalidate, private`)
 	w.Header().Set(`Content-Type`, contentType)
-	w.Write(asset)
+	_, _ = w.Write(asset)
 }
 
-func detectContentType(name string, data []byte) string {
+func detectContentType(data []byte) string {
 	if strings.HasPrefix(string(data), "/*") || strings.HasPrefix(string(data), "@font-face") {
 		return "text/css; charset=utf-8"
 	}

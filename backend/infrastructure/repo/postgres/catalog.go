@@ -101,7 +101,8 @@ func (cr catalogRepo) CreateCategory(category orderdomain.Category) (int, error)
 	}
 
 	var id int
-	if err := cr.db.QueryRow(`INSERT INTO categories (name) VALUES ($1) RETURNING id;`, category.Name,
+	if err := cr.db.QueryRow(
+		`INSERT INTO categories (name) VALUES ($1) RETURNING id;`, category.Name,
 	).Scan(&id); err != nil {
 		return 0, fmt.Errorf("catalogRepo.CreateCategory: insert: %w", err)
 	}

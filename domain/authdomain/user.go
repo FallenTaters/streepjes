@@ -1,6 +1,7 @@
 package authdomain
 
 import (
+	"slices"
 	"time"
 
 	"github.com/FallenTaters/streepjes/domain"
@@ -32,13 +33,7 @@ const (
 )
 
 func (r Role) Has(p Permission) bool {
-	for _, permission := range permissions[r] {
-		if permission == p {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(permissions[r], p)
 }
 
 type Permission int

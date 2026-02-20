@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/FallenTaters/streepjes/backend/infrastructure/repo"
@@ -87,10 +88,11 @@ func (or *orderRepo) Create(order orderdomain.Order) (int, error) {
 }
 
 func (or *orderRepo) Filter(filter repo.OrderFilter) ([]orderdomain.Order, error) { //nolint:funlen,gocyclo,cyclop
-	q := `SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
-		`O.price, O.order_time, O.status, O.status_time FROM orders O `
+	var q strings.Builder
+	q.WriteString(`SELECT O.id, O.club, O.bartender_id, O.member_id, O.contents, ` +
+		`O.price, O.order_time, O.status, O.status_time FROM orders O `)
 	var conditions []string
-	var args []interface{}
+	var args []any
 
 	if filter.BartenderID != 0 {
 		args = append(args, filter.BartenderID)
@@ -125,21 +127,21 @@ func (or *orderRepo) Filter(filter repo.OrderFilter) ([]orderdomain.Order, error
 	}
 
 	if len(conditions) > 0 {
-		q += `WHERE `
+		q.WriteString(`WHERE `)
 	}
 	for i, condition := range conditions {
-		q += condition
+		q.WriteString(condition)
 		if i < len(conditions)-1 {
-			q += ` AND `
+			q.WriteString(` AND `)
 		}
 	}
 	if filter.Limit > 0 {
 		args = append(args, filter.Limit)
-		q += fmt.Sprintf(` LIMIT $%d`, len(args))
+		q.WriteString(fmt.Sprintf(` LIMIT $%d`, len(args)))
 	}
-	q += `;`
+	q.WriteString(`;`)
 
-	rows, err := or.db.Query(q, args...)
+	rows, err := or.db.Query(q.String(), args...)
 	if err != nil {
 		return nil, fmt.Errorf("orderRepo.Filter: query: %w", err)
 	}
