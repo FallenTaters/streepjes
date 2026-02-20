@@ -140,7 +140,7 @@ func run(cfg settings.Config) error {
 			return fmt.Errorf("loading TLS keypair: %w", err)
 		}
 
-		lis, err = tls.Listen("tcp", ":443", &tls.Config{Certificates: []tls.Certificate{cer}})
+		lis, err = tls.Listen("tcp", ":443", &tls.Config{Certificates: []tls.Certificate{cer}}) //nolint:gosec // intentionally binds to all interfaces
 		if err != nil {
 			return fmt.Errorf("TLS listen: %w", err)
 		}
@@ -179,14 +179,14 @@ func run(cfg settings.Config) error {
 	orderService := order.New(memberRepo, orderRepo, catalogRepo, timezone)
 
 	handler := router.New(static.Get, authService, orderService, !cfg.DisableSecure, logger)
-	srv := &http.Server{Handler: handler}
+	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	logger.Info("starting server", zap.Int("port", cfg.Port))
 	go func() {
-		if err := srv.Serve(lis); err != nil && err != http.ErrServerClosed {
+		if err := srv.Serve(lis); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Fatal("server exited", zap.Error(err))
 		}
 	}()
@@ -205,7 +205,7 @@ func run(cfg settings.Config) error {
 }
 
 func redirectHTTPS(logger *zap.Logger) {
-	err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	err := http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { //nolint:gosec // redirect-only handler, no timeout risk
 		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 	}))
 	if err != nil {
@@ -220,19 +220,19 @@ func checkNoUsers(userRepo repo.User, authService auth.Service, logger *zap.Logg
 		return
 	}
 	if len(users) == 0 {
-		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
+		_ = authService.Register(authdomain.User{
 			Username: `adminGladiators`,
 			Club:     domain.ClubGladiators,
 			Name:     `Gladiators Admin`,
 			Role:     authdomain.RoleAdmin,
 		}, `playlacrossebecauseitsfun`)
-		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
+		_ = authService.Register(authdomain.User{
 			Username: `adminParabool`,
 			Club:     domain.ClubParabool,
 			Name:     `Parabool Admin`,
 			Role:     authdomain.RoleAdmin,
 		}, `groningerstudentenkorfbalcommissie`)
-		_ = authService.Register(authdomain.User{ //nolint:exhaustivestruct
+		_ = authService.Register(authdomain.User{
 			Username: `adminCalamari`,
 			Club:     domain.ClubCalamari,
 			Name:     `Calamari Admin`,

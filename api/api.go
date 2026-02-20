@@ -1,4 +1,4 @@
-/* api package contains payload types to be used by backend and frontend */
+// Package api contains payload types to be used by backend and frontend.
 package api
 
 import (
