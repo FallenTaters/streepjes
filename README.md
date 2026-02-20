@@ -168,8 +168,10 @@ See `streepjes.example.toml` for config file format.
 
 - Standard Go tests, co-located with source (`*_test.go`)
 - Mock repos in `backend/infrastructure/repo/mockdb/` (User, Member, Order, Catalog) — structs with function fields
+- Router tests: HTTP handler tests using `httptest` with mock services
+- Postgres integration tests: use `github.com/ory/dockertest/v3` to spin up a real PostgreSQL container; test all repo CRUD, filters, error paths, and migrations
 - Assertion library: `git.fuyu.moe/Fuyu/assert`
-- Run: `just test`
+- Run: `just test` (postgres tests require Docker)
 - Vulnerability scan: `go run golang.org/x/vuln/cmd/govulncheck@latest ./...`
 
 ## How to Implement a New Feature
